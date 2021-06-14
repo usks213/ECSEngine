@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine">
+      <UniqueIdentifier>{d7d3cf1c-a713-478c-b9ce-60c854532f03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\App">
+      <UniqueIdentifier>{ead9b371-0fb9-4231-a5b5-468c6b8328db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\OS">
+      <UniqueIdentifier>{d934a3e3-6437-46cd-a37b-184b020772dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Renderer">
+      <UniqueIdentifier>{5508221e-d4ec-485e-977f-368366788c48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Renderer\D3D11">
+      <UniqueIdentifier>{9b9a42b2-ef2a-4c91-9aa3-93ad1d280d61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\ECS">
+      <UniqueIdentifier>{2383689e-b6f9-49c4-bcca-b62dd6e88cfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\OS\Win">
+      <UniqueIdentifier>{aae6bfcb-766f-4a6e-8fae-e3a93e78187b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Utility">
+      <UniqueIdentifier>{f5cd26ab-9336-4245-a031-2bde663e8560}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\App\main.cpp">
+      <Filter>ソース ファイル\App</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Engine.cpp">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\OS\Win\WindowsWindow.cpp">
+      <Filter>ソース ファイル\Engine\OS\Win</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\WindowManagerBase.cpp">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\RendererManagerBase.cpp">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\WorldManager.cpp">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\Engine\Engine.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>リソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\OS\Win\WindowsWindow.h">
+      <Filter>ソース ファイル\Engine\OS\Win</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Utility\Singleton.h">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\WindowManagerBase.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\RendererManagerBase.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\WorldManager.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ECSEngine.rc">
+      <Filter>リソース ファイル</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
