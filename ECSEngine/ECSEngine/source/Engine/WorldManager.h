@@ -11,7 +11,7 @@ class WorldManager
 {
 public:
 	WorldManager() = default;
-	~WorldManager() = default;
+	virtual ~WorldManager() = default;
 
 
 	WorldManager(const WorldManager&) = delete;

@@ -11,7 +11,7 @@ class RendererManagerBase
 {
 public:
 	RendererManagerBase() = default;
-	~RendererManagerBase() = default;
+	virtual ~RendererManagerBase() = default;
 
 
 	RendererManagerBase(const RendererManagerBase&) = delete;

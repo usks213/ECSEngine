@@ -9,6 +9,8 @@
 #pragma once
 
 #include <memory>
+#include <chrono>
+
 #include"Utility/Singleton.h"
 #include "WindowManagerBase.h"
 #include"RendererManagerBase.h"
@@ -46,9 +48,9 @@ private:
 
 	//--- タイマー 
 	std::uint32_t m_nCurrentFPS;
-	std::uint64_t m_dwExecLastTime;
-	std::uint64_t m_dwFPSLastTime;
-	std::uint64_t m_dwCurrentTime;
+	std::chrono::system_clock::time_point m_ExecLastTime;
+	std::chrono::system_clock::time_point m_FPSLastTime;
+	std::chrono::system_clock::time_point m_CurrentTime;
 	std::uint64_t m_dwFrameCount;
 };
 

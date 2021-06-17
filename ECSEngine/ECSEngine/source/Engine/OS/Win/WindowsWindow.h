@@ -15,7 +15,7 @@ class WindowsWindow final : public WindowManagerBase
 {
 public:
 	WindowsWindow(std::string windowName, int windowWidth, int windowHeight);
-	virtual ~WindowsWindow();
+	~WindowsWindow();
 
 	[[nodiscard]] bool initialize(HINSTANCE& hInstance, std::string className, int nCmdShow, WNDPROC lpfnWndProc);
 

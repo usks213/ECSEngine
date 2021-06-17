@@ -46,7 +46,6 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	auto& engine = Engine::get();
 	engine.initialize(pWin, pRenderer);
 
-
 	// ウィンドウの初期化
 	pWin->initialize(hInstance, "AppClass", nCmdShow, WndProc);
 
@@ -64,9 +63,10 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		}
 	}
 
+	// ウィンドウの終了処理
+	pWin->finalize();
 	// エンジンの終了処理
 	engine.finalize();
-
 
 	return (int)msg.wParam;
 }

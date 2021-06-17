@@ -14,7 +14,7 @@ class WindowManagerBase
 {
 public:
 	WindowManagerBase(std::string windowName, int windowWidth, int windowHeight);
-	~WindowManagerBase();
+	virtual ~WindowManagerBase();
 
 	[[nodiscard]] std::string getWindowName() { return m_windowName; }
 	[[nodiscard]] int getWindowWidth() { return m_windowWidth; }
