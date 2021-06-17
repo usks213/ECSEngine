@@ -11,6 +11,8 @@
 #include <windows.h>
 #include <Engine/Engine.h>
 #include <Engine/OS/Win/WindowsWindow.h>
+#include <Engine/Renderer/D3D11/D3D11RendererManager.h>
+
 
 //-------- ライブラリのリンク
 #pragma comment(lib, "imm32")
@@ -39,15 +41,15 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);	// 未使用宣言
 	UNREFERENCED_PARAMETER(lpCmdLine);		// 未使用宣言
 
-
 	// エンジンの初期化
-	WindowsWindow* pWin = new WindowsWindow("ECSEngine", 1920, 1080);
-	RendererManagerBase* pRenderer = new RendererManagerBase();
+	WindowsWindow* pWin = new WindowsWindow("ECSEngine", 1280, 720);
+	D3D11RendererManager* pRenderer = new D3D11RendererManager();
 	auto& engine = Engine::get();
 	engine.initialize(pWin, pRenderer);
-
 	// ウィンドウの初期化
 	pWin->initialize(hInstance, "AppClass", nCmdShow, WndProc);
+	// レンダラーの初期化
+	pRenderer->initialize(pWin->getWindowHandle(), pWin->getWindowWidth(), pWin->getWindowHeight());
 
 
 	// メッセージループ
@@ -63,6 +65,9 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		}
 	}
 
+
+	// レンダラーの終了処理
+	pRenderer->finalize();
 	// ウィンドウの終了処理
 	pWin->finalize();
 	// エンジンの終了処理

@@ -7,7 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include <Engine/WindowManagerBase.h>
+#include <Engine/OS/Base/WindowManagerBase.h>
 #include <Windows.h>
 
 
@@ -21,9 +21,10 @@ public:
 
 	void finalize();
 
+	HWND getWindowHandle() { return m_hWnd; }
+
 	WindowsWindow(const WindowsWindow&) = delete;
 	WindowsWindow(WindowsWindow&&) = delete;
-
 private:
 	HINSTANCE   m_hInstance;
 	HWND		m_hWnd;

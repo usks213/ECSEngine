@@ -33,6 +33,15 @@
     <Filter Include="ソース ファイル\Engine\Utility">
       <UniqueIdentifier>{f5cd26ab-9336-4245-a031-2bde663e8560}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine\Renderer\Base">
+      <UniqueIdentifier>{eddc0bd3-b4c5-4022-94c1-66a5bdf8eec8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\OS\Base">
+      <UniqueIdentifier>{6cbf7f0b-95cb-49be-82ba-2b061f29d3a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\ECS\Base">
+      <UniqueIdentifier>{11f7fb88-9054-4476-9cfd-7734a5053535}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\App\main.cpp">
@@ -44,14 +53,17 @@
     <ClCompile Include="source\Engine\OS\Win\WindowsWindow.cpp">
       <Filter>ソース ファイル\Engine\OS\Win</Filter>
     </ClCompile>
-    <ClCompile Include="source\Engine\WindowManagerBase.cpp">
-      <Filter>ソース ファイル\Engine</Filter>
+    <ClCompile Include="source\Engine\ECS\Base\WorldManager.cpp">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClCompile>
-    <ClCompile Include="source\Engine\RendererManagerBase.cpp">
-      <Filter>ソース ファイル\Engine</Filter>
+    <ClCompile Include="source\Engine\OS\Base\WindowManagerBase.cpp">
+      <Filter>ソース ファイル\Engine\OS\Base</Filter>
     </ClCompile>
-    <ClCompile Include="source\Engine\WorldManager.cpp">
-      <Filter>ソース ファイル\Engine</Filter>
+    <ClCompile Include="source\Engine\Renderer\Base\RendererManagerBase.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RendererManager.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -67,14 +79,20 @@
     <ClInclude Include="source\Engine\Utility\Singleton.h">
       <Filter>ソース ファイル\Engine\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\Engine\WindowManagerBase.h">
-      <Filter>ソース ファイル\Engine</Filter>
+    <ClInclude Include="source\Engine\ECS\Base\WorldManager.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClInclude>
-    <ClInclude Include="source\Engine\RendererManagerBase.h">
-      <Filter>ソース ファイル\Engine</Filter>
+    <ClInclude Include="source\Engine\OS\Base\WindowManagerBase.h">
+      <Filter>ソース ファイル\Engine\OS\Base</Filter>
     </ClInclude>
-    <ClInclude Include="source\Engine\WorldManager.h">
-      <Filter>ソース ファイル\Engine</Filter>
+    <ClInclude Include="source\Engine\Renderer\Base\RendererManagerBase.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RendererManager.h">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

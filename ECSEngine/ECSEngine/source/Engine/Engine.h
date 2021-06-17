@@ -11,10 +11,10 @@
 #include <memory>
 #include <chrono>
 
-#include"Utility/Singleton.h"
-#include "WindowManagerBase.h"
-#include"RendererManagerBase.h"
-#include"WorldManager.h"
+#include "Utility/Singleton.h"
+#include "OS/Base/WindowManagerBase.h"
+#include "Renderer/Base/RendererManagerBase.h"
+#include "ECS/Base/WorldManager.h"
 
 
 /// @class Engine
@@ -48,9 +48,16 @@ private:
 
 	//--- タイマー 
 	std::uint32_t m_nCurrentFPS;
+	std::chrono::system_clock::time_point m_FixedExecLastTime;
 	std::chrono::system_clock::time_point m_ExecLastTime;
 	std::chrono::system_clock::time_point m_FPSLastTime;
 	std::chrono::system_clock::time_point m_CurrentTime;
-	std::uint64_t m_dwFrameCount;
+	std::uint64_t m_nFrameCount;
+	// デルタタイム
+	float m_deltaTime;
+	float m_fixedDeltaTime;
+	// フレームレート
+	std::int32_t m_nMaxFPS;
+	std::int64_t m_nFixedTime;
 };
 
