@@ -79,4 +79,6 @@ private:
 	ComPtr<ID3D11SamplerState>			m_samplerStates[(size_t)ESamplerState::MAX];			// サンプラステート
 	ComPtr<ID3D11BlendState>			m_blendStates[(size_t)EBlendState::MAX];				// ブレンドステート
 	ComPtr<ID3D11DepthStencilState>		m_depthStencilStates[(size_t)EDepthStencilState::MAX];	// 深度ステンシルステート
+
+
 };

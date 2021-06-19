@@ -158,6 +158,7 @@
     <ClCompile Include="source\Engine\OS\Win\WindowsWindow.cpp" />
     <ClCompile Include="source\Engine\Renderer\Base\RendererManagerBase.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RendererManager.cpp" />
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -167,7 +168,9 @@
     <ClInclude Include="source\Engine\OS\Win\WindowsWindow.h" />
     <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h" />
     <ClInclude Include="source\Engine\Renderer\Base\RendererManagerBase.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\ShaderBase.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RendererManager.h" />
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Shader.h" />
     <ClInclude Include="source\Engine\Utility\Singleton.h" />
   </ItemGroup>
   <ItemGroup>

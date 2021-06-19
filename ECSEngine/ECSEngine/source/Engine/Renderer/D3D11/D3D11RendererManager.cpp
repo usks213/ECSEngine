@@ -14,6 +14,7 @@
 #pragma comment(lib, "D3D11.lib")
 #pragma comment(lib, "DXGI.lib")
 
+#undef max;
 
 
 /// @brief コンストラクタ
@@ -79,7 +80,7 @@ void D3D11RendererManager::clear()
 	// バッファのクリア
 	m_d3dAnnotation->BeginEvent(L"Clear");
 
-	m_d3dContext->OMSetBlendState(nullptr, nullptr, std::numeric_limits<std::uint32_t>::infinity());
+	m_d3dContext->OMSetBlendState(nullptr, nullptr, std::numeric_limits<std::uint32_t>::max());
 
 	m_d3dContext->ClearRenderTargetView(m_backBufferRTV.Get(), DirectX::Colors::Black);
 	m_d3dContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);

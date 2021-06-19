@@ -8,6 +8,14 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <array>
+#include <algorithm>
+#include <memory>
+
 #include <comdef.h>
 #include <Windows.h>
 #include <DirectXMath.h>
@@ -25,7 +33,7 @@ using Microsoft::WRL::ComPtr;
 		LPCTSTR     errMsg = err.ErrorMessage();							\
         sprintf_s(szResult, sizeof(szResult), "[ERROR] HRESULT: %s",errMsg);\
 		MessageBox(nullptr, szResult, "Err", MB_ICONSTOP);					\
-		return hr;															\
+		throw std::exception(szResult);     								\
 	}
 
 /// @enum ERasterizeState

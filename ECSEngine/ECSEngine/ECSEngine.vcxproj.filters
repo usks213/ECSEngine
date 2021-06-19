@@ -65,6 +65,9 @@
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RendererManager.cpp">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Shader.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -93,6 +96,12 @@
     </ClInclude>
     <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h">
       <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\ShaderBase.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Shader.h">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
