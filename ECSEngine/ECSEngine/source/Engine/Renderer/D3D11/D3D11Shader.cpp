@@ -12,6 +12,7 @@
 #include <iostream>
 
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
 
 namespace {
 	/// @brief シェーダファイルパス
@@ -36,7 +37,7 @@ namespace {
 /// @param device デバイス
 /// @param desc シェーダ情報
 D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
-	ShaderBase(desc),
+	Shader(desc),
 	m_comShaders(static_cast<size_t>(EShaderStage::MAX)),
 	m_inputLayout()
 {
@@ -111,7 +112,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 
 		// 入力レイアウト数分
 		m_inputLayoutVariableList.resize(shaderDesc.InputParameters);
-		for (auto i = 0; i < shaderDesc.InputParameters; ++i)
+		for (UINT i = 0; i < shaderDesc.InputParameters; ++i)
 		{
 			D3D11_SIGNATURE_PARAMETER_DESC signature;
 			vsReflection->GetInputParameterDesc(i, &signature);
@@ -209,7 +210,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 
 			// CB変数のレイアウト作成
 			D3D11_SHADER_VARIABLE_DESC varDesc;
-			for (std::uint32_t v; v < shaderBufferDesc.Variables; ++v)
+			for (std::uint32_t v = 0; v < shaderBufferDesc.Variables; ++v)
 			{
 				// 変数情報取得
 				auto* variable = constantBuffer->GetVariableByIndex(v);
@@ -228,7 +229,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 				}
 			}
 			// コンスタントバッファレイアウト格納
-			m_cbufferLayouts[stageIndex][cbIdx] = cbLayout;
+			m_cbufferLayouts[stageIndex].emplace(cbIdx, cbLayout);
 		}
 
 
@@ -255,7 +256,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 				m_samplerBindDatas[stageIndex][shaderInputBindDesc.BindPoint].stage = stage;
 				break;
 
-			/// @brief 色々ある…
+			// 色々ある…
 			case D3D_SIT_UAV_RWTYPED:
 				break;
 			case D3D_SIT_STRUCTURED:

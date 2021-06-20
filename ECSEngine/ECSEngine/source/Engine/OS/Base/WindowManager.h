@@ -1,5 +1,5 @@
 /*****************************************************************//**
- * \file   WindowManagerBase.h
+ * \file   WindowManager.h
  * \brief  アプリケーションウィンドウのベースクラス
  * 
  * \author USAMI KOSHI
@@ -10,18 +10,18 @@
 #include <string>
 
 
-class WindowManagerBase
+class WindowManager
 {
 public:
-	WindowManagerBase(std::string windowName, int windowWidth, int windowHeight);
-	virtual ~WindowManagerBase();
+	WindowManager(std::string windowName, int windowWidth, int windowHeight);
+	virtual ~WindowManager();
 
 	[[nodiscard]] std::string getWindowName() { return m_windowName; }
 	[[nodiscard]] int getWindowWidth() { return m_windowWidth; }
 	[[nodiscard]] int getWindowHeight()	{ return m_windowHeight; }
 
-	WindowManagerBase(const WindowManagerBase&) = delete;
-	WindowManagerBase(WindowManagerBase&&) = delete;
+	WindowManager(const WindowManager&) = delete;
+	WindowManager(WindowManager&&) = delete;
 
 protected:
 	std::string m_windowName;

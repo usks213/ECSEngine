@@ -12,8 +12,8 @@
 #include <chrono>
 
 #include "Utility/Singleton.h"
-#include "OS/Base/WindowManagerBase.h"
-#include "Renderer/Base/RendererManagerBase.h"
+#include "OS/Base/WindowManager.h"
+#include "Renderer/Base/RendererManager.h"
 #include "ECS/Base/WorldManager.h"
 
 
@@ -22,7 +22,7 @@
 class Engine final : public Singleton<Engine>
 {
 public:
-	[[nodiscard]] bool initialize(WindowManagerBase* pWindow, RendererManagerBase* pRenderer);
+	[[nodiscard]] bool initialize(WindowManager* pWindow, RendererManager* pRenderer);
 
 	void tick();
 
@@ -42,8 +42,8 @@ private:
 	/// @brief デストラクタ
 	~Engine() = default;
 
-	std::unique_ptr<WindowManagerBase>		m_windowManager;
-	std::unique_ptr<RendererManagerBase>	m_rendererManager;
+	std::unique_ptr<WindowManager>		m_windowManager;
+	std::unique_ptr<RendererManager>	m_rendererManager;
 	std::unique_ptr<WorldManager>			m_worldManager;
 
 	//--- タイマー 

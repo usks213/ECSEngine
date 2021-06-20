@@ -1,10 +1,10 @@
 /*****************************************************************//**
- * \file   RendererManagerBase.cpp
+ * \file   RendererManager.cpp
  * \brief  レンダラーマネージャーのベースクラス
  *
  * \author USAMI KOSHI
  * \date   2021/06/14
  *********************************************************************/
 
-#include "RendererManagerBase.h"
+#include "RendererManager.h"
 

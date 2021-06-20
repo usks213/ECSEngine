@@ -1,5 +1,5 @@
 /*****************************************************************//**
- * \file   RendererManagerBase.h
+ * \file   RendererManager.h
  * \brief  レンダラーマネージャーのベースクラス
  * 
  * \author USAMI KOSHI
@@ -8,20 +8,20 @@
 #pragma once
 
 /// @brief レンダラーのベースクラス
-/// @class RendererManagerBase
-class RendererManagerBase
+/// @class RendererManager
+class RendererManager
 {
 public:
-	RendererManagerBase() = default;
-	virtual ~RendererManagerBase() = default;
+	RendererManager() = default;
+	virtual ~RendererManager() = default;
 
 	virtual void finalize() = 0;
 	virtual void clear() = 0;
 	virtual void present() = 0;
 
 
-	RendererManagerBase(const RendererManagerBase&) = delete;
-	RendererManagerBase(RendererManagerBase&&) = delete;
+	RendererManager(const RendererManager&) = delete;
+	RendererManager(RendererManager&&) = delete;
 
 protected:
 

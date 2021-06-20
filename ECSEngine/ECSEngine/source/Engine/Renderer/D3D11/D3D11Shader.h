@@ -7,7 +7,7 @@
  *********************************************************************/
 #pragma once
 
-#include <Engine/Renderer/Base/ShaderBase.h>
+#include <Engine/Renderer/Base/Shader.h>
 #include <Engine/Renderer/Base/D3DUtility.h>
 #include <d3d11_1.h>
 #include <d3d11shader.h>
@@ -15,7 +15,7 @@
 
 /// @class D3D11Shader
 /// @brief DirectX11シェーダ
-class D3D11Shader : public ShaderBase
+class D3D11Shader final : public Shader
 {
 public:
 	/// @brief  コンストラクタ
@@ -63,51 +63,6 @@ public:
 	};
 	/// @brief 入力レイアウト情報リスト
 	std::vector<InputLayoutVariable> m_inputLayoutVariableList;
-
-	/// @brief CBufferの変数情報
-	struct CBufferVariable
-	{
-		std::string name;	// 変数名
-		std::size_t size;	// 型サイズ
-		std::size_t offset;	// 変数オフセット
-	};
-	/// @brief CBufferの構造体レイアウト情報
-	struct CBufferLayout
-	{
-		std::string		name;	// cbuffer宣言名
-		std::uint32_t	slot;	// レジスタスロット
-		std::size_t		size;	// cbufferサイズ
-		std::vector<CBufferVariable> variables;	// 変数データ
-		CBufferLayout(const std::uint32_t& slot, const std::string& name, const std::size_t& size) :
-			slot(slot), name(name), size(size){}
-	};
-	/// @brief 全ステージのCBufferレイアウト
-	std::array<std::unordered_map<std::uint32_t, CBufferLayout>, 
-		static_cast<size_t>(EShaderStage::MAX)> m_cbufferLayouts;
-	/// @brief CBuffer変数のデフォルト値(初期化子付き値)
-	std::unordered_map<std::string, std::unique_ptr<std::byte[]>> m_cbufferDefaults;
-
-	/// @brief テクスチャリソースバインド情報
-	struct TextureBindData
-	{
-		std::string name;
-		EShaderStage stage;
-		std::uint32_t slot;
-	};
-	/// @brief サンプラリソースバインド情報
-	struct SamplerBindData
-	{
-		std::string name;
-		EShaderStage stage;
-		std::uint32_t slot;
-	};
-
-	/// @brief 全ステージのテクスチャリソース情報
-	std::array<std::unordered_map<std::uint32_t, TextureBindData>,
-		static_cast<size_t>(EShaderStage::MAX)> m_textureBindDatas;
-	/// @brief 全ステージのサンプラリソース情報
-	std::array<std::unordered_map<std::uint32_t, SamplerBindData>,
-		static_cast<size_t>(EShaderStage::MAX)> m_samplerBindDatas;
 
 private:
 	/// @brief シェーダのスマートポインタ(解放用)

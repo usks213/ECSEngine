@@ -56,17 +56,23 @@
     <ClCompile Include="source\Engine\ECS\Base\WorldManager.cpp">
       <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClCompile>
-    <ClCompile Include="source\Engine\OS\Base\WindowManagerBase.cpp">
-      <Filter>ソース ファイル\Engine\OS\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Engine\Renderer\Base\RendererManagerBase.cpp">
-      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
-    </ClCompile>
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RendererManager.cpp">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClCompile>
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Shader.cpp">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\Base\RendererManager.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\OS\Base\WindowManager.cpp">
+      <Filter>ソース ファイル\Engine\OS\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\Base\Material.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\Base\Shader.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,23 +91,32 @@
     <ClInclude Include="source\Engine\ECS\Base\WorldManager.h">
       <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClInclude>
-    <ClInclude Include="source\Engine\OS\Base\WindowManagerBase.h">
-      <Filter>ソース ファイル\Engine\OS\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Engine\Renderer\Base\RendererManagerBase.h">
-      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
-    </ClInclude>
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RendererManager.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClInclude>
     <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h">
       <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClInclude>
-    <ClInclude Include="source\Engine\Renderer\Base\ShaderBase.h">
-      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
-    </ClInclude>
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Shader.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Utility\HashUtil.h">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\Material.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\Shader.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\RendererManager.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\OS\Base\WindowManager.h">
+      <Filter>ソース ファイル\Engine\OS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\CommonState.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

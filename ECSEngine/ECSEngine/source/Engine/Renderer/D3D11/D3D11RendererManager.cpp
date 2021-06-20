@@ -14,7 +14,7 @@
 #pragma comment(lib, "D3D11.lib")
 #pragma comment(lib, "DXGI.lib")
 
-#undef max;
+#undef max
 
 
 /// @brief コンストラクタ

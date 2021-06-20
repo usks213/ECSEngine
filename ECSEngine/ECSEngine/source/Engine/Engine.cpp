@@ -25,7 +25,7 @@ Engine::Engine()
 /// @param pWindow 
 /// @param pRenderer 
 /// @return ¬Œ÷‚©
-bool Engine::initialize(WindowManagerBase* pWindow, RendererManagerBase* pRenderer)
+bool Engine::initialize(WindowManager* pWindow, RendererManager* pRenderer)
 {
 	// Ši”[
 	m_windowManager.reset(pWindow);

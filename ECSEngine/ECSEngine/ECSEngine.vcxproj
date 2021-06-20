@@ -154,9 +154,11 @@
     <ClCompile Include="source\App\main.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\WorldManager.cpp" />
     <ClCompile Include="source\Engine\Engine.cpp" />
-    <ClCompile Include="source\Engine\OS\Base\WindowManagerBase.cpp" />
+    <ClCompile Include="source\Engine\OS\Base\WindowManager.cpp" />
     <ClCompile Include="source\Engine\OS\Win\WindowsWindow.cpp" />
-    <ClCompile Include="source\Engine\Renderer\Base\RendererManagerBase.cpp" />
+    <ClCompile Include="source\Engine\Renderer\Base\Material.cpp" />
+    <ClCompile Include="source\Engine\Renderer\Base\RendererManager.cpp" />
+    <ClCompile Include="source\Engine\Renderer\Base\Shader.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RendererManager.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Shader.cpp" />
   </ItemGroup>
@@ -164,13 +166,16 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\Engine\ECS\Base\WorldManager.h" />
     <ClInclude Include="source\Engine\Engine.h" />
-    <ClInclude Include="source\Engine\OS\Base\WindowManagerBase.h" />
+    <ClInclude Include="source\Engine\OS\Base\WindowManager.h" />
     <ClInclude Include="source\Engine\OS\Win\WindowsWindow.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\CommonState.h" />
     <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h" />
-    <ClInclude Include="source\Engine\Renderer\Base\RendererManagerBase.h" />
-    <ClInclude Include="source\Engine\Renderer\Base\ShaderBase.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\Material.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\RendererManager.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\Shader.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RendererManager.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Shader.h" />
+    <ClInclude Include="source\Engine\Utility\HashUtil.h" />
     <ClInclude Include="source\Engine\Utility\Singleton.h" />
   </ItemGroup>
   <ItemGroup>

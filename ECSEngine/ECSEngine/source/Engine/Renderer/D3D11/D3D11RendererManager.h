@@ -7,14 +7,14 @@
  *********************************************************************/
 #pragma once
 
-#include <Engine/Renderer/Base/RendererManagerBase.h>
+#include <Engine/Renderer/Base/RendererManager.h>
 #include <d3d11_1.h>
 #include <Engine/Renderer/Base/D3DUtility.h>
 
 
 /// @brief DirectX11レンダラー管理クラス
 /// @class D3D11RendererManager
-class D3D11RendererManager : public RendererManagerBase
+class D3D11RendererManager : public RendererManager
 {
 public:
 	/// @brief コンストラクタ

@@ -7,11 +7,11 @@
  *********************************************************************/
 #pragma once
 
-#include <Engine/OS/Base/WindowManagerBase.h>
+#include <Engine/OS/Base/WindowManager.h>
 #include <Windows.h>
 
 
-class WindowsWindow final : public WindowManagerBase
+class WindowsWindow final : public WindowManager
 {
 public:
 	WindowsWindow(std::string windowName, int windowWidth, int windowHeight);

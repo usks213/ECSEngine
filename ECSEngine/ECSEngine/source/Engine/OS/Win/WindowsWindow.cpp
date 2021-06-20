@@ -11,7 +11,7 @@
 
 
 WindowsWindow::WindowsWindow(std::string windowName, int windowWidth, int windowHeight)
-	: WindowManagerBase(windowName, windowWidth, windowHeight),
+	: WindowManager(windowName, windowWidth, windowHeight),
 	m_hInstance(NULL), m_hWnd(NULL), m_nCmdShow(NULL)
 {
 }
