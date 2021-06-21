@@ -16,6 +16,9 @@ public:
 	WindowManager(std::string windowName, int windowWidth, int windowHeight);
 	virtual ~WindowManager();
 
+	virtual void finalize() = 0;
+
+public:
 	[[nodiscard]] std::string getWindowName() { return m_windowName; }
 	[[nodiscard]] int getWindowWidth() { return m_windowWidth; }
 	[[nodiscard]] int getWindowHeight()	{ return m_windowHeight; }

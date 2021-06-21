@@ -8,16 +8,18 @@
 #pragma once
 
 #include "CommonState.h"
-#include"Shader.h"
+#include "Shader.h"
+#include "Texture.h"
 
-// 仮
-using TextureID = std::uint32_t;
 
+/// @brief マテリアルID
 using MaterialID = std::uint32_t;
 
-
-struct Material
+/// @class Material
+/// @brief マテリアル
+class Material
 {
+public:
 	/// @brief コンストラクタ
 	/// @param シェーダ情報
 	Material(const MaterialID& id, const std::string& name, const Shader& shader);

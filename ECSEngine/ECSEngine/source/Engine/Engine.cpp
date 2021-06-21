@@ -25,15 +25,11 @@ Engine::Engine()
 /// @param pWindow 
 /// @param pRenderer 
 /// @return 成功か
-bool Engine::initialize(WindowManager* pWindow, RendererManager* pRenderer)
+bool Engine::initialize()
 {
-	// 格納
-	m_windowManager.reset(pWindow);
-	m_rendererManager.reset(pRenderer);
-
 	// ワールドマネージャーの初期化
-	//m_worldManager = std::make_unique<WorldManager>();
-
+	m_worldManager = std::make_unique<WorldManager>();
+	m_worldManager->initialize();
 
 	// フレームカウント初期化
 	m_ExecLastTime = m_FPSLastTime = 
@@ -96,4 +92,10 @@ void Engine::tick()
 /// @brief 終了処理
 void Engine::finalize()
 {
+	// ワールドマネージャーの終了処理
+	m_worldManager->finalize();
+	// レンダラーマネージャーのの終了処理
+	m_rendererManager->finalize();
+	// ウィンドウマネージャーの終了処理
+	m_windowManager->finalize();
 }

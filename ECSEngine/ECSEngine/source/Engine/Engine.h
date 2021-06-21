@@ -22,11 +22,33 @@
 class Engine final : public Singleton<Engine>
 {
 public:
-	[[nodiscard]] bool initialize(WindowManager* pWindow, RendererManager* pRenderer);
+	[[nodiscard]] bool initialize();
 
 	void tick();
 
 	void finalize();
+
+public:
+
+	/// @brief ウィンドウマネージャーの生成
+	/// @tparam T ウィンドウタイプ
+	/// @tparam WindowManager継承型のみ
+	/// @return ウィンドウのポインタ
+	template<class T, typename = std::enable_if_t<std::is_base_of_v<WindowManager, T>>>
+	T* createWindow(std::string windowName, int windowWidth, int windowHeight) {
+		m_windowManager = std::make_unique<T>(windowName, windowWidth, windowHeight);
+		return static_cast<T*>(m_windowManager.get());
+	}
+
+	/// @brief レンダラーマネージャーの生成
+	/// @tparam T レンダラータイプ
+	/// @tparam RendererManager継承型のみ
+	/// @return レンダラーのポインタ
+	template<class T, typename = std::enable_if_t<std::is_base_of_v<RendererManager, T>>>
+	T* createRenderer() {
+		m_rendererManager = std::make_unique<T>();
+		return static_cast<T*>(m_rendererManager.get());
+	}
 
 public:
 
@@ -44,7 +66,7 @@ private:
 
 	std::unique_ptr<WindowManager>		m_windowManager;
 	std::unique_ptr<RendererManager>	m_rendererManager;
-	std::unique_ptr<WorldManager>			m_worldManager;
+	std::unique_ptr<WorldManager>		m_worldManager;
 
 	//--- タイマー 
 	std::uint32_t m_nCurrentFPS;

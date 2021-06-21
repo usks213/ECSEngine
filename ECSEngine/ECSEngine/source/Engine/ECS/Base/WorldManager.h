@@ -13,6 +13,12 @@ public:
 	WorldManager() = default;
 	virtual ~WorldManager() = default;
 
+	void initialize();
+	void finalize();
+
+	void fixedUpdate();
+	void update();
+	void render();
 
 	WorldManager(const WorldManager&) = delete;
 	WorldManager(WorldManager&&) = delete;

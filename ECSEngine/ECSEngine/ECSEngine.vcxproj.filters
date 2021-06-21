@@ -74,6 +74,9 @@
     <ClCompile Include="source\Engine\Renderer\Base\Shader.cpp">
       <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Material.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -117,6 +120,15 @@
     </ClInclude>
     <ClInclude Include="source\Engine\Renderer\Base\CommonState.h">
       <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\Texture.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Material.h">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Utility.h">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

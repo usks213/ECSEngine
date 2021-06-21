@@ -77,8 +77,11 @@ struct ShaderDesc
 	// シェーダマクロ
 };
 
-struct Shader
+/// @class Shader
+/// @brief シェーダ
+class Shader
 {
+public:
 	/// @brief コンストラクタ
 	Shader(ShaderDesc shaderDesc) :
 		m_id(std::numeric_limits<ShaderID>::max()),

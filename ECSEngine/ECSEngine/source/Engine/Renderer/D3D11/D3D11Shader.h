@@ -8,8 +8,7 @@
 #pragma once
 
 #include <Engine/Renderer/Base/Shader.h>
-#include <Engine/Renderer/Base/D3DUtility.h>
-#include <d3d11_1.h>
+#include "D3D11Utility.h"
 #include <d3d11shader.h>
 
 
@@ -74,8 +73,6 @@ private:
 	/// @param stage シェーダステージ
 	/// @param blob コンパイルデータ
 	void createShaderObjct(ID3D11Device1* device, const EShaderStage& stage, ComPtr<ID3DBlob>& blob);
-
-private:
 
 };
 

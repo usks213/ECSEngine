@@ -8,8 +8,7 @@
 #pragma once
 
 #include <Engine/Renderer/Base/RendererManager.h>
-#include <d3d11_1.h>
-#include <Engine/Renderer/Base/D3DUtility.h>
+#include "D3D11Utility.h"
 
 
 /// @brief DirectX11レンダラー管理クラス

@@ -8,3 +8,30 @@
 
 #include "WorldManager.h"
 
+
+void WorldManager::initialize()
+{
+
+}
+
+void WorldManager::finalize()
+{
+
+}
+
+void WorldManager::fixedUpdate()
+{
+
+}
+
+void WorldManager::update()
+{
+
+}
+
+void WorldManager::render()
+{
+
+}
+
+

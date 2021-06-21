@@ -16,3 +16,4 @@ WindowManager::WindowManager(std::string windowName, int windowWidth, int window
 WindowManager::~WindowManager()
 {
 }
+

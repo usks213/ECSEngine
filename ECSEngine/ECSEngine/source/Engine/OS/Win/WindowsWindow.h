@@ -19,7 +19,7 @@ public:
 
 	[[nodiscard]] bool initialize(HINSTANCE& hInstance, std::string className, int nCmdShow, WNDPROC lpfnWndProc);
 
-	void finalize();
+	void finalize() override;
 
 	HWND getWindowHandle() { return m_hWnd; }
 
