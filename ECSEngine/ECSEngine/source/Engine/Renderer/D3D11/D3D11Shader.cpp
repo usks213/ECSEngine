@@ -53,14 +53,14 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
 	{
 		// ステージがない場合はスキップ
-		if (hasStaderStage(desc.m_stages, stage)) continue;
+		if (!hasStaderStage(desc.m_stages, stage)) continue;
 
 		ComPtr<ID3DBlob>& blob = blobs[static_cast<size_t>(stage)];
 		ComPtr<ID3D11ShaderReflection>& reflection = reflections[static_cast<size_t>(stage)];
 
 		// パス
 		std::string filepath = SHADER_FILE_PATH + desc.m_name + "_" + 
-			SHADER_TYPES[static_cast<size_t>(stage)] + ".hsls";
+			SHADER_TYPES[static_cast<size_t>(stage)] + ".hlsl";
 		std::wstring wfilepath = std::wstring(filepath.begin(), filepath.end());
 		// エラー
 		ID3DBlob* d3dError = nullptr;
@@ -133,12 +133,12 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 			if (i > 0)
 			{
 				m_inputLayoutVariableList[i].offset =
-					static_cast<std::size_t>(m_inputLayoutVariableList[i - 1].formatSize) +
+					static_cast<std::size_t>(m_inputLayoutVariableList[i - 1].formatSize) * sizeof(float) +
 					m_inputLayoutVariableList[i - 1].offset;
 			}
 
 			// ビットマスクでフォーマットを分ける
-			if (signature.Mask & 0x1) {
+			if (signature.Mask == 0x01) {
 				switch (signature.ComponentType) {
 				case D3D_REGISTER_COMPONENT_UINT32 : inputDesc.Format = DXGI_FORMAT_R32_UINT;  break;
 				case D3D_REGISTER_COMPONENT_SINT32 : inputDesc.Format = DXGI_FORMAT_R32_SINT;  break;
@@ -149,7 +149,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 					static_cast<InputLayoutVariable::FormatType>(signature.ComponentType);
 				
 			}
-			else if (signature.Mask & 0x3) {
+			else if (signature.Mask <= 0x03) {
 				switch (signature.ComponentType) {
 				case D3D_REGISTER_COMPONENT_UINT32: inputDesc.Format = DXGI_FORMAT_R32G32_UINT;  break;
 				case D3D_REGISTER_COMPONENT_SINT32: inputDesc.Format = DXGI_FORMAT_R32G32_SINT;  break;
@@ -159,7 +159,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 				m_inputLayoutVariableList[i].formatType =
 					static_cast<InputLayoutVariable::FormatType>(signature.ComponentType);
 			}
-			else if (signature.Mask & 0x07) {
+			else if (signature.Mask <= 0x07) {
 				switch (signature.ComponentType) {
 				case D3D_REGISTER_COMPONENT_UINT32: inputDesc.Format = DXGI_FORMAT_R32G32B32_UINT;  break;
 				case D3D_REGISTER_COMPONENT_SINT32: inputDesc.Format = DXGI_FORMAT_R32G32B32_SINT;  break;
@@ -169,7 +169,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
 				m_inputLayoutVariableList[i].formatType =
 					static_cast<InputLayoutVariable::FormatType>(signature.ComponentType);
 			}
-			else if (signature.Mask & 0x0F) {
+			else if (signature.Mask <= 0x0F) {
 				switch (signature.ComponentType) {
 				case D3D_REGISTER_COMPONENT_UINT32: inputDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;  break;
 				case D3D_REGISTER_COMPONENT_SINT32: inputDesc.Format = DXGI_FORMAT_R32G32B32A32_SINT;  break;

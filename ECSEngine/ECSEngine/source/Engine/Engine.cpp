@@ -68,7 +68,7 @@ void Engine::tick()
 		m_FixedExecLastTime = m_CurrentTime;
 
 		// FixedUpdate
-		//m_worldManager.FixedUpdate();
+		m_worldManager->fixedUpdate();
 	}
 
 	//--- 可変フレームレート更新 ---
@@ -79,10 +79,10 @@ void Engine::tick()
 		m_ExecLastTime = m_CurrentTime;
 
 		// Update
-		//m_worldManager.Update();
+		m_worldManager->update();
 
 		// Draw
-		//m_worldManager.Draw();
+		m_worldManager->render();
 		m_rendererManager->present();
 
 		// フレームカウンタ更新

@@ -21,10 +21,16 @@ D3D11Material::D3D11Material(ID3D11Device1* device, const MaterialID& id,
 	// コンスタントバッファの初期化
 	D3D11_BUFFER_DESC d3dDesc = {};
 	d3dDesc.BindFlags		= D3D11_BIND_CONSTANT_BUFFER;
-	d3dDesc.Usage			= D3D11_USAGE_DYNAMIC;
-	d3dDesc.CPUAccessFlags	= D3D11_CPU_ACCESS_WRITE;
+	d3dDesc.Usage			= D3D11_USAGE_DEFAULT;
+	d3dDesc.CPUAccessFlags	= 0;
 	d3dDesc.MiscFlags		= 0; // STRUCTURED_BUFFERならD3D11_RESOURCE_MISC_BUFFER_STRUCTURED
 	//d3dDesc.StructureByteStride = 0;
+	// Map()/Unmap()でリソースを更新する場合は↓を用いる
+	//d3dDesc.Usage = D3D11_USAGE_DYNAMIC;
+	//d3dDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	// 初期化データ
+	D3D11_SUBRESOURCE_DATA initData = {};
 
 	// コンスタントバッファの確保(GPU)
 	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
@@ -35,8 +41,11 @@ D3D11Material::D3D11Material(ID3D11Device1* device, const MaterialID& id,
 		{
 			// CBufferサイズ
 			d3dDesc.ByteWidth	= cbData.second.size;
+			// 初期化データ
+			ZeroMemory(&initData, sizeof(initData));
+			initData.pSysMem = cbData.second.data.get();
 			// 生成
-			CHECK_FAILED(device->CreateBuffer(&d3dDesc, nullptr, 
+			CHECK_FAILED(device->CreateBuffer(&d3dDesc, &initData,
 				m_d3dCbuffer[stageIndex][cbData.first].GetAddressOf()));
 		}
 	}

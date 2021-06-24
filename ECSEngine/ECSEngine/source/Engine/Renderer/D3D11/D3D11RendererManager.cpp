@@ -82,7 +82,8 @@ void D3D11RendererManager::clear()
 
 	m_d3dContext->OMSetBlendState(nullptr, nullptr, std::numeric_limits<std::uint32_t>::max());
 
-	m_d3dContext->ClearRenderTargetView(m_backBufferRTV.Get(), DirectX::Colors::Black);
+	float ClearColor[4] = { 0.117647f, 0.254902f, 0.352941f, 1.0f };
+	m_d3dContext->ClearRenderTargetView(m_backBufferRTV.Get(), ClearColor);
 	m_d3dContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
 
