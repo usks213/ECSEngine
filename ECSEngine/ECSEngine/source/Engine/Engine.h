@@ -37,6 +37,7 @@ public:
 	template<class T, typename = std::enable_if_t<std::is_base_of_v<WindowManager, T>>>
 	T* createWindow(std::string windowName, int windowWidth, int windowHeight) {
 		m_windowManager = std::make_unique<T>(windowName, windowWidth, windowHeight);
+		m_windowManager->m_pEngine = this;
 		return static_cast<T*>(m_windowManager.get());
 	}
 
@@ -47,10 +48,14 @@ public:
 	template<class T, typename = std::enable_if_t<std::is_base_of_v<RendererManager, T>>>
 	T* createRenderer() {
 		m_rendererManager = std::make_unique<T>();
+		m_rendererManager->m_pEngine = this;
 		return static_cast<T*>(m_rendererManager.get());
 	}
 
 public:
+	[[nodiscard]] WindowManager* getWindowManager()		{ return m_windowManager.get(); }
+	[[nodiscard]] RendererManager* getRendererManager() { return m_rendererManager.get(); }
+	[[nodiscard]] WorldManager* getWorldManager()		{ return m_worldManager.get(); }
 
 	[[nodiscard]] int getWindowWidth()	{ return m_windowManager.get()->getWindowWidth(); }
 	[[nodiscard]] int getWindowHeight() { return m_windowManager.get()->getWindowHeight(); }

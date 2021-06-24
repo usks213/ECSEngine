@@ -9,9 +9,11 @@
 
 #include <string>
 
+class Engine;
 
 class WindowManager
 {
+	friend class Engine;
 public:
 	WindowManager(std::string windowName, int windowWidth, int windowHeight);
 	virtual ~WindowManager();
@@ -27,6 +29,8 @@ public:
 	WindowManager(WindowManager&&) = delete;
 
 protected:
+	Engine* m_pEngine;
+
 	std::string m_windowName;
 	int m_windowWidth;
 	int m_windowHeight;

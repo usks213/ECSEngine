@@ -48,7 +48,7 @@ private:
 	/// @return HRESULT
 	HRESULT createCommonState();
 
-private:
+public:
 	ComPtr<ID3D11Device1>				m_d3dDevice;			// デバイス
 	ComPtr<ID3D11DeviceContext1>		m_d3dContext;			// デバイスコンテキスト
 	ComPtr<ID3D11DeviceContext1>		m_d3dDefferedContext;	// 遅延コンテキスト

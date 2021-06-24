@@ -7,10 +7,13 @@
  *********************************************************************/
 #pragma once
 
+class Engine;
+
 /// @brief レンダラーのベースクラス
 /// @class RendererManager
 class RendererManager
 {
+	friend class Engine;
 public:
 	RendererManager() = default;
 	virtual ~RendererManager() = default;
@@ -24,6 +27,7 @@ public:
 	RendererManager(RendererManager&&) = delete;
 
 protected:
+	Engine* m_pEngine;
 
 };
 

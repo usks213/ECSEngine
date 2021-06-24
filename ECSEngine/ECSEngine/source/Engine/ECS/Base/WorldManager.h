@@ -7,8 +7,11 @@
  *********************************************************************/
 #pragma once
 
+class Engine;
+
 class WorldManager
 {
+	friend class Engine;
 public:
 	WorldManager() = default;
 	virtual ~WorldManager() = default;
@@ -24,6 +27,6 @@ public:
 	WorldManager(WorldManager&&) = delete;
 
 protected:
-
+	Engine* m_pEngine;
 };
 

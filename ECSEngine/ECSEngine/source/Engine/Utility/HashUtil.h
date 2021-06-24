@@ -95,6 +95,15 @@ namespace hash
     }
 
     /// @brief 文字列のCRC32コード
+    constexpr std::size_t crc32string(const char* string)
+    {
+        std::size_t size = std::strlen(string);
+        unsigned const char* buff = reinterpret_cast<unsigned const char*>(string);
+
+        return crc32memory(0xFFFFFFFF, buff, size) ^ 0xFFFFFFFF;
+    }
+
+    /// @brief 文字列のCRC32コード
 	constexpr std::size_t crc32string(const char* string, std::size_t size)
 	{
         unsigned const char* buff = reinterpret_cast<unsigned const char*>(string);

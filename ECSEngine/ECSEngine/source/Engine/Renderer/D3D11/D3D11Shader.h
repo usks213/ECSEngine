@@ -44,7 +44,7 @@ public:
 	struct InputLayoutVariable
 	{
 		enum class FormatType {
-			R32,
+			R32 = 1,
 			R32G32,
 			R32G32B32,
 			R32G32B32A32,
