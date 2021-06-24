@@ -40,29 +40,6 @@ public:
 	/// @brief 入力レイアウト
 	ComPtr<ID3D11InputLayout>				m_inputLayout;
 
-	/// @brief 入力レイアウト情報構造体
-	struct InputLayoutVariable
-	{
-		enum class FormatType {
-			R32 = 1,
-			R32G32,
-			R32G32B32,
-			R32G32B32A32,
-			MAX,
-		};
-		std::string semanticName;		// セマンティック名		例:TEXCOOD
-		std::uint32_t semanticIndex;	// セマンティック番号	例:TEXCOOD[0]←
-		FormatType formatType;			// フォーマットタイプ	例:R32=0,R32B32=1, MAX=4
-		DXGI_FORMAT	format;				// フォーマット
-		InputLayoutVariable():
-			semanticName(),
-			semanticIndex(0),
-			formatType(FormatType::MAX),
-			format(DXGI_FORMAT_UNKNOWN){}
-	};
-	/// @brief 入力レイアウト情報リスト
-	std::vector<InputLayoutVariable> m_inputLayoutVariableList;
-
 private:
 	/// @brief シェーダのスマートポインタ(解放用)
 	std::vector<ComPtr<ID3D11DeviceChild>>	m_comShaders;

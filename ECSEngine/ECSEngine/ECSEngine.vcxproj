@@ -175,11 +175,13 @@
     <ClInclude Include="source\Engine\Renderer\Base\RendererManager.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Shader.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Texture.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\Vertex.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Material.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RendererManager.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Shader.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Utility.h" />
     <ClInclude Include="source\Engine\Utility\HashUtil.h" />
+    <ClInclude Include="source\Engine\Utility\Mathf.h" />
     <ClInclude Include="source\Engine\Utility\Singleton.h" />
   </ItemGroup>
   <ItemGroup>

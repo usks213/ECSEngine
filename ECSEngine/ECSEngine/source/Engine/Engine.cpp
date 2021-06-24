@@ -29,7 +29,7 @@ bool Engine::initialize()
 {
 	// ワールドマネージャーの初期化
 	m_worldManager = std::make_unique<WorldManager>();
-	m_windowManager->m_pEngine = this;
+	m_worldManager->m_pEngine = this;
 	m_worldManager->initialize();
 
 	// フレームカウント初期化

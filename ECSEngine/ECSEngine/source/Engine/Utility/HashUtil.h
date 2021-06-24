@@ -95,7 +95,7 @@ namespace hash
     }
 
     /// @brief 文字列のCRC32コード
-    constexpr std::size_t crc32string(const char* string)
+    static std::size_t crc32string(const char* string)
     {
         std::size_t size = std::strlen(string);
         unsigned const char* buff = reinterpret_cast<unsigned const char*>(string);
@@ -104,7 +104,7 @@ namespace hash
     }
 
     /// @brief 文字列のCRC32コード
-	constexpr std::size_t crc32string(const char* string, std::size_t size)
+	static std::size_t crc32string(const char* string, std::size_t size)
 	{
         unsigned const char* buff = reinterpret_cast<unsigned const char*>(string);
 
@@ -118,12 +118,12 @@ namespace hash
     template<class T>
     constexpr std::size_t typeHash()		  
     {												  
-        constexpr auto fnvOffsetBasis = 14695981039346656037ULL;
+        auto fnvOffsetBasis = 14695981039346656037ULL;
         constexpr auto cFnvPrime = 1099511628211ULL;  
 
         for (auto idx : TYPE_STRING(T))
         {											  
-            fnvOffsetBasis ^= static_cast<size_t>(idx)
+            fnvOffsetBasis ^= static_cast<size_t>(idx);
             fnvOffsetBasis *= cFnvPrime;			  
         }											  
             return fnvOffsetBasis;						

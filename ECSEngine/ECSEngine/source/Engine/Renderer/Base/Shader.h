@@ -15,6 +15,7 @@
 #include <memory>
 #include <array>
 
+#undef max
 
 /// @brief シェーダーID (格納先ハッシュ値)
 using ShaderID = std::uint32_t;
@@ -93,6 +94,40 @@ public:
 	virtual ~Shader() = default;
 
 public:
+	/// @brief 入力レイアウト情報構造体
+	struct InputLayoutVariable
+	{
+		enum class FormatSize {
+			UNKNOWN,
+			R32,
+			R32G32,
+			R32G32B32,
+			R32G32B32A32,
+			MAX,
+		};
+		enum class FormatType {
+			UNKNOWN,
+			UINT32,
+			SINT32,
+			FLOAT32,
+			MAX,
+		};
+		enum class Format;
+		std::string semanticName;		// セマンティック名		例:TEXCOOD
+		std::uint32_t semanticIndex;	// セマンティック番号	例:TEXCOOD[0]←
+		std::size_t offset;				// 変数オフセット
+		FormatSize formatSize;			// フォーマットサイズ	例:R32=1,R32B32=2, MAX=5
+		FormatType formatType;			// フォーマットタイプ	例:uint32=1,sint32=2, MAX=5
+		InputLayoutVariable() :
+			semanticName(),
+			semanticIndex(0),
+			offset(0),
+			formatSize(FormatSize::UNKNOWN),
+			formatType(FormatType::UNKNOWN) {}
+	};
+
+	/// @brief 入力レイアウト情報リスト
+	std::vector<InputLayoutVariable> m_inputLayoutVariableList;
 
 	/// @brief CBufferの変数情報
 	struct CBufferVariable

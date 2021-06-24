@@ -11,9 +11,18 @@
 
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
 #include <Engine/Renderer/D3D11/D3D11Shader.h>
+#include <Engine/Renderer/Base/Vertex.h>
 #include <Engine/Utility/HashUtil.h>
 #include <string>
 
+using namespace DirectX;
+struct VERTEX_3D 
+{
+	Vector3 vtx;		// 頂点座標
+	Vector3 nor;		// 法線ベクトル
+	Vector4 diffuse;	// 拡散反射光
+	Vector2 tex;		// テクスチャ座標
+} ;
 
 void WorldManager::initialize()
 {
@@ -25,40 +34,40 @@ void WorldManager::initialize()
 	shaderDesc.m_name = "Test";
 	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
 	D3D11Shader shader(device, shaderDesc);
+	
+	// 頂点座標の設定
+	VERTEX_3D pVtx[4];
+	// 頂点座標の設定
+	pVtx[0].vtx = Vector3(-1.0f / 2, -1.0f / 2, 0.0f);
+	pVtx[1].vtx = Vector3(-1.0f / 2, 1.0f / 2, 0.0f);
+	pVtx[2].vtx = Vector3(1.0f / 2, -1.0f / 2, 0.0f);
+	pVtx[3].vtx = Vector3(1.0f / 2, 1.0f / 2, 0.0f);
+	// 法線の設定
+	pVtx[0].nor = Vector3(0.0f, 0.0f, -1.0f);
+	pVtx[1].nor = Vector3(0.0f, 0.0f, -1.0f);
+	pVtx[2].nor = Vector3(0.0f, 0.0f, -1.0f);
+	pVtx[3].nor = Vector3(0.0f, 0.0f, -1.0f);
+	// 反射光の設定
+	pVtx[0].diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	pVtx[1].diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	pVtx[2].diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	pVtx[3].diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	// テクスチャ座標の設定
+	pVtx[0].tex = Vector2(0.0f, 1.0f);
+	pVtx[1].tex = Vector2(0.0f, 0.0f);
+	pVtx[2].tex = Vector2(1.0f, 1.0f);
+	pVtx[3].tex = Vector2(1.0f, 0.0f);
 
-	// 頂点レイアウトから頂点情報を
-	for (auto var : shader.m_inputLayoutVariableList)
+	// 頂点情報生成
+	VertexData verData(shader, 8);
+	for (int i = 0; i < 4; ++i)
 	{
-		std::size_t type = hash::crc32string(var.semanticName.c_str());
-		auto& format = var.formatType;
-
-		if (type == hash::crc32string("POSITION"))
-		{
-			switch (format)
-			{
-			case D3D11Shader::InputLayoutVariable::FormatType::R32:
-				break;
-			default:
-				break;
-			}
-		}
-		else if (type == hash::crc32string("NORMAL"))
-		{
-
-		}
-		else if (type == hash::crc32string("TANGENT"))
-		{
-
-		}
-		else if (type == hash::crc32string("COLOR"))
-		{
-
-		}
-		else if (type == hash::crc32string("TEXCOORD"))
-		{
-
-		}
+		verData.setPosition(pVtx[i].vtx, i);
+		verData.setNormal(pVtx[i].nor, i);
+		verData.setColor(pVtx[i].diffuse, i);
+		verData.setTexCoord(pVtx[i].tex, 0, i);
 	}
+
 	D3D11_BUFFER_DESC vertex;
 
 	//renderer->m_d3dDevice->CreateBuffer();

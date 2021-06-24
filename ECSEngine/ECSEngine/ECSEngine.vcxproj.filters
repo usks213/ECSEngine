@@ -130,6 +130,12 @@
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Utility.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClInclude>
+    <ClInclude Include="source\Engine\Utility\Mathf.h">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\Vertex.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">
