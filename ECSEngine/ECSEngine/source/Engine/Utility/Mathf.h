@@ -43,3 +43,10 @@ struct VectorUint4
 		int n[4];
 	};
 };
+
+struct AABB {
+	Vector3 center;
+	Vector3 scale;
+	//Vector3 Min() { return center; };
+	//Vector3 Max() { return center; };
+};

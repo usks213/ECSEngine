@@ -59,7 +59,10 @@ void WorldManager::initialize()
 	ShaderDesc shaderDesc;
 	shaderDesc.m_name = "Test2D";
 	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
-	g_pShader = new D3D11Shader(device, shaderDesc);
+
+	ShaderID shaderID = renderer->createShader(shaderDesc);
+	g_pShader = static_cast<D3D11Shader*>(renderer->getShader(shaderID));
+	//g_pShader = new D3D11Shader(device, shaderDesc);
 	
 	// 頂点座標の設定
 	VERTEX_3D pVtx[4];
@@ -94,7 +97,7 @@ void WorldManager::initialize()
 		verData.setTexCoord(pVtx[i].tex, 0, i);
 	}
 	std::vector<VERTEX_3D_TEST> test(4);
-	std::memcpy(test.data(), verData.verData.get(), verData.size * verData.count);
+	std::memcpy(test.data(), verData.buffer.get(), verData.size * verData.count);
 
 	D3D11_BUFFER_DESC vertex = {};
 	vertex.Usage = D3D11_USAGE_IMMUTABLE;
@@ -104,7 +107,7 @@ void WorldManager::initialize()
 
 	D3D11_SUBRESOURCE_DATA initData;
 	ZeroMemory(&initData, sizeof(initData));
-	initData.pSysMem = verData.verData.get();
+	initData.pSysMem = verData.buffer.get();
 
 	g_vertexSize = verData.size;
 	CHECK_FAILED(device->CreateBuffer(&vertex, &initData, g_vertexBuffer.GetAddressOf()));
@@ -122,7 +125,9 @@ void WorldManager::initialize()
 	//device->CreateBuffer(&ibd, &initData, g_indexBuffer.GetAddressOf());
 
 	// マテリアルの作成
-	g_pMat = new D3D11Material(device, 0, "TestMat", *g_pShader);
+	MaterialID matID = renderer->createMaterial("TestMat", shaderID);
+	g_pMat = static_cast<D3D11Material*>(renderer->getMaterial(matID));
+	//g_pMat = new D3D11Material(device, 0, "TestMat", *g_pShader);
 
 	// コンスタントバッファ
 	// 拡縮
@@ -206,18 +211,22 @@ void WorldManager::render()
 
 	// コンスタントバッファ
 	// 拡縮
-	XMMATRIX mWorld = XMMatrixScaling(10,10,10);
+	XMMATRIX mWorld = XMMatrixScaling(1,1,1);
 	// 回転
+	static float rad;
+	rad += 1.0f;
 	mWorld *= XMMatrixRotationRollPitchYaw(XMConvertToRadians(0),
-		XMConvertToRadians(0), XMConvertToRadians(0));
+		XMConvertToRadians(rad), XMConvertToRadians(0));
 	// 移動
 	mWorld *= XMMatrixTranslation(0,0,0);
 
 	XMMATRIX mtxView, mtxProj, mtxTex;
 	mtxView = XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, -10.0f, 1.0f),
 		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-	mtxProj = XMMatrixOrthographicLH(m_pEngine->getWindowWidth(),
-		m_pEngine->getWindowHeight(), 1.0f, 100.0f);
+	float asoect = (float)m_pEngine->getWindowWidth() / m_pEngine->getWindowHeight();
+	mtxProj = XMMatrixPerspectiveFovLH(
+		XMConvertToRadians(45), asoect, 1.0f, 1000.0f);
+
 	mtxTex = XMMatrixIdentity();
 	CBuffer cb;
 	cb.g_mWorld = XMMatrixTranspose(mWorld);

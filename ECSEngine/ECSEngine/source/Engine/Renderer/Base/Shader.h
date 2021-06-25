@@ -21,6 +21,19 @@
 using ShaderID = std::uint32_t;
 
 
+namespace SEMANTIC_NAME
+{
+	const char* POSITION	= "POSITION";
+	const char* NORMAL		= "NORMAL";
+	const char* TANGENT		= "TANGENT";
+	const char* BINORMAL	= "BINORMAL";
+	const char* COLOR		= "COLOR";
+	const char* TEXCOORD	= "TEXCOORD";
+	const char* BONE_WEIGHT = "BONE_WEIGHT";
+	const char* BONE_INDEX	= "BONE_INDEX";
+}
+
+
 /// @enum EShaderStage
 /// @brief シェーダーステージ
 enum class EShaderStage : std::uint32_t

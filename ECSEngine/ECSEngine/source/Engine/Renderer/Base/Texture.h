@@ -8,6 +8,13 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 /// @brief テクスチャID
 using TextureID = std::uint32_t;
+
+struct Texture
+{
+	std::string		m_name;
+	TextureID		m_id;
+};

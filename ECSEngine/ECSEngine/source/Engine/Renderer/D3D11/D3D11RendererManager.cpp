@@ -10,6 +10,12 @@
 #include <vector>
 #include <stdio.h>
 
+#include <Engine/Utility/HashUtil.h>
+
+#include "D3D11Shader.h"
+#include "D3D11Material.h"
+
+
 // ライブラリリンク
 #pragma comment(lib, "D3D11.lib")
 #pragma comment(lib, "DXGI.lib")
@@ -485,3 +491,47 @@ HRESULT D3D11RendererManager::createCommonState()
 
 	return S_OK;
 }
+
+
+ShaderID D3D11RendererManager::createShader(ShaderDesc desc)
+{
+	// IDの取得
+	ShaderID id = hash::crc32string(desc.m_name.c_str());
+
+	// 既に生成済み
+	const auto& itr = m_shaderPool.find(id);
+	if (m_shaderPool.end() != itr) return id;
+
+	// 新規生成
+	auto shader = std::make_unique<D3D11Shader>(m_d3dDevice.Get(), desc);
+	m_shaderPool[id] = std::move(shader);
+
+	return id;
+}
+
+MaterialID D3D11RendererManager::createMaterial(std::string name, ShaderID shaderID)
+{
+	// IDの取得
+	MaterialID id = hash::crc32string(name.c_str());
+
+	// 既に生成済み
+	const auto& itr = m_materialPool.find(id);
+	if (m_materialPool.end() != itr) return id;
+
+	// シェーダー取得
+	auto* shader = getShader(shaderID);
+	if (shader == nullptr) return std::numeric_limits<MaterialID>::max();
+
+	// 新規生成
+	auto material = std::make_unique<D3D11Material>(
+		m_d3dDevice.Get(), id, name, *shader);
+	m_materialPool[id] = std::move(material);
+
+	return id;
+}
+
+TextureID D3D11RendererManager::createTexture()
+{
+	return std::numeric_limits<TextureID>::max();
+}
+

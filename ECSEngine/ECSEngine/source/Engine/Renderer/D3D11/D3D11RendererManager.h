@@ -37,6 +37,11 @@ public:
 	/// @brief スワップ
 	void present() override;
 
+public:
+	ShaderID createShader(ShaderDesc desc) override;
+	MaterialID createMaterial(std::string name, ShaderID shaderID) override;
+	TextureID createTexture() override;
+
 private:
 	/// @brief デバイスの生成
 	/// @return HRESULT
