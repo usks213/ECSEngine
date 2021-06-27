@@ -27,7 +27,15 @@ namespace ecs {
 		/// @brief エンティティの生成
 		/// @param archetype アーキタイプ
 		/// @return 生成したエンティティ
-		Entity createEntity(const Archetype& archetype) const;
+		[[nodiscard]] Entity createEntity(const Archetype& archetype) const;
+
+		/// @brief エンティティの生成
+		template<typename ...Args>
+		[[nodiscard]] Entity createEntity() const
+		{
+			constexpr auto archetype = Archetype::create<Args...>();
+			return createEntity(archetype);
+		}
 
 		/// @brief エンティティの削除
 		/// @param entity 削除するエンティティ

@@ -10,6 +10,7 @@
 #include <vector>
 #include <stdio.h>
 
+#include <Engine/Engine.h>
 #include <Engine/Utility/HashUtil.h>
 
 #include "D3D11Shader.h"
@@ -21,7 +22,12 @@
 #pragma comment(lib, "D3D11.lib")
 #pragma comment(lib, "DXGI.lib")
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
 #undef max
+#endif
 
 
 /// @brief コンストラクタ
@@ -491,6 +497,176 @@ HRESULT D3D11RendererManager::createCommonState()
 	}
 
 	return S_OK;
+}
+
+
+void D3D11RendererManager::render(const Matrix& world, const MaterialID& materialID, const MeshID& meshID)
+{
+	auto* context = m_d3dContext.Get();
+
+	// データの取得
+	auto* material = static_cast<D3D11Material*>(getMaterial(materialID));
+	auto* shader = static_cast<D3D11Shader*>(getShader(material->m_shaderID));
+	const auto& rdID = createRenderBuffer(shader->m_id, meshID);
+	auto* renderBuffer = static_cast<D3D11RenderBuffer*>(getRenderBuffer(rdID));
+
+	
+	// プリミティブ指定
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	// ブレンドステート
+	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	context->OMSetBlendState(m_blendStates[
+		static_cast<std::size_t>(material->m_blendState)].Get(), blendFactor, 0xffffffff);
+	// ラスタライザステート
+	context->RSSetState(m_rasterizeStates[
+		static_cast<std::size_t>(material->m_rasterizeState)].Get());
+	// 深度ステンシルステート
+	context->OMSetDepthStencilState(m_depthStencilStates[
+		static_cast<std::size_t>(material->m_depthStencilState)].Get(), 0);
+
+	// 頂点バッファをセット
+	UINT stride = static_cast<UINT>(renderBuffer->m_vertexData.size);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, renderBuffer->m_vertexBuffer.GetAddressOf(), &stride, &offset);
+	// インデックスバッファをセット
+	if (renderBuffer->m_indexData.count > 0) {
+		context->IASetIndexBuffer(renderBuffer->m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	}
+
+	//// 各シェーダーステージのコンスタントバッファを更新
+	//for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	//{
+	//	auto index = static_cast<std::size_t>(stage);
+
+	//	// CBuffer確認
+	//	switch (stage)
+	//	{
+	//	case EShaderStage::VS:
+	//		if (shader->vs)
+	//		{
+	//			context->VSSetShader(shader->vs, nullptr, 0);
+	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
+	//			{
+	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
+	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
+	//				context->VSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
+	//			}
+	//		}
+	//		else
+	//		{
+	//			context->VSSetShader(nullptr, nullptr, 0);
+	//		}
+	//		break;
+	//	case EShaderStage::GS:
+	//		if (shader->gs)
+	//		{
+	//			context->GSSetShader(shader->gs, nullptr, 0);
+	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
+	//			{
+	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
+	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
+	//				context->GSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
+	//			}
+	//		}
+	//		else
+	//		{
+	//			context->GSSetShader(nullptr, nullptr, 0);
+	//		}
+	//		break;
+	//	case EShaderStage::DS:
+	//		if (shader->ds)
+	//		{
+	//			context->DSSetShader(shader->ds, nullptr, 0);
+	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
+	//			{
+	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
+	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
+	//				context->DSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
+	//			}
+	//		}
+	//		else
+	//		{
+	//			context->DSSetShader(nullptr, nullptr, 0);
+	//		}
+	//		break;
+	//	case EShaderStage::HS:
+	//		if (shader->hs)
+	//		{
+	//			context->HSSetShader(shader->hs, nullptr, 0);
+	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
+	//			{
+	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
+	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
+	//				context->HSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
+	//			}
+	//		}
+	//		else
+	//		{
+	//			context->HSSetShader(nullptr, nullptr, 0);
+	//		}
+	//		break;
+	//	case EShaderStage::PS:
+	//		if (shader->ps)
+	//		{
+	//			context->PSSetShader(shader->ps, nullptr, 0);
+	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
+	//			{
+	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
+	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
+	//				context->PSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
+	//			}
+	//		}
+	//		else
+	//		{
+	//			context->PSSetShader(nullptr, nullptr, 0);
+	//		}
+	//		break;
+	//	case EShaderStage::CS:
+	//		break;
+	//	}
+	//}
+
+	// シェーダー
+	context->VSSetShader(shader->vs, nullptr, 0);
+	context->PSSetShader(shader->ps, nullptr, 0);
+	context->IASetInputLayout(shader->m_inputLayout.Get());
+
+	// 変換行列
+	XMMATRIX mtxView, mtxProj, mtxTex;
+	mtxView = XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, -10.0f, 1.0f),
+		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+	float asoect = (float)m_pEngine->getWindowWidth() / m_pEngine->getWindowHeight();
+	mtxProj = XMMatrixPerspectiveFovLH(
+		XMConvertToRadians(45), asoect, 1.0f, 1000.0f);
+	mtxTex = XMMatrixIdentity();
+
+	struct CBuffer
+	{
+		XMMATRIX g_mWorld;
+		XMMATRIX g_mView;
+		XMMATRIX g_mProjection;
+		XMMATRIX g_mTexture;
+	};
+
+	CBuffer cb;
+	cb.g_mWorld = XMMatrixTranspose(world);
+	cb.g_mView = XMMatrixTranspose(mtxView);
+	cb.g_mProjection = XMMatrixTranspose(mtxProj);
+	cb.g_mTexture = XMMatrixTranspose(mtxTex);
+
+	// コンスタントバッファ更新
+	context->UpdateSubresource(material->m_d3dCbuffer[0][0].Get(), 0, nullptr, &cb, 0, 0);
+	context->VSSetConstantBuffers(0, 1, material->m_d3dCbuffer[0][0].GetAddressOf());
+
+	// ポリゴンの描画
+	if (renderBuffer->m_indexData.count > 0)
+	{
+		context->DrawIndexed(renderBuffer->m_indexData.count, 0, 0);
+	}
+	else
+	{
+		context->Draw(renderBuffer->m_vertexData.count, 0);
+	}
 }
 
 

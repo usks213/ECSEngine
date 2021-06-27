@@ -62,6 +62,9 @@ namespace ecs {
 		/// @param output 読み込み先のストリーム
 		void readBinaryStream(BinaryStream& input);
 
+		/// @brief ワールドマネージャー取得
+		WorldManager* getWorldManager() { return m_pWorldManager; }
+
 	private:
 
 		/// @brief システムの更新順整理

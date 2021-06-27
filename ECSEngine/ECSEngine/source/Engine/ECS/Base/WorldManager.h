@@ -36,6 +36,9 @@ public:
 		m_pWorld->Start();
 	}
 
+	/// @brief ƒGƒ“ƒWƒ“‚Ìæ“¾
+	Engine* getEngine() { return m_pEngine; }
+
 protected:
 	Engine* m_pEngine;
 	std::unique_ptr<ecs::World>	m_pWorld;

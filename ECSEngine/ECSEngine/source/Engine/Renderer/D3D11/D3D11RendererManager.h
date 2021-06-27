@@ -38,6 +38,12 @@ public:
 	void present() override;
 
 public:
+	/// @brief 描画
+	/// @param materialID マテリアルID
+	/// @param meshID メッシュID
+	void render(const Matrix& world, const MaterialID& materialID, const MeshID& meshID) override;
+
+public:
 	ShaderID createShader(ShaderDesc desc) override;
 	MaterialID createMaterial(std::string name, ShaderID shaderID) override;
 	MeshID createMesh(std::string name) override;

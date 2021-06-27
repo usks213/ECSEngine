@@ -7,31 +7,44 @@
  *********************************************************************/
 #pragma once
 
-#include<DirectXMath.h>
+#include <d3d11_1.h>
+#include <DirectXMath.h>
+#include <SimpleMath.h>
+
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
+using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 
-struct Vector2 : public DirectX::XMFLOAT2
-{
-	Vector2() = default;
-	Vector2(float x, float y) {
-		this->x = x; this->y = y;
-	}
-};
-struct Vector3 : public DirectX::XMFLOAT3
-{
-	Vector3() = default;
-	Vector3(float x, float y, float z) {
-		this->x = x; this->y = y; this->z = z;
-	}
-};
-struct Vector4 : public DirectX::XMFLOAT4
-{
-	Vector4() = default;
-	Vector4(float x, float y, float z, float w) {
-		this->x = x; this->y = y; 
-		this->z = z; this->w = w;
-	}
-};
+//struct Vector2 : public DirectX::XMFLOAT2
+//{
+//	Vector2() = default;
+//	Vector2(float x, float y) {
+//		this->x = x; this->y = y;
+//	}
+//};
+//struct Vector3 : public DirectX::XMFLOAT3
+//{
+//	Vector3() = default;
+//	Vector3(float x, float y, float z) {
+//		this->x = x; this->y = y; this->z = z;
+//	}
+//};
+//struct Vector4 : public DirectX::XMFLOAT4
+//{
+//	Vector4() = default;
+//	Vector4(float x, float y, float z, float w) {
+//		this->x = x; this->y = y; 
+//		this->z = z; this->w = w;
+//	}
+//};
+
 struct VectorUint4
 {
 	union 

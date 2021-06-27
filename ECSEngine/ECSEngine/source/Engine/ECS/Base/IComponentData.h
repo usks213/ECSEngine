@@ -28,8 +28,10 @@ namespace ecs {
 	/// @brief Tがコンポーネントデータか判定
 	/// @tparam T getTypeHash()を保持している型
 	template<class T>
-	constexpr bool is_component_data = std::is_base_of_v<IComponentData, T> && std::is_trivial_v<T> &&
-		std::is_trivially_destructible_v<T> && type::has_get_type_hash<T>;
+	constexpr bool is_component_data = std::is_base_of_v<IComponentData, T> && type::has_get_type_hash<T>;
+	//std::is_trivially_destructible_v<T> && std::is_trivial_v<T>&&;
+	// ↑これがあるとコンポーネンデータに構造体が持てない
+	//	 この制約を外した場合、何か不具合が出るかも...
 
 	/// @struct Entity
 	/// @brief エンティティ

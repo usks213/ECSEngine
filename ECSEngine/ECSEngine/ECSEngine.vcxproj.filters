@@ -45,11 +45,11 @@
     <Filter Include="ソース ファイル\Engine\ECS\System">
       <UniqueIdentifier>{3724df73-1913-4039-b877-77af97bd7801}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\ECS\Component">
-      <UniqueIdentifier>{8746229e-a409-4c60-8a7f-482160434be1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\App\World">
       <UniqueIdentifier>{16be55d3-8663-474c-a573-95537b729c76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\ECS\ComponentData">
+      <UniqueIdentifier>{8746229e-a409-4c60-8a7f-482160434be1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="source\App\World\DevelopWorld.cpp">
       <Filter>ソース ファイル\App\World</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\TransformSystem.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\RenderingSystem.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -201,6 +207,18 @@
     </ClInclude>
     <ClInclude Include="source\App\World\DevelopWorld.h">
       <Filter>ソース ファイル\App\World</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\TransformSystem.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\RenderingSystem.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\TransformComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\RenderingComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

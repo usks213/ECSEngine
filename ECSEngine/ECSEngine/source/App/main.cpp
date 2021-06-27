@@ -12,6 +12,9 @@
 #include <Engine/Engine.h>
 #include <Engine/OS/Win/WindowsWindow.h>
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
+#include <Engine/ECS/Base/WorldManager.h>
+
+#include <App/World/DevelopWorld.h>
 
 
 //-------- ライブラリのリンク
@@ -54,6 +57,9 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	pRenderer->initialize(pWin->getWindowHandle(), pWin->getWindowWidth(), pWin->getWindowHeight());
 	// エンジンの初期化
 	engine.initialize();
+
+	// ワールド
+	engine.getWorldManager()->LoadWorld<ecs::DevelopWorld>();
 
 
 	// メッセージループ

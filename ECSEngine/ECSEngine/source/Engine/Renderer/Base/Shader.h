@@ -15,7 +15,12 @@
 #include <memory>
 #include <array>
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
 #undef max
+#endif
 
 /// @brief シェーダーID (格納先ハッシュ値)
 using ShaderID = std::uint32_t;

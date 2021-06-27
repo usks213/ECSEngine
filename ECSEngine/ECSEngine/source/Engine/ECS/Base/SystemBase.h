@@ -29,10 +29,10 @@ namespace ecs {
 
 		/// @brief 生成時
 		virtual void onCreate();
-		/// @brief 更新
-		virtual void onUpdate() = 0;
 		/// @brief 削除時
 		virtual void onDestroy();
+		/// @brief 更新
+		virtual void onUpdate() = 0;
 
 		/// @brief 更新順番号取得
 		[[nodiscard]] int getExecutionOrder() const;
@@ -81,7 +81,7 @@ namespace ecs {
 		template<class T1, class T2, class T3, class T4, typename Func>
 		void foreach(Func&& func);
 
-	private:
+	protected:
 
 		/// @brief 指定したコンポーネントデータをフェッチして処理する
 		/// @tparam Func 関数オブジェクト
@@ -121,7 +121,7 @@ namespace ecs {
 	template<class T1, class T2, typename Func>
 	void SystemBase::foreach(Func&& func)
 	{
-		auto pChunkList = getEntityManager()->getChunkList<T1, T2>;
+		auto pChunkList = getEntityManager()->getChunkList<T1, T2>();
 		for (auto&& pChunk : pChunkList)
 		{
 			auto arg1 = pChunk->template getComponentArray<T1>();
@@ -139,7 +139,7 @@ namespace ecs {
 	template<class T1, class T2, class T3, typename Func>
 	void SystemBase::foreach(Func&& func)
 	{
-		auto pChunkList = getEntityManager()->getChunkList<T1, T2, T3>;
+		auto pChunkList = getEntityManager()->getChunkList<T1, T2, T3>();
 		for (auto&& pChunk : pChunkList)
 		{
 			auto arg1 = pChunk->template getComponentArray<T1>();
@@ -159,7 +159,7 @@ namespace ecs {
 	template<class T1, class T2, class T3, class T4, typename Func>
 	void SystemBase::foreach(Func&& func)
 	{
-		auto pChunkList = getEntityManager()->getChunkList<T1, T2, T3, T4>;
+		auto pChunkList = getEntityManager()->getChunkList<T1, T2, T3, T4>();
 		for (auto&& pChunk : pChunkList)
 		{
 			auto arg1 = pChunk->template getComponentArray<T1>();

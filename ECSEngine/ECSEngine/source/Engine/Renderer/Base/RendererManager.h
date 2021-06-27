@@ -13,6 +13,8 @@
 #include "Mesh.h"
 #include "RenderBuffer.h"
 
+#include <Engine/Utility/Mathf.h>
+
 
 class Engine;
 
@@ -32,6 +34,12 @@ public:
 
 	RendererManager(const RendererManager&) = delete;
 	RendererManager(RendererManager&&) = delete;
+
+public:
+	/// @brief 描画
+	/// @param materialID マテリアルID
+	/// @param meshID メッシュID
+	virtual void render(const Matrix& world, const MaterialID& materialID, const MeshID& meshID) = 0;
 
 public:
 	virtual ShaderID createShader(ShaderDesc desc) = 0;
