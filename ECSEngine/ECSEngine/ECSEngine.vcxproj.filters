@@ -42,6 +42,15 @@
     <Filter Include="ソース ファイル\Engine\ECS\Base">
       <UniqueIdentifier>{11f7fb88-9054-4476-9cfd-7734a5053535}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine\ECS\System">
+      <UniqueIdentifier>{3724df73-1913-4039-b877-77af97bd7801}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\ECS\Component">
+      <UniqueIdentifier>{8746229e-a409-4c60-8a7f-482160434be1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\App\World">
+      <UniqueIdentifier>{16be55d3-8663-474c-a573-95537b729c76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\App\main.cpp">
@@ -91,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="source\Engine\ECS\Base\SystemBase.cpp">
       <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\App\World\DevelopWorld.cpp">
+      <Filter>ソース ファイル\App\World</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -186,6 +198,9 @@
     </ClInclude>
     <ClInclude Include="source\Engine\ECS\Base\SystemBase.h">
       <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\App\World\DevelopWorld.h">
+      <Filter>ソース ファイル\App\World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

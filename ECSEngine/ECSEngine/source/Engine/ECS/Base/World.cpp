@@ -15,7 +15,8 @@ using namespace ecs;
 
 
 /// @brief コンストラクタ
-World::World()
+World::World(WorldManager* pWorldManager):
+	m_pWorldManager(pWorldManager)
 {
 	m_pEntityManager.reset(new EntityManager(this));
 }

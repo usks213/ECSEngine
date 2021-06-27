@@ -7,6 +7,8 @@
  *********************************************************************/
 #pragma once
 
+#include "World.h"
+
 class Engine;
 
 class WorldManager
@@ -26,7 +28,16 @@ public:
 	WorldManager(const WorldManager&) = delete;
 	WorldManager(WorldManager&&) = delete;
 
+public:
+
+	template<class T, typename = std::enable_if_t<std::is_base_of_v<ecs::World, T>>>
+	void LoadWorld() {
+		m_pWorld = std::make_unique<T>(this);
+		m_pWorld->Start();
+	}
+
 protected:
 	Engine* m_pEngine;
+	std::unique_ptr<ecs::World>	m_pWorld;
 };
 

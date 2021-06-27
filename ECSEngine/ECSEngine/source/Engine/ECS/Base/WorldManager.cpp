@@ -46,6 +46,7 @@ struct RenderData
 	RenderBufferID	rdID;
 };
 
+
 RenderData g_rd;
 
 

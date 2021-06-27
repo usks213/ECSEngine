@@ -10,6 +10,8 @@
 #include"Chunk.h"
 
 
+class WorldManager;
+
 namespace ecs {
 	class EntityManager;
 	class SystemBase;
@@ -18,23 +20,29 @@ namespace ecs {
 	/// @brief ワールド
 	class World
 	{
+		friend class WorldManager;
 		friend class EntityManager;
 	public:
 		/// @brief コンストラクタ
-		World();
+		World(WorldManager* pWorldManager);
 		/// @brief デストラクタ
-		~World();
+		virtual ~World();
 
 		/// @brief エンティティマネージャーの取得
 		/// @return エンティティマネージャー
 		[[nodiscard]] EntityManager* getEntityManager() const;
+
+		/// @brief スタート
+		virtual void Start() = 0;
+		/// @brief エンド
+		virtual void End() = 0;
 
 		/// @brief システムの更新
 		void update();
 
 		/// @brief  システムの追加
 		/// @tparam システムの型
-		template<class T>
+		template<class T, typename = std::enable_if_t<std::is_base_of_v<SystemBase,T>>>
 		void addSystem()
 		{
 			callDoCreate(m_SystemList.emplace_back(new T(this)).get());
@@ -68,5 +76,7 @@ namespace ecs {
 		std::vector<std::unique_ptr<SystemBase>> m_SystemList;
 		/// @brief エンティティマネージャー
 		std::unique_ptr<EntityManager> m_pEntityManager;
+		/// @brief ワールドマネージャー
+		WorldManager* m_pWorldManager;
 	};
 }
