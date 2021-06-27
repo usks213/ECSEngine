@@ -23,7 +23,7 @@ struct VertexData
 	ShaderID shaderID;
 	std::vector<Shader::InputLayoutVariable> inputLayoutVariableList;
 
-	VertexData(const Shader& shader, std::size_t vertexNum) :
+	explicit VertexData(const Shader& shader, std::size_t vertexNum) :
 		size(0),count(0),shaderID(0)
 	{
 		/*inputLayoutVariableList.reserve(shader.m_inputLayoutVariableList.size());
@@ -37,6 +37,7 @@ struct VertexData
 		count = vertexNum;
 		shaderID = shader.m_id;
 		buffer = std::make_unique<std::byte[]>(size * count);
+		std::memset(buffer.get(), 0, size * count);
 	}
 
 	void setPosition(const Vector3& data, const std::uint32_t& index) {
@@ -68,9 +69,11 @@ struct VertexData
 	template<class T>
 	void setVertexData(std::string_view semanticName, const std::uint32_t& semanticIndex,
 		const T& data, const std::uint32_t& index) {
-		if (hasVertexVariable(semanticName, semanticIndex)) {
-			std::memcpy(buffer.get() + size * index + var.offset, &data,
-				static_cast<std::size_t>(var.formatSize) * sizeof(float));
+		for (auto& var : inputLayoutVariableList) {
+			if (var.semanticName == semanticName && var.semanticIndex == semanticIndex) {
+				std::memcpy(buffer.get() + size * index + var.offset, &data,
+					static_cast<std::size_t>(var.formatSize) * sizeof(float));
+			}
 		}
 	}
 

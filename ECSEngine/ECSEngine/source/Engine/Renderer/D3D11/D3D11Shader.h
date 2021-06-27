@@ -20,7 +20,7 @@ public:
 	/// @brief  コンストラクタ
 	/// @param device デバイス
 	/// @param desc シェーダ情報
-	D3D11Shader(ID3D11Device1* device, ShaderDesc desc);
+	explicit D3D11Shader(ID3D11Device1* device, ShaderDesc desc, ShaderID id);
 	/// @brief デストラクタ
 	~D3D11Shader() = default;
 

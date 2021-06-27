@@ -26,6 +26,22 @@ Material* RendererManager::getMaterial(MaterialID id)
 	return itr->second.get();
 }
 
+Mesh* RendererManager::getMesh(MeshID id)
+{
+	const auto& itr = m_meshPool.find(id);
+	if (m_meshPool.end() == itr) return nullptr;
+
+	return itr->second.get();
+}
+
+RenderBuffer* RendererManager::getRenderBuffer(RenderBufferID id)
+{
+	const auto& itr = m_renderBufferPool.find(id);
+	if (m_renderBufferPool.end() == itr) return nullptr;
+
+	return itr->second.get();
+}
+
 Texture* RendererManager::getTexture(TextureID id)
 {
 	const auto& itr = m_texturePool.find(id);

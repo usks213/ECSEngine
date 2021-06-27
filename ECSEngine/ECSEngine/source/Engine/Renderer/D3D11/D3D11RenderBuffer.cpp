@@ -24,9 +24,11 @@ D3D11RenderBuffer::D3D11RenderBuffer(ID3D11Device1* device, const Shader& shader
 	CHECK_FAILED(device->CreateBuffer(&desc, &initData, m_vertexBuffer.GetAddressOf()));
 
 	// インデックスの生成
-	desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	desc.ByteWidth = m_indexData.size * m_indexData.count;
-	initData.pSysMem = mesh.m_indexData.data();
-	CHECK_FAILED(device->CreateBuffer(&desc, &initData, m_indexBuffer.GetAddressOf()));
-
+	if (m_indexData.size > 0 && m_indexData.count > 0)
+	{
+		desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		desc.ByteWidth = m_indexData.size * m_indexData.count;
+		initData.pSysMem = mesh.m_indexData.data();
+		CHECK_FAILED(device->CreateBuffer(&desc, &initData, m_indexBuffer.GetAddressOf()));
+	}
 }

@@ -160,6 +160,7 @@
     <ClCompile Include="source\Engine\Renderer\Base\RendererManager.cpp" />
     <ClCompile Include="source\Engine\Renderer\Base\Shader.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Material.cpp" />
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RenderBuffer.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RendererManager.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Shader.cpp" />
   </ItemGroup>
@@ -172,11 +173,14 @@
     <ClInclude Include="source\Engine\Renderer\Base\CommonState.h" />
     <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Material.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\Mesh.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\RenderBuffer.h" />
     <ClInclude Include="source\Engine\Renderer\Base\RendererManager.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Shader.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Texture.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Vertex.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Material.h" />
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RenderBuffer.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RendererManager.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Shader.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Utility.h" />

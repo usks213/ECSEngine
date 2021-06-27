@@ -11,7 +11,8 @@
 #include "Mesh.h"
 #include "Vertex.h"
 
-using RenderBufferID = std::uint32_t;
+/// @brief 64 = 32:ShaderID + 32:MaterialID
+using RenderBufferID = std::uint64_t;
 
 struct IndexData
 {
@@ -28,7 +29,7 @@ public:
 class RenderBuffer
 {
 public:
-	RenderBuffer(const Shader& shader, const Mesh& mesh) :
+	explicit RenderBuffer(const Shader& shader, const Mesh& mesh) :
 		m_vertexData(shader, mesh.m_vertexCount),
 		m_indexData(mesh.m_indexCount, sizeof(std::uint32_t))
 	{
@@ -73,7 +74,7 @@ public:
 	}
 
 
-protected:
+public:
 	RenderBufferID	m_id;
 	ShaderID		m_shaderID;
 	MeshID			m_meshID;

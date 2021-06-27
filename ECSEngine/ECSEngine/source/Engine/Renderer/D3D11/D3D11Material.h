@@ -21,7 +21,7 @@ public:
 	/// @param id マテリアルID
 	/// @param name マテリアル名
 	/// @param shader シェーダ
-	D3D11Material(ID3D11Device1* device, const MaterialID& id, 
+	explicit D3D11Material(ID3D11Device1* device, const MaterialID& id, 
 		const std::string& name, const Shader& shader);
 
 	/// @brief デストラクタ

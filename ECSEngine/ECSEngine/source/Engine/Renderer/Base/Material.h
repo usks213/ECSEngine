@@ -22,7 +22,7 @@ class Material
 public:
 	/// @brief コンストラクタ
 	/// @param シェーダ情報
-	Material(const MaterialID& id, const std::string& name, const Shader& shader);
+	explicit Material(const MaterialID& id, const std::string& name, const Shader& shader);
 
 	/// @brief デストラクタ
 	virtual ~Material() = default;

@@ -15,7 +15,16 @@ using MeshID = std::uint32_t;
 
 struct Mesh
 {
-	struct VertexLayout
+public:
+	explicit Mesh(std::string name):
+		m_name(name),
+		m_id(std::numeric_limits<MeshID>::max()),
+		m_vertexCount(0),
+		m_indexCount(0)
+	{}
+
+public:
+	struct VertexInfo
 	{
 		std::vector<Vector3> positions;
 		std::vector<Vector3> normals;
@@ -32,7 +41,7 @@ struct Mesh
 	MeshID						m_id;
 
 	std::uint32_t				m_vertexCount;
-	VertexLayout				m_vertexData;
+	VertexInfo					m_vertexData;
 	std::uint32_t				m_indexCount;
 	std::vector<std::uint32_t>  m_indexData;
 	AABB						m_aabb;

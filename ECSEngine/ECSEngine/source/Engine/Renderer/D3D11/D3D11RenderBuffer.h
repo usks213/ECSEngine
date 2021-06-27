@@ -14,7 +14,7 @@ class D3D11RenderBuffer : public RenderBuffer
 {
 public:
 
-	D3D11RenderBuffer(ID3D11Device1* device, const Shader& shader, const Mesh& mesh);
+	explicit D3D11RenderBuffer(ID3D11Device1* device, const Shader& shader, const Mesh& mesh);
 
 	~D3D11RenderBuffer() = default;
 

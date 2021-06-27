@@ -14,6 +14,7 @@
 
 #include "D3D11Shader.h"
 #include "D3D11Material.h"
+#include "D3D11RenderBuffer.h"
 
 
 // ライブラリリンク
@@ -503,8 +504,7 @@ ShaderID D3D11RendererManager::createShader(ShaderDesc desc)
 	if (m_shaderPool.end() != itr) return id;
 
 	// 新規生成
-	auto shader = std::make_unique<D3D11Shader>(m_d3dDevice.Get(), desc);
-	m_shaderPool[id] = std::move(shader);
+	m_shaderPool[id] = std::make_unique<D3D11Shader>(m_d3dDevice.Get(), desc, id);
 
 	return id;
 }
@@ -520,12 +520,51 @@ MaterialID D3D11RendererManager::createMaterial(std::string name, ShaderID shade
 
 	// シェーダー取得
 	auto* shader = getShader(shaderID);
-	if (shader == nullptr) return std::numeric_limits<MaterialID>::max();
+	if (shader == nullptr) return id;
 
 	// 新規生成
-	auto material = std::make_unique<D3D11Material>(
+	m_materialPool[id] = std::make_unique<D3D11Material>(
 		m_d3dDevice.Get(), id, name, *shader);
-	m_materialPool[id] = std::move(material);
+
+	return id;
+}
+
+MeshID D3D11RendererManager::createMesh(std::string name)
+{
+	// IDの取得
+	MeshID id = hash::crc32string(name.c_str());
+
+	// 既に生成済み
+	const auto& itr = m_meshPool.find(id);
+	if (m_meshPool.end() != itr) return id;
+
+	// 新規生成
+	m_meshPool[id] = std::make_unique<Mesh>(name);
+
+	return id;
+}
+
+RenderBufferID D3D11RendererManager::createRenderBuffer(ShaderID shaderID, MeshID meshID)
+{
+	// IDの生成
+	RenderBufferID id;
+	std::memcpy(&id, &shaderID, sizeof(std::uint32_t));
+	std::memcpy(&id + sizeof(std::uint32_t), &meshID, sizeof(std::uint32_t));
+	
+	// 既にある
+	const auto& itr = m_renderBufferPool.find(id);
+	if (m_renderBufferPool.end() != itr) return id;
+
+	// シェーダー取得
+	auto* shader = getShader(shaderID);
+	if (shader == nullptr) return id;
+	// メッシュ取得
+	auto* mesh = getMesh(meshID);
+	if (mesh == nullptr) return id;
+
+	// 新規生成
+	m_renderBufferPool[id] = std::make_unique<D3D11RenderBuffer>(
+		m_d3dDevice.Get(), *shader, *mesh);
 
 	return id;
 }

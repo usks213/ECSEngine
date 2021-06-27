@@ -36,8 +36,8 @@ namespace {
 /// @brief  コンストラクタ
 /// @param device デバイス
 /// @param desc シェーダ情報
-D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc) :
-	Shader(desc),
+D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, ShaderID id) :
+	Shader(desc, id),
 	m_comShaders(static_cast<size_t>(EShaderStage::MAX)),
 	m_inputLayout()
 {

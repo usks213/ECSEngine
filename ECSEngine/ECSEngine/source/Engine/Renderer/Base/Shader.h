@@ -23,14 +23,14 @@ using ShaderID = std::uint32_t;
 
 namespace SEMANTIC_NAME
 {
-	const char* POSITION	= "POSITION";
-	const char* NORMAL		= "NORMAL";
-	const char* TANGENT		= "TANGENT";
-	const char* BINORMAL	= "BINORMAL";
-	const char* COLOR		= "COLOR";
-	const char* TEXCOORD	= "TEXCOORD";
-	const char* BONE_WEIGHT = "BONE_WEIGHT";
-	const char* BONE_INDEX	= "BONE_INDEX";
+	constexpr char POSITION[]		= "POSITION";
+	constexpr char NORMAL[]			= "NORMAL";
+	constexpr char TANGENT[]		= "TANGENT";
+	constexpr char BINORMAL[]		= "BINORMAL";
+	constexpr char COLOR[]			= "COLOR";
+	constexpr char TEXCOORD[]		= "TEXCOORD";
+	constexpr char BONE_WEIGHT[]	= "BONE_WEIGHT";
+	constexpr char BONE_INDEX[]		= "BONE_INDEX";
 }
 
 
@@ -97,8 +97,8 @@ class Shader
 {
 public:
 	/// @brief コンストラクタ
-	Shader(ShaderDesc shaderDesc) :
-		m_id(std::numeric_limits<ShaderID>::max()),
+	explicit Shader(ShaderDesc shaderDesc, ShaderID id) :
+		m_id(id),
 		m_desc(shaderDesc)
 	{
 	}

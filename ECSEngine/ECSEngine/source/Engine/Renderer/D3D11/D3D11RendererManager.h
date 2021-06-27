@@ -40,6 +40,8 @@ public:
 public:
 	ShaderID createShader(ShaderDesc desc) override;
 	MaterialID createMaterial(std::string name, ShaderID shaderID) override;
+	MeshID createMesh(std::string name) override;
+	RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) override;
 	TextureID createTexture() override;
 
 private:
