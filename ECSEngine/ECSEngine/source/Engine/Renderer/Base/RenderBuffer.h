@@ -36,39 +36,39 @@ public:
 		// 頂点データの生成
 		const auto& verData = mesh.m_vertexData;
 		if(m_vertexData.hasVertexVariable(SEMANTIC_NAME::POSITION))
-		for (int i = 0; i < verData.positions.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.positions.size(); ++i) {
 			m_vertexData.setPosition(verData.positions[i], i);
 		}
 		if (m_vertexData.hasVertexVariable(SEMANTIC_NAME::NORMAL))
-		for (int i = 0; i < verData.normals.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.normals.size(); ++i) {
 			m_vertexData.setNormal(verData.normals[i], i);
 		}
 		if (m_vertexData.hasVertexVariable(SEMANTIC_NAME::TANGENT))
-		for (int i = 0; i < verData.tangents.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.tangents.size(); ++i) {
 			m_vertexData.setTangent(verData.tangents[i], i);
 		}
 		if (m_vertexData.hasVertexVariable(SEMANTIC_NAME::BINORMAL))
-		for (int i = 0; i < verData.binormals.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.binormals.size(); ++i) {
 			m_vertexData.setBinormal(verData.binormals[i], i);
 		}
 		if (m_vertexData.hasVertexVariable(SEMANTIC_NAME::COLOR))
-		for (int i = 0; i < verData.colors.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.colors.size(); ++i) {
 			m_vertexData.setColor(verData.colors[i], i);
 		}
 		if (m_vertexData.hasVertexVariable(SEMANTIC_NAME::TEXCOORD, 0))
-		for (int i = 0; i < verData.texcoord0s.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.texcoord0s.size(); ++i) {
 			m_vertexData.setTexCoord(verData.texcoord0s[i], 0, i);
 		}
 		if (m_vertexData.hasVertexVariable(SEMANTIC_NAME::TEXCOORD, 1))
-		for (int i = 0; i < verData.texcoord1s.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.texcoord1s.size(); ++i) {
 			m_vertexData.setTexCoord(verData.texcoord1s[i], 1, i);
 		}
 		if (m_vertexData.hasVertexVariable(SEMANTIC_NAME::BONE_WEIGHT))
-		for (int i = 0; i < verData.boneWeights.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.boneWeights.size(); ++i) {
 			m_vertexData.setBoneWeight(verData.boneWeights[i], i);
 		}
 		if (m_vertexData.hasVertexVariable(SEMANTIC_NAME::BONE_INDEX))
-		for (int i = 0; i < verData.boneIndexs.size(); ++i) {
+		for (std::uint32_t i = 0; i < verData.boneIndexs.size(); ++i) {
 			m_vertexData.setBoneIndex(verData.boneIndexs[i], i);
 		}
 	}

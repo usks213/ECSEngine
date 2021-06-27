@@ -84,7 +84,7 @@ namespace hash
     };
 
     /// @brief メモリのCRC32コード
-    constexpr std::size_t crc32memory(unsigned long crc32, unsigned const char* buff, std::size_t size)
+    constexpr std::uint32_t crc32memory(unsigned long crc32, unsigned const char* buff, std::uint32_t size)
     {
         while (size != 0) {
             crc32 = CRC32Table[(crc32 >> (32 - CHAR_BIT)) ^ *buff] ^ (crc32 << CHAR_BIT);
@@ -95,16 +95,16 @@ namespace hash
     }
 
     /// @brief 文字列のCRC32コード
-    static std::size_t crc32string(const char* string)
+    static std::uint32_t crc32string(const char* string)
     {
-        std::size_t size = std::strlen(string);
+        std::uint32_t size = std::strlen(string);
         unsigned const char* buff = reinterpret_cast<unsigned const char*>(string);
 
         return crc32memory(0xFFFFFFFF, buff, size) ^ 0xFFFFFFFF;
     }
 
     /// @brief 文字列のCRC32コード
-	static std::size_t crc32string(const char* string, std::size_t size)
+	static std::uint32_t crc32string(const char* string, std::uint32_t size)
 	{
         unsigned const char* buff = reinterpret_cast<unsigned const char*>(string);
 
@@ -116,14 +116,14 @@ namespace hash
 
     /// @brief 型のハッシュ値
     template<class T>
-    constexpr std::size_t typeHash()		  
+    constexpr std::uint32_t typeHash()
     {												  
         auto fnvOffsetBasis = 14695981039346656037ULL;
         constexpr auto cFnvPrime = 1099511628211ULL;  
 
         for (auto idx : TYPE_STRING(T))
         {											  
-            fnvOffsetBasis ^= static_cast<size_t>(idx);
+            fnvOffsetBasis ^= static_cast<std::uint32_t>(idx);
             fnvOffsetBasis *= cFnvPrime;			  
         }											  
             return fnvOffsetBasis;						

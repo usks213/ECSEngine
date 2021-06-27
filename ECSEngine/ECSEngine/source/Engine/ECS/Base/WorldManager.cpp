@@ -149,7 +149,7 @@ void WorldManager::render()
 	context->IASetInputLayout(shader->m_inputLayout.Get());
 
 	// 頂点バッファをセット
-	UINT stride = renderBuffer->m_vertexData.size;
+	UINT stride = static_cast<UINT>(renderBuffer->m_vertexData.size);
 	UINT offset = 0;
 	context->IASetVertexBuffers(0, 1, renderBuffer->m_vertexBuffer.GetAddressOf(), &stride, &offset);
 	// インデックスバッファをセット

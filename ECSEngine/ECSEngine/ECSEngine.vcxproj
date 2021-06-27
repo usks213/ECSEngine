@@ -152,6 +152,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\App\main.cpp" />
+    <ClCompile Include="source\Engine\ECS\Base\Chunk.cpp" />
+    <ClCompile Include="source\Engine\ECS\Base\EntityManager.cpp" />
+    <ClCompile Include="source\Engine\ECS\Base\SystemBase.cpp" />
+    <ClCompile Include="source\Engine\ECS\Base\World.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\WorldManager.cpp" />
     <ClCompile Include="source\Engine\Engine.cpp" />
     <ClCompile Include="source\Engine\OS\Base\WindowManager.cpp" />
@@ -166,6 +170,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="source\Engine\ECS\Base\Archetype.h" />
+    <ClInclude Include="source\Engine\ECS\Base\BinaryStream.h" />
+    <ClInclude Include="source\Engine\ECS\Base\Chunk.h" />
+    <ClInclude Include="source\Engine\ECS\Base\ComponentArray.h" />
+    <ClInclude Include="source\Engine\ECS\Base\EntityManager.h" />
+    <ClInclude Include="source\Engine\ECS\Base\IComponentData.h" />
+    <ClInclude Include="source\Engine\ECS\Base\SystemBase.h" />
+    <ClInclude Include="source\Engine\ECS\Base\TypeInfo.h" />
+    <ClInclude Include="source\Engine\ECS\Base\World.h" />
     <ClInclude Include="source\Engine\ECS\Base\WorldManager.h" />
     <ClInclude Include="source\Engine\Engine.h" />
     <ClInclude Include="source\Engine\OS\Base\WindowManager.h" />

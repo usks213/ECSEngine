@@ -80,6 +80,18 @@
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RenderBuffer.cpp">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\ECS\Base\Chunk.cpp">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\ECS\Base\World.cpp">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\ECS\Base\EntityManager.cpp">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\ECS\Base\SystemBase.cpp">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -147,6 +159,33 @@
     </ClInclude>
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RenderBuffer.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\TypeInfo.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\BinaryStream.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\IComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\ComponentArray.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\Archetype.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\Chunk.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\World.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\EntityManager.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\SystemBase.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
