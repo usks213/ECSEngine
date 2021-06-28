@@ -9,6 +9,7 @@
 
 //===== インクルード =====
 #include <windows.h>
+
 #include <Engine/Engine.h>
 #include <Engine/OS/Win/WindowsWindow.h>
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
@@ -24,12 +25,12 @@
 //===== 定数定義 =====
 
 
-
 //===== プロトタイプ宣言 =====
 // ウィンドウプロシージャ
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 // ウィンドウ初期化
 int OnCreate(HWND hWnd, LPCREATESTRUCT lpcs);
+
 
 
 /// @brief エントリポイント
@@ -47,7 +48,7 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	// エンジン取得
 	auto& engine = Engine::get();
 	// ウィンドウの生成
-	WindowsWindow* pWin = engine.createWindow<WindowsWindow>("ECSEngine", 1280, 720);
+	WindowsWindow* pWin = engine.createWindow<WindowsWindow>("ECSEngine", 1920, 1080);
 	// レンダラーの生成
 	D3D11RendererManager* pRenderer = engine.createRenderer<D3D11RendererManager>();
 
@@ -110,6 +111,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_MENUCHAR:
 		return MNC_CLOSE << 16;			// [Alt]+[Enter]時のBEEPを抑止
+	case WM_DPICHANGED:
+	{
+		int dpi = HIWORD(wParam);
+		float scale = (float)dpi / USER_DEFAULT_SCREEN_DPI;
+
+		// ここにDPI変更に反応する処理を書く予定
+		return OnCreate(hWnd, (LPCREATESTRUCT)lParam);
+	}
+	break;
 	default:
 		break;
 	}
@@ -138,6 +148,7 @@ int OnCreate(HWND hWnd, LPCREATESTRUCT lpcs)
 		SIZE sizeWnd;
 		sizeWnd.cx = (rcWnd.right - rcWnd.left) - rcClnt.right + SCREEN_WIDTH;
 		sizeWnd.cy = (rcWnd.bottom - rcWnd.top) - rcClnt.bottom + SCREEN_HEIGHT;
+
 		SetWindowPos(hWnd, nullptr, 0, 0, sizeWnd.cx, sizeWnd.cy, SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 	}
 

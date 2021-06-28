@@ -10,10 +10,14 @@
 #include "CommonState.h"
 #include "Shader.h"
 #include "Texture.h"
+#include <Engine/Utility/Mathf.h>
 
 
 /// @brief マテリアルID
 using MaterialID = std::uint32_t;
+/// @brief 存在しないマテリアルID
+constexpr MaterialID NONE_MATERIAL_ID = std::numeric_limits<MaterialID>::max();
+
 
 /// @class Material
 /// @brief マテリアル
@@ -43,6 +47,8 @@ public:
 	ERasterizeState		m_rasterizeState;
 	/// @brief シェーダID
 	ShaderID			m_shaderID;
+	/// @brief シェーダー
+	Shader*				m_pShader;
 
 	/// @brief CBufferデータ
 	struct CBuffer
@@ -62,4 +68,40 @@ public:
 	/// @brief 全ステージ、スロット分のサンプラステート
 	std::array<std::unordered_map<std::uint32_t, ESamplerState>,
 		static_cast<size_t>(EShaderStage::MAX)>	m_samplerData;
+
+public:
+    /// @brief float設定
+	void setFloat(const char* name, const float& data) { setData(name, &data); }
+
+    /// @brief Vector2設定
+    void setVector2(const char* name, const Vector2& data) { setData(name, &data); }
+
+    /// @brief Vector3設定
+    void setVector3(const char* name, const Vector3& data) { setData(name, &data); }
+
+    /// @brief Vector4設定
+    void setVector4(const char* name, const Vector4& data) { setData(name, &data); }
+
+    /// @brief Matrix設定
+    void setMatrix(const char* name, const Matrix& data) { setData(name, &data); }
+
+    /// @brief Struct設定
+    void setStruct(const char* name, const void* data) { setData(name, &data); }
+
+    /// @brief テクスチャ設定
+    void setTexture(const char* name, const TextureID textureID);
+
+    /// @brief テクスチャ取得
+    TextureID getTexture(const char* name);
+
+    /// @brief サンプラ設定
+    void setSampler(const char* name, const ESamplerState sampler);
+
+    /// @brief サンプラ取得
+    ESamplerState getSampler(const char* name);
+
+protected:
+	/// @brief データ設定
+	void setData(const char* name, const void* data);
+
 };

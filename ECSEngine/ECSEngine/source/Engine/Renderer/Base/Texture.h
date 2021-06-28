@@ -12,6 +12,8 @@
 
 /// @brief テクスチャID
 using TextureID = std::uint32_t;
+/// @brief 存在しないテクスチャID
+constexpr TextureID NONE_TEXTURE_ID = std::numeric_limits<TextureID>::max();
 
 struct Texture
 {

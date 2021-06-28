@@ -11,14 +11,18 @@
 #include <vector>
 #include <string>
 
+/// @brief メッシュID
 using MeshID = std::uint32_t;
+/// @brief 存在しないメッシュID
+constexpr MeshID NONE_MESH_ID = std::numeric_limits<MeshID>::max();
+
 
 struct Mesh
 {
 public:
-	explicit Mesh(std::string name):
+	explicit Mesh(const MeshID& id, const std::string& name):
 		m_name(name),
-		m_id(std::numeric_limits<MeshID>::max()),
+		m_id(id),
 		m_vertexCount(0),
 		m_indexCount(0)
 	{}

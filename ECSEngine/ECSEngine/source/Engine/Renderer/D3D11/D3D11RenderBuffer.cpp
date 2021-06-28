@@ -9,8 +9,9 @@
 #include "D3D11RenderBuffer.h"
 
 
-D3D11RenderBuffer::D3D11RenderBuffer(ID3D11Device1* device, const Shader& shader, const Mesh& mesh) :
-	RenderBuffer(shader, mesh)
+D3D11RenderBuffer::D3D11RenderBuffer(ID3D11Device1* device, const RenderBufferID id, 
+	const Shader& shader, const Mesh& mesh) :
+	RenderBuffer(id, shader, mesh)
 {
 	D3D11_BUFFER_DESC desc = {};
 	desc.Usage = D3D11_USAGE_IMMUTABLE;

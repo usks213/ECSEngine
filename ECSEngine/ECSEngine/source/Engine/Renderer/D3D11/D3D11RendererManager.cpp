@@ -696,7 +696,7 @@ MaterialID D3D11RendererManager::createMaterial(std::string name, ShaderID shade
 
 	// シェーダー取得
 	auto* shader = getShader(shaderID);
-	if (shader == nullptr) return id;
+	if (shader == nullptr) return NONE_MATERIAL_ID;
 
 	// 新規生成
 	m_materialPool[id] = std::make_unique<D3D11Material>(
@@ -715,7 +715,7 @@ MeshID D3D11RendererManager::createMesh(std::string name)
 	if (m_meshPool.end() != itr) return id;
 
 	// 新規生成
-	m_meshPool[id] = std::make_unique<Mesh>(name);
+	m_meshPool[id] = std::make_unique<Mesh>(id, name);
 
 	return id;
 }
@@ -733,20 +733,20 @@ RenderBufferID D3D11RendererManager::createRenderBuffer(ShaderID shaderID, MeshI
 
 	// シェーダー取得
 	auto* shader = getShader(shaderID);
-	if (shader == nullptr) return id;
+	if (shader == nullptr) return NONE_RENDERBUFFER_ID;
 	// メッシュ取得
 	auto* mesh = getMesh(meshID);
-	if (mesh == nullptr) return id;
+	if (mesh == nullptr) return NONE_RENDERBUFFER_ID;
 
 	// 新規生成
 	m_renderBufferPool[id] = std::make_unique<D3D11RenderBuffer>(
-		m_d3dDevice.Get(), *shader, *mesh);
+		m_d3dDevice.Get(), id, *shader, *mesh);
 
 	return id;
 }
 
 TextureID D3D11RendererManager::createTexture()
 {
-	return std::numeric_limits<TextureID>::max();
+	return NONE_TEXTURE_ID;
 }
 

@@ -13,6 +13,8 @@
 
 /// @brief 64 = 32:ShaderID + 32:MaterialID
 using RenderBufferID = std::uint64_t;
+/// @brief 存在しないレンダーバッファID
+constexpr RenderBufferID NONE_RENDERBUFFER_ID = std::numeric_limits<RenderBufferID>::max();
 
 struct IndexData
 {
@@ -29,7 +31,10 @@ public:
 class RenderBuffer
 {
 public:
-	explicit RenderBuffer(const Shader& shader, const Mesh& mesh) :
+	explicit RenderBuffer(const RenderBufferID id, const Shader& shader, const Mesh& mesh) :
+		m_id(id),
+		m_shaderID(shader.m_id),
+		m_meshID(mesh.m_id),
 		m_vertexData(shader, mesh.m_vertexCount),
 		m_indexData(mesh.m_indexCount, sizeof(std::uint32_t))
 	{

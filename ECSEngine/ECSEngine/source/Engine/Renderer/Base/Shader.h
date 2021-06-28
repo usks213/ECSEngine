@@ -24,6 +24,8 @@
 
 /// @brief シェーダーID (格納先ハッシュ値)
 using ShaderID = std::uint32_t;
+/// @brief 存在しないシェーダーID
+constexpr ShaderID NONE_SHADER_ID = std::numeric_limits<ShaderID>::max();
 
 
 namespace SEMANTIC_NAME
@@ -102,7 +104,7 @@ class Shader
 {
 public:
 	/// @brief コンストラクタ
-	explicit Shader(ShaderDesc shaderDesc, ShaderID id) :
+	explicit Shader(ShaderDesc shaderDesc, const ShaderID& id) :
 		m_id(id),
 		m_desc(shaderDesc)
 	{
