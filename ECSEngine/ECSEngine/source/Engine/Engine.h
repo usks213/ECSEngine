@@ -59,6 +59,7 @@ public:
 
 	[[nodiscard]] int getWindowWidth()	{ return m_windowManager.get()->getWindowWidth(); }
 	[[nodiscard]] int getWindowHeight() { return m_windowManager.get()->getWindowHeight(); }
+	[[nodiscard]] std::uint32_t getCurrentFPS() { return m_nCurrentFPS; }
 
 private:
 	friend Singleton<Engine>;

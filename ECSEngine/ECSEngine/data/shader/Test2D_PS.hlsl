@@ -1,12 +1,5 @@
 // 2D用ピクセルシェーダ
-
-// グローバル
-cbuffer global : register(b0) {
-	matrix g_mWorld;
-	matrix g_mView;
-	matrix g_mProjection;
-	matrix g_mTexture;
-};
+#include "Common.hlsli"
 
 // パラメータ
 struct VS_OUTPUT {
@@ -21,8 +14,6 @@ SamplerState g_sampler : register(s0);	// サンプラ
 float4 PS(VS_OUTPUT input) : SV_Target0
 {
 	float4 Color = input.Diffuse;
-	//if (g_mTexture._44 > 0.0f) {
-	//	Color *= g_texture.Sample(g_sampler, input.TexCoord);
-	//}
+
 	return Color;
 }

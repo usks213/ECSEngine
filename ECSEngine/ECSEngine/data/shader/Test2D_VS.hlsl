@@ -1,12 +1,5 @@
 // 2D用頂点シェーダ
-
-// グローバル
-cbuffer global : register(b0) {
-	matrix g_mWorld;
-	matrix g_mView;
-	matrix g_mProjection;
-	matrix g_mTexture;
-};
+#include "Common.hlsli"
 
 // パラメータ
 struct VS_INPUT {
@@ -24,9 +17,9 @@ struct VS_OUTPUT {
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	float4 P = mul(float4(input.Position, 1.0f), g_mWorld);
-	P = mul(P, g_mView);
-	output.Position = mul(P, g_mProjection);
+	float4 P = mul(float4(input.Position, 1.0f), _mWorld);
+	P = mul(P, _mView);
+	output.Position = mul(P, _mProj);
 	output.TexCoord = mul(float4(input.TexCoord, 0.0f, 1.0f), g_mTexture).xy;
 	output.Diffuse = input.Diffuse;
 	return output;

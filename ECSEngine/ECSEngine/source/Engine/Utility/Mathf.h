@@ -47,6 +47,10 @@ using namespace DirectX::SimpleMath;
 
 struct VectorUint4
 {
+	VectorUint4() {
+		x = y = z = w = 0;
+	}
+
 	union 
 	{
 		struct

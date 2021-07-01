@@ -73,7 +73,7 @@ bool WindowsWindow::initialize(HINSTANCE& hInstance, std::string className, int 
 		nullptr);
 
 	//
-	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	//SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
 	// ウインドウの表示(初期化処理の後に呼ばないと駄目)
 	ShowWindow(m_hWnd, nCmdShow);

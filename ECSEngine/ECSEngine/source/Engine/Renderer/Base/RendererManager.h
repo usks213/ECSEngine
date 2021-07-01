@@ -36,10 +36,17 @@ public:
 	RendererManager(RendererManager&&) = delete;
 
 public:
+	/// @brief マテリアル指定
+	/// @param materialID マテリアルID
+	void setMaterial(const MaterialID& materialID);
+
+	//
+
+
 	/// @brief 描画
 	/// @param materialID マテリアルID
 	/// @param meshID メッシュID
-	virtual void render(const Matrix& world, const MaterialID& materialID, const MeshID& meshID) = 0;
+	virtual void render(const MaterialID& materialID, const MeshID& meshID) = 0;
 
 public:
 	virtual ShaderID createShader(ShaderDesc desc) = 0;

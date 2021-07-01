@@ -39,8 +39,19 @@ namespace {
 D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID& id) :
 	Shader(desc, id),
 	m_comShaders(static_cast<size_t>(EShaderStage::MAX)),
-	m_inputLayout()
+	m_inputLayout(),
+	vs(nullptr),
+	gs(nullptr),
+	ds(nullptr),
+	hs(nullptr),
+	ps(nullptr),
+	cs(nullptr)
 {
+	// 初期化
+	for (auto* shader : shaders) {
+		shader = nullptr;
+	}
+
 	// コンパイルしたシェーダデータ
 	std::vector<ComPtr<ID3DBlob>>				blobs(static_cast<size_t>(EShaderStage::MAX));
 	// シェーダリフレクション
@@ -212,8 +223,12 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 		{
 			auto* constantBuffer = reflection->GetConstantBufferByIndex(cbIdx);
 			constantBuffer->GetDesc(&shaderBufferDesc);
+
 			// 共通の定数バッファは飛ばす??
-			//if()
+			std::string cbName = shaderBufferDesc.Name;
+			if (cbName == D3D::SHADER_CB_NAME_SYSTEM		||
+				cbName == D3D::SHADER_CB_NAME_TRANSFORM		||
+				cbName == D3D::SHADER_CB_NAME_MATERIAL) continue;
 
 			// レイアウト生成
 			CBufferLayout cbLayout(cbIdx, shaderBufferDesc.Name, shaderBufferDesc.Size);

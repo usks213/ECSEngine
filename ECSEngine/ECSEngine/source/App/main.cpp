@@ -73,6 +73,11 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		else {
 			// エンジンの更新
 			engine.tick();
+			// FPS
+			char fps[256];
+			sprintf_s(fps, "FPS:%u", engine.getCurrentFPS());
+			SetWindowText(pWin->getWindowHandle(), fps);
+			
 		}
 	}
 

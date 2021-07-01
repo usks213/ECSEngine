@@ -9,6 +9,8 @@
 
 #include <Engine/Renderer/Base/RendererManager.h>
 #include "D3D11Utility.h"
+#include "D3D11Shader.h"
+#include "D3D11Material.h"
 
 
 /// @brief DirectX11レンダラー管理クラス
@@ -38,10 +40,19 @@ public:
 	void present() override;
 
 public:
+
+	void setD3D11Material(const MaterialID& materialID);
+
+	void setD3D11MaterialResource(const D3D11Material& d3dMaterial, const D3D11Shader& d3dShader);
+
+	void setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer);
+
+	void setD3DTransformBuffer(const Matrix& mtxWorld);
+
 	/// @brief 描画
 	/// @param materialID マテリアルID
 	/// @param meshID メッシュID
-	void render(const Matrix& world, const MaterialID& materialID, const MeshID& meshID) override;
+	void render(const MaterialID& materialID, const MeshID& meshID) override;
 
 public:
 	ShaderID createShader(ShaderDesc desc) override;
@@ -92,5 +103,14 @@ public:
 	ComPtr<ID3D11BlendState>			m_blendStates[(size_t)EBlendState::MAX];				// ブレンドステート
 	ComPtr<ID3D11DepthStencilState>		m_depthStencilStates[(size_t)EDepthStencilState::MAX];	// 深度ステンシルステート
 
+private:
+	D3D11Shader*		m_curD3DShader;
+	EBlendState			m_curBlendState;
+	ERasterizeState		m_curRasterizeState;
+	EDepthStencilState	m_curDepthStencilState;
+
+	ComPtr<ID3D11Buffer> m_systemBuffer;
+	ComPtr<ID3D11Buffer> m_transformBuffer;
+	ComPtr<ID3D11Buffer> m_materialBuffer;
 
 };

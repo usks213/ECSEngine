@@ -9,6 +9,7 @@
 #include "D3D11RendererManager.h"
 #include <vector>
 #include <stdio.h>
+#include <functional>
 
 #include <Engine/Engine.h>
 #include <Engine/Utility/HashUtil.h>
@@ -30,6 +31,19 @@
 #endif
 
 
+namespace {
+	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11Buffer* const*)>
+		setCBuffer[static_cast<std::size_t>(EShaderStage::MAX)] = {
+		&ID3D11DeviceContext1::VSSetConstantBuffers,
+		&ID3D11DeviceContext1::GSSetConstantBuffers,
+		&ID3D11DeviceContext1::DSSetConstantBuffers,
+		&ID3D11DeviceContext1::HSSetConstantBuffers,
+		&ID3D11DeviceContext1::PSSetConstantBuffers,
+		&ID3D11DeviceContext1::CSSetConstantBuffers, };
+
+}
+
+
 /// @brief コンストラクタ
 D3D11RendererManager::D3D11RendererManager() :
 	m_backBufferFormat(DXGI_FORMAT_R8G8B8A8_UNORM), 
@@ -40,7 +54,11 @@ D3D11RendererManager::D3D11RendererManager() :
 	m_dxgiMSAA(DXGI_SAMPLE_DESC{1, 0}),
 	m_vireport(),
 	m_hWnd(nullptr),
-	m_bUseMSAA(false)
+	m_bUseMSAA(false),
+	m_curD3DShader(nullptr),
+	m_curBlendState(EBlendState::NONE),
+	m_curRasterizeState(ERasterizeState::CULL_BACK),
+	m_curDepthStencilState(EDepthStencilState::ENABLE_TEST_AND_ENABLE_WRITE)
 {
 }
 
@@ -69,6 +87,24 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 
 	// 共通ステートの初期化
 	CHECK_FAILED(createCommonState());
+
+	// 共通CBufferの初期化
+	D3D11_BUFFER_DESC d3dDesc = {};
+	d3dDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	d3dDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dDesc.CPUAccessFlags = 0;
+	d3dDesc.MiscFlags = 0;
+
+	// System
+	d3dDesc.ByteWidth = sizeof(D3D::SystemBuffer);
+	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_systemBuffer.ReleaseAndGetAddressOf()));
+	// Transform
+	d3dDesc.ByteWidth = sizeof(D3D::TransformBuffer);
+	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_transformBuffer.ReleaseAndGetAddressOf()));
+	// Material
+	d3dDesc.ByteWidth = sizeof(D3D::MaterialBuffer);
+	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_materialBuffer.ReleaseAndGetAddressOf()));
+
 
 	//--- imgui
 
@@ -112,7 +148,8 @@ void D3D11RendererManager::present()
 
 
 	//m_swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING); // ティアリング許容描画
-	m_swapChain->Present(1, 0); // 垂直同期描画
+	//m_swapChain->Present(0, 0);		// 非垂直同期描画
+	m_swapChain->Present(1, 0);	// 垂直同期描画
 }
 
 /// @brief デバイスの生成
@@ -499,8 +536,133 @@ HRESULT D3D11RendererManager::createCommonState()
 	return S_OK;
 }
 
+/// @brief D3D11マテリアルの指定
+/// @param materialID マテリアルID
+void D3D11RendererManager::setD3D11Material(const MaterialID& materialID)
+{
+	// マテリアルの取得
+	auto* d3dMat = static_cast<D3D11Material*>(getMaterial(materialID));
+	if (d3dMat == nullptr) return;
 
-void D3D11RendererManager::render(const Matrix& world, const MaterialID& materialID, const MeshID& meshID)
+	// シェーダーの取得
+	auto* d3dShader = static_cast<D3D11Shader*>(getShader(d3dMat->m_shaderID));
+	if (d3dShader == nullptr) return;
+
+	// シェーダーの指定
+	if (m_curD3DShader != d3dShader)
+	{
+		if (d3dShader->vs) m_d3dContext->VSSetShader(d3dShader->vs, nullptr, 0);
+		if (d3dShader->gs) m_d3dContext->GSSetShader(d3dShader->gs, nullptr, 0);
+		if (d3dShader->ds) m_d3dContext->DSSetShader(d3dShader->ds, nullptr, 0);
+		if (d3dShader->hs) m_d3dContext->HSSetShader(d3dShader->hs, nullptr, 0);
+		if (d3dShader->ps) m_d3dContext->PSSetShader(d3dShader->ps, nullptr, 0);
+		if (d3dShader->cs) m_d3dContext->CSSetShader(d3dShader->cs, nullptr, 0);
+		// 入力レイアウト指定
+		m_d3dContext->IASetInputLayout(d3dShader->m_inputLayout.Get());
+		m_curD3DShader = d3dShader;
+	}
+
+	// ブレンドステート
+	if (m_curBlendState != d3dMat->m_blendState)
+	{
+		constexpr float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		m_d3dContext->OMSetBlendState(m_blendStates[
+			static_cast<std::size_t>(d3dMat->m_blendState)].Get(), blendFactor, 0xffffffff);
+		m_curBlendState = d3dMat->m_blendState;
+	}
+	// ラスタライザステート
+	if (m_curRasterizeState != d3dMat->m_rasterizeState)
+	{
+		m_d3dContext->RSSetState(m_rasterizeStates[
+			static_cast<std::size_t>(d3dMat->m_rasterizeState)].Get());
+		m_curRasterizeState = d3dMat->m_rasterizeState;
+	}
+	// 深度ステンシルステート
+	if (m_curDepthStencilState != d3dMat->m_depthStencilState)
+	{
+		if (d3dMat->m_isTransparent)
+		{
+			m_d3dContext->OMSetDepthStencilState(m_depthStencilStates[
+				static_cast<std::size_t>(EDepthStencilState::ENABLE_TEST_AND_DISABLE_WRITE)].Get(), 0);
+			m_curDepthStencilState = EDepthStencilState::ENABLE_TEST_AND_DISABLE_WRITE;
+		}
+		else
+		{
+			m_d3dContext->OMSetDepthStencilState(m_depthStencilStates[
+				static_cast<std::size_t>(d3dMat->m_depthStencilState)].Get(), 0);
+			m_curDepthStencilState = d3dMat->m_depthStencilState;
+		}
+	}
+
+	// マテリアルリソース指定・更新
+	setD3D11MaterialResource(*d3dMat, *d3dShader);
+
+}
+
+/// @brief D3D11マテリアルのリソースを指定
+/// @param d3dMaterial D3D11マテリアルの参照
+void D3D11RendererManager::setD3D11MaterialResource(const D3D11Material& d3dMaterial, const D3D11Shader& d3dShader)
+{
+	auto& d3dMat = const_cast<D3D11Material&>(d3dMaterial);
+
+	// ステージごと
+	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	{
+		if (!hasStaderStage(d3dShader.m_desc.m_stages, stage)) continue;
+
+		auto stageIndex = static_cast<std::size_t>(stage);
+
+		// マテリアルバッファ更新
+		setCBuffer[stageIndex](m_d3dContext.Get(), D3D::SHADER_CB_SLOT_MATERIAL, 1, m_materialBuffer.GetAddressOf());
+		m_d3dContext->UpdateSubresource(m_materialBuffer.Get(), 0, nullptr, &d3dMat.m_materialBuffer, 0, 0);
+
+		// コンスタントバッファ
+		for (const auto& cbuffer : d3dMaterial.m_d3dCbuffer[stageIndex]) 
+		{
+			// 指定
+			setCBuffer[stageIndex](m_d3dContext.Get(), cbuffer.first, 1, cbuffer.second.GetAddressOf());
+			// 更新
+			if (d3dMat.m_cbufferData[stageIndex][cbuffer.first].isUpdate)
+			{
+				m_d3dContext->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
+					d3dMat.m_cbufferData[stageIndex][cbuffer.first].data.get(), 0, 0);
+				d3dMat.m_cbufferData[stageIndex][cbuffer.first].isUpdate = false;
+			}
+		}
+
+		// テクスチャ更新
+
+
+		// サンプラ更新
+
+	}
+
+}
+
+void D3D11RendererManager::setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer)
+{
+	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	{
+		auto stageIndex = static_cast<std::size_t>(stage);
+		setCBuffer[stageIndex](m_d3dContext.Get(), D3D::SHADER_CB_SLOT_SYSTEM, 1, m_systemBuffer.GetAddressOf());
+		m_d3dContext->UpdateSubresource(m_systemBuffer.Get(), 0, nullptr, &systemBuffer, 0, 0);
+	}
+}
+
+void D3D11RendererManager::setD3DTransformBuffer(const Matrix& mtxWorld)
+{
+	D3D::TransformBuffer transform;
+	transform._mWorld = mtxWorld.Transpose();
+
+	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	{
+		auto stageIndex = static_cast<std::size_t>(stage);
+		setCBuffer[stageIndex](m_d3dContext.Get(), D3D::SHADER_CB_SLOT_TRANSFORM, 1, m_transformBuffer.GetAddressOf());
+		m_d3dContext->UpdateSubresource(m_transformBuffer.Get(), 0, nullptr, &transform, 0, 0);
+	}
+}
+
+void D3D11RendererManager::render(const MaterialID& materialID, const MeshID& meshID)
 {
 	auto* context = m_d3dContext.Get();
 
@@ -509,20 +671,6 @@ void D3D11RendererManager::render(const Matrix& world, const MaterialID& materia
 	auto* shader = static_cast<D3D11Shader*>(getShader(material->m_shaderID));
 	const auto& rdID = createRenderBuffer(shader->m_id, meshID);
 	auto* renderBuffer = static_cast<D3D11RenderBuffer*>(getRenderBuffer(rdID));
-
-	
-	// プリミティブ指定
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	// ブレンドステート
-	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	context->OMSetBlendState(m_blendStates[
-		static_cast<std::size_t>(material->m_blendState)].Get(), blendFactor, 0xffffffff);
-	// ラスタライザステート
-	context->RSSetState(m_rasterizeStates[
-		static_cast<std::size_t>(material->m_rasterizeState)].Get());
-	// 深度ステンシルステート
-	context->OMSetDepthStencilState(m_depthStencilStates[
-		static_cast<std::size_t>(material->m_depthStencilState)].Get(), 0);
 
 	// 頂点バッファをセット
 	UINT stride = static_cast<UINT>(renderBuffer->m_vertexData.size);
@@ -533,130 +681,8 @@ void D3D11RendererManager::render(const Matrix& world, const MaterialID& materia
 		context->IASetIndexBuffer(renderBuffer->m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 	}
 
-	//// 各シェーダーステージのコンスタントバッファを更新
-	//for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
-	//{
-	//	auto index = static_cast<std::size_t>(stage);
-
-	//	// CBuffer確認
-	//	switch (stage)
-	//	{
-	//	case EShaderStage::VS:
-	//		if (shader->vs)
-	//		{
-	//			context->VSSetShader(shader->vs, nullptr, 0);
-	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
-	//			{
-	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
-	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
-	//				context->VSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
-	//			}
-	//		}
-	//		else
-	//		{
-	//			context->VSSetShader(nullptr, nullptr, 0);
-	//		}
-	//		break;
-	//	case EShaderStage::GS:
-	//		if (shader->gs)
-	//		{
-	//			context->GSSetShader(shader->gs, nullptr, 0);
-	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
-	//			{
-	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
-	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
-	//				context->GSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
-	//			}
-	//		}
-	//		else
-	//		{
-	//			context->GSSetShader(nullptr, nullptr, 0);
-	//		}
-	//		break;
-	//	case EShaderStage::DS:
-	//		if (shader->ds)
-	//		{
-	//			context->DSSetShader(shader->ds, nullptr, 0);
-	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
-	//			{
-	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
-	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
-	//				context->DSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
-	//			}
-	//		}
-	//		else
-	//		{
-	//			context->DSSetShader(nullptr, nullptr, 0);
-	//		}
-	//		break;
-	//	case EShaderStage::HS:
-	//		if (shader->hs)
-	//		{
-	//			context->HSSetShader(shader->hs, nullptr, 0);
-	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
-	//			{
-	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
-	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
-	//				context->HSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
-	//			}
-	//		}
-	//		else
-	//		{
-	//			context->HSSetShader(nullptr, nullptr, 0);
-	//		}
-	//		break;
-	//	case EShaderStage::PS:
-	//		if (shader->ps)
-	//		{
-	//			context->PSSetShader(shader->ps, nullptr, 0);
-	//			for (const auto& cbuffer : material->m_d3dCbuffer[index])
-	//			{
-	//				context->UpdateSubresource(cbuffer.second.Get(), 0, nullptr,
-	//					material->m_cbufferData[index][cbuffer.first].data.get(), 0, 0);
-	//				context->PSSetConstantBuffers(cbuffer.first, 1, cbuffer.second.GetAddressOf());
-	//			}
-	//		}
-	//		else
-	//		{
-	//			context->PSSetShader(nullptr, nullptr, 0);
-	//		}
-	//		break;
-	//	case EShaderStage::CS:
-	//		break;
-	//	}
-	//}
-
-	// シェーダー
-	context->VSSetShader(shader->vs, nullptr, 0);
-	context->PSSetShader(shader->ps, nullptr, 0);
-	context->IASetInputLayout(shader->m_inputLayout.Get());
-
-	// 変換行列
-	XMMATRIX mtxView, mtxProj, mtxTex;
-	mtxView = XMMatrixLookAtLH(XMVectorSet(0.0f, 0.0f, -10.0f, 1.0f),
-		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f), XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-	float asoect = (float)m_pEngine->getWindowWidth() / m_pEngine->getWindowHeight();
-	mtxProj = XMMatrixPerspectiveFovLH(
-		XMConvertToRadians(45), asoect, 1.0f, 1000.0f);
-	mtxTex = XMMatrixIdentity();
-
-	struct CBuffer
-	{
-		XMMATRIX g_mWorld;
-		XMMATRIX g_mView;
-		XMMATRIX g_mProjection;
-		XMMATRIX g_mTexture;
-	};
-
-	CBuffer cb;
-	cb.g_mWorld = XMMatrixTranspose(world);
-	cb.g_mView = XMMatrixTranspose(mtxView);
-	cb.g_mProjection = XMMatrixTranspose(mtxProj);
-	cb.g_mTexture = XMMatrixTranspose(mtxTex);
-
-	// コンスタントバッファ更新
-	context->UpdateSubresource(material->m_d3dCbuffer[0][0].Get(), 0, nullptr, &cb, 0, 0);
-	context->VSSetConstantBuffers(0, 1, material->m_d3dCbuffer[0][0].GetAddressOf());
+	// プリミティブ指定
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	// ポリゴンの描画
 	if (renderBuffer->m_indexData.count > 0)

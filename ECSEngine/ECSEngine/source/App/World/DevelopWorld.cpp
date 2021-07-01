@@ -27,6 +27,24 @@ struct VERTEX_3D
 	Vector2 tex;		// テクスチャ座標
 };
 
+struct MaterialComponentData : public IComponentData
+{
+	ECS_DECLARE_COMPONENT_DATA(MaterialComponentData);
+};
+
+class RotationSystem : public ecs::SystemBase {
+public:
+	explicit RotationSystem(World* pWorld) :
+		SystemBase(pWorld)
+	{}
+	void onUpdate() override {
+		foreach<Rotation>([](Rotation& rot) {
+			rot.value *= Quaternion::CreateFromYawPitchRoll(0.1f, 0, 0);
+			//rot.value.x += 0.1f;
+			});
+	}
+};
+
 /// @brief スタート
 void DevelopWorld::Start()
 {
@@ -35,7 +53,7 @@ void DevelopWorld::Start()
 
 	// シェーダ読み込み
 	ShaderDesc shaderDesc;
-	shaderDesc.m_name = "Test2D";
+	shaderDesc.m_name = "Unlit";
 	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
 	ShaderID shaderID = renderer->createShader(shaderDesc);
 
@@ -86,24 +104,28 @@ void DevelopWorld::Start()
 
 	// 初期化データ
 	Scale scale;
-	scale.value = Vector3(1, 1, 1);
+	scale.value = Vector3(1, 3, 1);
+	Rotation rot;
+	rot.value = Quaternion::CreateFromYawPitchRoll(3.14 / 2, 0, 0);
 	RenderData rd;
 	rd.materialID = matID;
 	rd.meshID = meshID;
 
 	// オブジェクトの生成
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		auto entity = getEntityManager()->createEntity(archetype);
 
 		Position pos;
-		pos.value.x = -5 + i*2;
+		pos.value.x = -5 + i;
 		getEntityManager()->setComponentData<Position>(entity, pos);
 		getEntityManager()->setComponentData<Scale>(entity, scale);
+		getEntityManager()->setComponentData<Rotation>(entity, rot);
 		getEntityManager()->setComponentData(entity, rd);
 	}
 
 	// システムの追加
+	addSystem<RotationSystem>();
 	addSystem<TransformSystem>();
 	addSystem<RenderingSystem>();
 }
