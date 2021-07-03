@@ -45,6 +45,10 @@ public:
 
 	void setD3D11MaterialResource(const D3D11Material& d3dMaterial, const D3D11Shader& d3dShader);
 
+	void setD3D11Texture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage);
+
+	void setD3D11Sampler(std::uint32_t slot, ESamplerState state, EShaderStage stage);
+
 	void setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer);
 
 	void setD3DTransformBuffer(const Matrix& mtxWorld);
@@ -104,10 +108,16 @@ public:
 	ComPtr<ID3D11DepthStencilState>		m_depthStencilStates[(size_t)EDepthStencilState::MAX];	// 深度ステンシルステート
 
 private:
-	D3D11Shader*		m_curD3DShader;
 	EBlendState			m_curBlendState;
 	ERasterizeState		m_curRasterizeState;
 	EDepthStencilState	m_curDepthStencilState;
+	EPrimitiveTopology	m_curPrimitiveTopology;
+
+	D3D11Shader*		m_curD3DShader;
+	MaterialID			m_curMaterial;
+	ESamplerState		m_curSamplerState[static_cast<size_t>(EShaderStage::MAX)][D3D::MAX_SAMPLER_SLOT_COUNT];
+	TextureID			m_curTexture[static_cast<size_t>(EShaderStage::MAX)][D3D::MAX_TEXTURE_SLOT_COUNT];
+
 
 	ComPtr<ID3D11Buffer> m_systemBuffer;
 	ComPtr<ID3D11Buffer> m_transformBuffer;

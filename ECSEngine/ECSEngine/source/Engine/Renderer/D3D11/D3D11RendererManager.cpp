@@ -32,6 +32,7 @@
 
 
 namespace {
+	// CBuffer
 	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11Buffer* const*)>
 		setCBuffer[static_cast<std::size_t>(EShaderStage::MAX)] = {
 		&ID3D11DeviceContext1::VSSetConstantBuffers,
@@ -40,7 +41,24 @@ namespace {
 		&ID3D11DeviceContext1::HSSetConstantBuffers,
 		&ID3D11DeviceContext1::PSSetConstantBuffers,
 		&ID3D11DeviceContext1::CSSetConstantBuffers, };
-
+	// SRV
+	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11ShaderResourceView* const*)>
+		setShaderResource[static_cast<std::size_t>(EShaderStage::MAX)] = {
+		&ID3D11DeviceContext1::VSSetShaderResources,
+		&ID3D11DeviceContext1::GSSetShaderResources,
+		&ID3D11DeviceContext1::DSSetShaderResources,
+		&ID3D11DeviceContext1::HSSetShaderResources,
+		&ID3D11DeviceContext1::PSSetShaderResources,
+		&ID3D11DeviceContext1::CSSetShaderResources, };
+	// Sampler
+	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11SamplerState* const*)>
+		setSamplers[static_cast<std::size_t>(EShaderStage::MAX)] = {
+		&ID3D11DeviceContext1::VSSetSamplers,
+		&ID3D11DeviceContext1::GSSetSamplers,
+		&ID3D11DeviceContext1::DSSetSamplers,
+		&ID3D11DeviceContext1::HSSetSamplers,
+		&ID3D11DeviceContext1::PSSetSamplers,
+		&ID3D11DeviceContext1::CSSetSamplers, };
 }
 
 
@@ -631,12 +649,49 @@ void D3D11RendererManager::setD3D11MaterialResource(const D3D11Material& d3dMate
 		}
 
 		// テクスチャ更新
-
+		for (const auto& tex : d3dMat.m_textureData[stageIndex])
+		{
+			setD3D11Texture(tex.first, tex.second, stage);
+		}
 
 		// サンプラ更新
-
+		for (const auto& sam : d3dMat.m_samplerData[stageIndex])
+		{
+			setD3D11Sampler(sam.first, sam.second, stage);
+		}
 	}
 
+}
+
+void D3D11RendererManager::setD3D11Texture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage)
+{
+	auto stageIndex = static_cast<std::size_t>(stage);
+	if (m_curTexture[stageIndex][slot] == textureID) return;
+
+
+	if (textureID == NONE_TEXTURE_ID)
+	{
+		ID3D11ShaderResourceView* nullView = nullptr;
+		setShaderResource[stageIndex](m_d3dContext.Get(), slot, 1, &nullView);
+		m_curTexture[stageIndex][slot] = NONE_TEXTURE_ID;
+	}
+	else
+	{
+		ID3D11ShaderResourceView* pTex = nullptr; //m_texturePool[textureID];
+		setShaderResource[stageIndex](m_d3dContext.Get(), slot, 1, &pTex);
+		m_curTexture[stageIndex][slot] = textureID;
+	}
+}
+
+void D3D11RendererManager::setD3D11Sampler(std::uint32_t slot, ESamplerState state, EShaderStage stage)
+{
+	auto stageIndex = static_cast<size_t>(stage);
+	if (m_curSamplerState[stageIndex][slot] == state) {
+		return;
+	}
+
+	setSamplers[stageIndex](m_d3dContext.Get() ,slot, 1, m_samplerStates[static_cast<size_t>(state)].GetAddressOf());
+	m_curSamplerState[stageIndex][slot] = state;
 }
 
 void D3D11RendererManager::setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer)

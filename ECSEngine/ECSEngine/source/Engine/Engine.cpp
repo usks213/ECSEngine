@@ -44,9 +44,6 @@ bool Engine::initialize()
 /// @brief 更新
 void Engine::tick()
 {
-	// レンダラーのクリア
-	m_rendererManager->clear();
-
 	// タイマー更新
 	m_CurrentTime = std::chrono::system_clock::now();
 
@@ -78,11 +75,16 @@ void Engine::tick()
 	{
 		m_ExecLastTime = m_CurrentTime;
 
+		// レンダラーのクリア
+		m_rendererManager->clear();
+
 		// Update
 		m_worldManager->update();
 
-		// Draw
+		// Render
 		m_worldManager->render();
+
+		// 画面更新
 		m_rendererManager->present();
 
 		// フレームカウンタ更新

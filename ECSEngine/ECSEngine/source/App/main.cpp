@@ -15,6 +15,8 @@
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
 #include <Engine/ECS/Base/WorldManager.h>
 
+#include <Engine/Utility/Input.h>
+
 #include <App/World/DevelopWorld.h>
 
 
@@ -45,6 +47,9 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);	// 未使用宣言
 	UNREFERENCED_PARAMETER(lpCmdLine);		// 未使用宣言
 
+	// 入力
+	InitInput();
+
 	// エンジン取得
 	auto& engine = Engine::get();
 	// ウィンドウの生成
@@ -71,6 +76,9 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 			DispatchMessage(&msg);
 		}
 		else {
+			// 入力
+			UpdateInput();
+
 			// エンジンの更新
 			engine.tick();
 			// FPS
@@ -84,6 +92,9 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	// エンジンの終了処理
 	engine.finalize();
+
+	// 入力
+	UninitInput();
 
 	return (int)msg.wParam;
 }

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Engine/Renderer/Base/D3DUtility.h>
+#include <Engine/Renderer/Base/LightData.h>
 #include <d3d11_1.h>
 #include <Engine/Utility/Mathf.h>
 
@@ -22,22 +23,38 @@ namespace D3D {
 	constexpr std::uint32_t SHADER_CB_SLOT_TRANSFORM = 6;
 	constexpr std::uint32_t SHADER_CB_SLOT_MATERIAL  = 7;
 
+	constexpr std::uint32_t SHADER_TEX_SLOT_MAIN	= 4;
+	constexpr std::uint32_t SHADER_TEX_SLOT_SHADOW  = 5;
+	constexpr std::uint32_t SHADER_TEX_SLOT_SKYBOX  = 6;
+
+	constexpr std::uint32_t SHADER_SS_SLOT_MAIN		= 4;
+	constexpr std::uint32_t SHADER_SS_SLOT_SHADOW	= 5;
+	constexpr std::uint32_t SHADER_SS_SLOT_SKYBOX	= 6;
+
+	constexpr std::uint32_t MAX_CBUFFER_SLOT_COUNT = 8;
+	constexpr std::uint32_t MAX_SAMPLER_SLOT_COUNT = 8;
+	constexpr std::uint32_t MAX_TEXTURE_SLOT_COUNT = 8;
+
 
 	// マテリアルフラグ
 	enum class Material_Flg : UINT
 	{
+		NONE		= 0,
 		TEXTURE		= (1 << 1),
 		LIGHT		= (1 << 2),
 		SHADOW		= (1 << 3),
 		FOG			= (1 << 4),
-		MAX			= std::numeric_limits<UINT>::max(),
+		ALL			= std::numeric_limits<UINT>::max(),
+		MAX			= ALL,
 	};
 
 	// システム定数バッファ
 	struct SystemBuffer
 	{
-		Matrix _mView;
-		Matrix _mProj;
+		Matrix	_mView;
+		Matrix	_mProj;
+		Vector4 _viewPos;
+		DirectionalLightData _directionalLit;
 	};
 
 	// トランスフォーム定数バッファ
@@ -49,8 +66,9 @@ namespace D3D {
 	// マテリアル定数バッファ
 	struct MaterialBuffer
 	{
-		Vector4		_Color = Vector4(1,1,1,1);
+		Vector4		_Color = Vector4(1,1,0,1);
 		Matrix		_mTex;
-		VectorUint4	_Flg;
+		UINT		_Flg = (UINT)Material_Flg::LIGHT;
+		Vector3		_Dummy;
 	};
 }

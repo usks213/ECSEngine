@@ -113,6 +113,12 @@
     <ClCompile Include="source\Engine\ECS\System\RenderingSystem.cpp">
       <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\Utility\Input.cpp">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\Base\Geometry.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -223,6 +229,24 @@
     <ClInclude Include="source\Engine\ECS\ComponentData\RenderingComponentData.h">
       <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
     </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\CameraComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Utility\Input.h">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\ComponentTag.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\LightData.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\Geometry.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Texture.h">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">
@@ -247,9 +271,27 @@
     <FxCompile Include="data\shader\Unlit_VS.hlsl">
       <Filter>リソース ファイル\Shader</Filter>
     </FxCompile>
+    <FxCompile Include="data\shader\Lit_PS.hlsl">
+      <Filter>リソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shader\Lit_VS.hlsl">
+      <Filter>リソース ファイル\Shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shader\Common.hlsli">
+      <Filter>リソース ファイル\Shader</Filter>
+    </None>
+    <None Include="data\shader\Light.hlsli">
+      <Filter>リソース ファイル\Shader</Filter>
+    </None>
+    <None Include="data\shader\BRDF.hlsli">
+      <Filter>リソース ファイル\Shader</Filter>
+    </None>
+    <None Include="data\shader\CookTorrance.hlsli">
+      <Filter>リソース ファイル\Shader</Filter>
+    </None>
+    <None Include="data\shader\PBR.hlsli">
       <Filter>リソース ファイル\Shader</Filter>
     </None>
   </ItemGroup>

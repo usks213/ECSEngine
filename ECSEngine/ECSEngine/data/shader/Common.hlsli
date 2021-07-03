@@ -1,5 +1,7 @@
 // 共通シェーダー
 
+#include "Light.hlsli"
+
 // フラグ
 #define TEXTURE_FLG		(1 << 1)
 #define LIGHT_FLG		(1 << 2)
@@ -12,6 +14,8 @@ cbuffer System : register(b5)
 {
 	float4x4 _mView;
 	float4x4 _mProj;
+	float4 _viewPos;
+	DirectionalLightData _directionalLit;
 }
 
 // トランスフォーム定数バッファ
@@ -25,9 +29,16 @@ cbuffer Material : register(b7)
 {
 	float4		_Color;
 	float4x4	_mTex;
-	uint4		_Flg;
+	uint		_Flg;
+	float3		_Dummy;
 }
 
 
-Texture2D		_MainTexture	: register(t7); // メインテクスチャ
-SamplerState	_MainSampler	: register(s7); // メインサンプラ
+
+Texture2D		_MainTexture	: register(t4); // メインテクスチャ
+Texture2D		_ShadowTexture	: register(t5); // シャドウマップ
+TextureCube		_SkyTexture		: register(t6); // スカイボックス
+
+SamplerState	_MainSampler	: register(s4); // メインサンプラ
+SamplerState	_ShadowSampler	: register(s5); // シャドウマップ
+SamplerState	_SkySampler		: register(s6); // スカイボックス

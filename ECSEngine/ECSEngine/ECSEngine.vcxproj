@@ -175,6 +175,7 @@
     <ClCompile Include="source\Engine\Engine.cpp" />
     <ClCompile Include="source\Engine\OS\Base\WindowManager.cpp" />
     <ClCompile Include="source\Engine\OS\Win\WindowsWindow.cpp" />
+    <ClCompile Include="source\Engine\Renderer\Base\Geometry.cpp" />
     <ClCompile Include="source\Engine\Renderer\Base\Material.cpp" />
     <ClCompile Include="source\Engine\Renderer\Base\RendererManager.cpp" />
     <ClCompile Include="source\Engine\Renderer\Base\Shader.cpp" />
@@ -182,6 +183,7 @@
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RenderBuffer.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RendererManager.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Shader.cpp" />
+    <ClCompile Include="source\Engine\Utility\Input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -196,6 +198,8 @@
     <ClInclude Include="source\Engine\ECS\Base\TypeInfo.h" />
     <ClInclude Include="source\Engine\ECS\Base\World.h" />
     <ClInclude Include="source\Engine\ECS\Base\WorldManager.h" />
+    <ClInclude Include="source\Engine\ECS\ComponentData\CameraComponentData.h" />
+    <ClInclude Include="source\Engine\ECS\ComponentData\ComponentTag.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\RenderingComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\TransformComponentData.h" />
     <ClInclude Include="source\Engine\ECS\System\RenderingSystem.h" />
@@ -205,6 +209,8 @@
     <ClInclude Include="source\Engine\OS\Win\WindowsWindow.h" />
     <ClInclude Include="source\Engine\Renderer\Base\CommonState.h" />
     <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\Geometry.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\LightData.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Material.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Mesh.h" />
     <ClInclude Include="source\Engine\Renderer\Base\RenderBuffer.h" />
@@ -216,8 +222,10 @@
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RenderBuffer.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RendererManager.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Shader.h" />
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Texture.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Utility.h" />
     <ClInclude Include="source\Engine\Utility\HashUtil.h" />
+    <ClInclude Include="source\Engine\Utility\Input.h" />
     <ClInclude Include="source\Engine\Utility\Mathf.h" />
     <ClInclude Include="source\Engine\Utility\Singleton.h" />
   </ItemGroup>
@@ -228,6 +236,18 @@
     <Image Include="icon1.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="data\shader\Lit_PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="data\shader\Lit_VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="data\shader\Test2D_PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -254,7 +274,31 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\shader\BRDF.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="data\shader\Common.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="data\shader\CookTorrance.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="data\shader\Light.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="data\shader\PBR.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

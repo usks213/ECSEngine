@@ -266,7 +266,10 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 			D3D11_SHADER_INPUT_BIND_DESC shaderInputBindDesc;
 			reflection->GetResourceBindingDesc(i, &shaderInputBindDesc);
 			// 共通リソースはスキップ
-			//if() ... SkyBox,ShadowMap,
+			if (shaderInputBindDesc.BindPoint == D3D::SHADER_TEX_SLOT_MAIN		||
+				shaderInputBindDesc.BindPoint == D3D::SHADER_TEX_SLOT_SHADOW	||
+				shaderInputBindDesc.BindPoint == D3D::SHADER_TEX_SLOT_SKYBOX) continue;
+
 
 			switch (shaderBufferDesc.Type) 
 			{

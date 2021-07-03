@@ -15,8 +15,16 @@ using TextureID = std::uint32_t;
 /// @brief 存在しないテクスチャID
 constexpr TextureID NONE_TEXTURE_ID = std::numeric_limits<TextureID>::max();
 
-struct Texture
+/// @class Texture
+/// @brief テクスチャ
+class Texture
 {
+public:
+	Texture(const TextureID& id, const std::string& name):
+		m_id(id),
+		m_name(name)
+	{}
+
 	std::string		m_name;
 	TextureID		m_id;
 };
