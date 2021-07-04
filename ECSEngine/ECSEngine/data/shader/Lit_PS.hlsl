@@ -1,6 +1,7 @@
 // ピクセルシェーダ
 #include "Common.hlsli"
 #include "PBR.hlsli"
+//#include "CookTorrance.hlsli"
 
 
 // パラメータ
@@ -15,8 +16,12 @@ struct VS_OUTPUT
 
 float4 PS(VS_OUTPUT input) : SV_Target0
 {
-	float4 Color = lerp(_Color, _Color * 
-	_MainTexture.Sample(_MainSampler, input.TexCoord), _Flg & TEXTURE_FLG);
+	float4 Color = _Color;
+	
+	//if (_Flg & TEXTURE_FLG)
+	//{
+	//	Color *= _MainTexture.Sample(_MainSampler, input.TexCoord);
+	//}
 	
 	if (_Flg & LIGHT_FLG)
 	{
@@ -30,12 +35,12 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 		float3 bitangent = normalize(cross(N, tangent));
 		tangent = normalize(cross(bitangent, N));
 		
-		float roughness = 0.1f;
-		float metallic = 0.0f;
+		float roughness = 0.5f;
+		float metallic = 1.0f;
 		
 		// 拡散反射BRDF
 		//float3 dif = NormalizedDisneyDiffuse(Color.rgb, N, L, V, roughness);
-		
+		//Color.rgb = dif;
 		//// ハーフランバート
 		//float PI = 3.14159265359f;
 		//float val = max(dot(N, L), 0.0f) * 0.5f + 0.5f;
@@ -53,7 +58,10 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 		
 		// Diff += g_vKe.rgb * vTd.rgb; // エミッション
 		
-		Color.rgb = PBR(L, N, V, _directionalLit.diffuse.rgb, Color.rgb, metallic, roughness);
+		//Color.rgb = PBR(L, N, V, _directionalLit.diffuse.rgb, Color.rgb, metallic, roughness,_SkyTexture, _SkySampler);
+		//Color.rgb = _SkyTexture.Sample(_SkySampler, SkyMapEquirect(reflect(V,N))).rgb;
+		Color.rgb = shade(Color.rgb, metallic, roughness, N, V, L, 
+		_directionalLit.diffuse.rgb, _directionalLit.ambient.rgb, _SkyTexture, _SkySampler);
 	}
 	
 	return Color;

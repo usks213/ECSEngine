@@ -37,8 +37,18 @@ cbuffer Material : register(b7)
 
 Texture2D		_MainTexture	: register(t4); // メインテクスチャ
 Texture2D		_ShadowTexture	: register(t5); // シャドウマップ
-TextureCube		_SkyTexture		: register(t6); // スカイボックス
+Texture2D		_SkyTexture		: register(t6);	// スカイボックス
 
 SamplerState	_MainSampler	: register(s4); // メインサンプラ
 SamplerState	_ShadowSampler	: register(s5); // シャドウマップ
 SamplerState	_SkySampler		: register(s6); // スカイボックス
+
+
+// 引数には正規化された反射ベクトルを代入
+float2 SkyMapEquirect(float3 reflectionVector)
+{
+	float PI = 3.14159265359f;
+	float phi = acos(-reflectionVector.y);
+	float theta = atan2(-1.0f * reflectionVector.x, reflectionVector.z) + PI;
+	return float2(theta / (PI * 2.0f), phi / PI);
+}

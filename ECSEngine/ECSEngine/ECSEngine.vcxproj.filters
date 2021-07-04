@@ -54,6 +54,9 @@
     <Filter Include="リソース ファイル\Shader">
       <UniqueIdentifier>{000099c2-a61b-4f2a-802c-952a2a6ffce3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ライブラリ">
+      <UniqueIdentifier>{72d042b8-c9eb-4580-88fb-fdeb43bd3185}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\App\main.cpp">
@@ -118,6 +121,15 @@
     </ClCompile>
     <ClCompile Include="source\Engine\Renderer\Base\Geometry.cpp">
       <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Texture.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DDSTextureLoader\DDSTextureLoader11.cpp">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\WICTextureLoader\WICTextureLoader11.cpp">
+      <Filter>ライブラリ</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -247,6 +259,15 @@
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Texture.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClInclude>
+    <ClInclude Include="lib\DirectXTex\DirectXTex.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DDSTextureLoader\DDSTextureLoader11.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\WICTextureLoader\WICTextureLoader11.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">
@@ -293,6 +314,9 @@
     </None>
     <None Include="data\shader\PBR.hlsli">
       <Filter>リソース ファイル\Shader</Filter>
+    </None>
+    <None Include="lib\DirectXTex\DirectXTex.inl">
+      <Filter>ライブラリ</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -20,7 +20,7 @@ constexpr TextureID NONE_TEXTURE_ID = std::numeric_limits<TextureID>::max();
 class Texture
 {
 public:
-	Texture(const TextureID& id, const std::string& name):
+	explicit Texture(const TextureID& id, const std::string& name):
 		m_id(id),
 		m_name(name)
 	{}

@@ -17,6 +17,7 @@
 #include "D3D11Shader.h"
 #include "D3D11Material.h"
 #include "D3D11RenderBuffer.h"
+#include "D3D11Texture.h"
 
 
 // ライブラリリンク
@@ -122,6 +123,14 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 	// Material
 	d3dDesc.ByteWidth = sizeof(D3D::MaterialBuffer);
 	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_materialBuffer.ReleaseAndGetAddressOf()));
+
+	// Sampler
+	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage) 
+	{
+		setD3D11Sampler(D3D::SHADER_SS_SLOT_MAIN,	ESamplerState::LINEAR_WRAP,		 stage);
+		setD3D11Sampler(D3D::SHADER_SS_SLOT_SHADOW, ESamplerState::SHADOW,			 stage);
+		setD3D11Sampler(D3D::SHADER_SS_SLOT_SKYBOX, ESamplerState::ANISOTROPIC_WRAP, stage);
+	}
 
 
 	//--- imgui
@@ -677,7 +686,8 @@ void D3D11RendererManager::setD3D11Texture(std::uint32_t slot, const TextureID& 
 	}
 	else
 	{
-		ID3D11ShaderResourceView* pTex = nullptr; //m_texturePool[textureID];
+		D3D11Texture* pD3DTex = static_cast<D3D11Texture*>(getTexture(textureID));
+		ID3D11ShaderResourceView* pTex = pD3DTex ? pD3DTex->m_srv.Get() : nullptr;
 		setShaderResource[stageIndex](m_d3dContext.Get(), slot, 1, &pTex);
 		m_curTexture[stageIndex][slot] = textureID;
 	}
@@ -716,6 +726,13 @@ void D3D11RendererManager::setD3DTransformBuffer(const Matrix& mtxWorld)
 		m_d3dContext->UpdateSubresource(m_transformBuffer.Get(), 0, nullptr, &transform, 0, 0);
 	}
 }
+
+
+void D3D11RendererManager::setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage)
+{
+	setD3D11Texture(slot, textureID, stage);
+}
+
 
 void D3D11RendererManager::render(const MaterialID& materialID, const MeshID& meshID)
 {
@@ -826,8 +843,18 @@ RenderBufferID D3D11RendererManager::createRenderBuffer(ShaderID shaderID, MeshI
 	return id;
 }
 
-TextureID D3D11RendererManager::createTexture()
+TextureID D3D11RendererManager::createTextureFromFile(std::string filePath)
 {
-	return NONE_TEXTURE_ID;
+	// IDの取得
+	TextureID id = hash::crc32string(filePath.c_str());
+
+	// 既に生成済み
+	const auto& itr = m_texturePool.find(id);
+	if (m_texturePool.end() != itr) return id;
+
+	// 新規生成
+	m_texturePool[id] = std::make_unique<D3D11Texture>(m_d3dDevice.Get(), m_d3dContext.Get(), id, filePath);
+
+	return id;
 }
 

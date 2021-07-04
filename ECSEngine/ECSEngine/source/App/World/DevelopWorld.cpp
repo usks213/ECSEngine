@@ -21,6 +21,8 @@
 
 #include <Engine/Utility/Input.h>
 #include <Engine/Renderer/Base/Geometry.h>
+#include <Engine/Renderer/D3D11/D3D11Utility.h>
+
 
 
 using namespace ecs;
@@ -139,6 +141,13 @@ void DevelopWorld::Start()
 	Material* mat = renderer->getMaterial(matID);
 	mat->m_rasterizeState = ERasterizeState::CULL_NONE;
 
+	// テクスチャの読み込み
+	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
+	renderer->setTexture(D3D::SHADER_TEX_SLOT_MAIN, texID, EShaderStage::PS);
+
+	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
+	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, EShaderStage::PS);
+
 	// 頂点座標の設定
 	VERTEX_3D pVtx[4];
 	// 頂点座標の設定
@@ -167,7 +176,7 @@ void DevelopWorld::Start()
 	auto* pMesh = renderer->getMesh(meshID);
 
 	// スフィア
-	Geometry::Sphere(*pMesh, 23, 1.0f, 1.0f);
+	Geometry::Sphere(*pMesh, 23, 1.0f, 1.0f / 10);
 	//Geometry::Cube(*pMesh);
 
 	//pMesh->m_vertexCount = 4;

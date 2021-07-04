@@ -53,17 +53,19 @@ public:
 
 	void setD3DTransformBuffer(const Matrix& mtxWorld);
 
+public:
+	void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) override;
+
 	/// @brief 描画
 	/// @param materialID マテリアルID
 	/// @param meshID メッシュID
 	void render(const MaterialID& materialID, const MeshID& meshID) override;
 
-public:
 	ShaderID createShader(ShaderDesc desc) override;
 	MaterialID createMaterial(std::string name, ShaderID shaderID) override;
 	MeshID createMesh(std::string name) override;
 	RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) override;
-	TextureID createTexture() override;
+	TextureID createTextureFromFile(std::string filePath) override;
 
 private:
 	/// @brief デバイスの生成

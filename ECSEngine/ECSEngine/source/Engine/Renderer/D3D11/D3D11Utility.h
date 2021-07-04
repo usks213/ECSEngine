@@ -66,9 +66,9 @@ namespace D3D {
 	// マテリアル定数バッファ
 	struct MaterialBuffer
 	{
-		Vector4		_Color = Vector4(1,1,0,1);
+		Vector4		_Color = Vector4(1,1,1,1);
 		Matrix		_mTex;
-		UINT		_Flg = (UINT)Material_Flg::LIGHT;
+		UINT		_Flg = (UINT)Material_Flg::ALL;
 		Vector3		_Dummy;
 	};
 }

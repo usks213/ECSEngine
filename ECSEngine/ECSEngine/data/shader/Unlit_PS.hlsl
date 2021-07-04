@@ -11,9 +11,12 @@ struct VS_OUTPUT
 
 float4 PS(VS_OUTPUT input) : SV_Target0
 {
-	float4 Color = lerp(_Color, _Color * 
-	_MainTexture.Sample(_MainSampler, input.TexCoord), _Flg & TEXTURE_FLG);
-
+	float4 Color = _Color;
+	
+	if (_Flg & TEXTURE_FLG)
+	{
+		Color *= _MainTexture.Sample(_MainSampler, input.TexCoord);
+	}
 	
 	return Color;
 }

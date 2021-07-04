@@ -38,9 +38,13 @@ public:
 public:
 	/// @brief マテリアル指定
 	/// @param materialID マテリアルID
-	void setMaterial(const MaterialID& materialID);
+	void setMaterial(const MaterialID& materialID) {}
 
-	//
+	/// @brief テクスチャ指定
+	/// @param slot スロット
+	/// @param textureID テクスチャID
+	/// @param stage シェーダーステージ
+	virtual void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) = 0;
 
 
 	/// @brief 描画
@@ -53,7 +57,7 @@ public:
 	virtual MaterialID createMaterial(std::string name, ShaderID id) = 0;
 	virtual MeshID createMesh(std::string name) = 0;
 	virtual RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) = 0;
-	virtual TextureID createTexture() = 0;
+	virtual TextureID createTextureFromFile(std::string filePath) = 0;
 
 	Shader*	getShader(ShaderID id);
 	Material* getMaterial(MaterialID id);

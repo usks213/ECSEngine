@@ -86,8 +86,8 @@ void RenderingSystem::onUpdate()
 
 	// ディレクショナルライト
 	DirectionalLightData dirLit;
-	dirLit.ambient = Vector4(0.1f, 0.1f, 0.1f, 0.1f);
-	dirLit.diffuse = Vector4(2.0f, 1.0f, 1.0f, 1.0f);
+	dirLit.ambient = Vector4(0.2f, 0.2f, 0.2f, 0.2f);
+	dirLit.diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	dirLit.specular = Vector4(0.1f, 0.1f, 0.1f, 0.2f);
 	dirLit.direction = Vector4(1.f, -1.5f, 1.f, 0.0f);
 

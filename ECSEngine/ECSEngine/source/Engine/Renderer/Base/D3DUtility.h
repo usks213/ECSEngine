@@ -28,12 +28,12 @@ using Microsoft::WRL::ComPtr;
 
 
 #define CHECK_FAILED(hr)													\
-	if (FAILED(hr)) {														\
-		static char szResult[256];                                          \
-		_com_error  err(hr);                                                \
-		LPCTSTR     errMsg = err.ErrorMessage();							\
-        sprintf_s(szResult, sizeof(szResult), "[ERROR] HRESULT: %s",errMsg);\
-		MessageBox(nullptr, szResult, "Err", MB_ICONSTOP);					\
-		throw std::exception(szResult);     								\
-	}
+    if (FAILED(hr)) {                                                                                                                 \
+        static char szResult[256];                                                                                                    \
+        _com_error  err(hr);                                                                                                          \
+        LPCTSTR     errMsg = err.ErrorMessage();                                                                                      \
+        sprintf_s(szResult, sizeof(szResult), "[ERROR] HRESULT: %08X %s#L%d\n%s", static_cast<UINT>(hr), __FILE__, __LINE__, errMsg); \
+        MessageBox(nullptr, szResult, "ERROR", MB_OK | MB_ICONERROR);                                                                 \
+        throw std::exception(szResult);                                                                                               \
+    }
 
