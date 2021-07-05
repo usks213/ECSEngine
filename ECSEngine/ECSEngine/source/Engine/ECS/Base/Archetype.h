@@ -125,9 +125,9 @@ namespace ecs {
 		/// @param typeHash 型のハッシュ値
 		/// @param typeSize 型のメモリサイズ
 		/// @return 自身の参照
-		constexpr Archetype& addType(const std::size_t typeHash, const std::size_t typeSize)
+		constexpr Archetype& addType(const std::size_t typeHash, const std::size_t typeSize, std::string_view typeName)
 		{
-			const auto newType = TypeInfo::create(typeHash, typeSize);
+			const auto newType = TypeInfo::create(typeHash, typeSize, typeName);
 			m_ArchetypeMemorySize += typeSize;
 
 			// ソート挿入

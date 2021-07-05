@@ -31,6 +31,10 @@ public:												   \
 	void _dumyFunction() = delete
 
 
+/// @brief 型名の最大文字数
+constexpr int MAX_TYPE_NAME = 256;
+
+
 namespace type
 {
 	/// @brief getTypeHashを持っているか (メタ)
@@ -72,14 +76,14 @@ class TypeInfo
 	/// @brief プライベートコンストラクタ
 	/// @param typeHash 型のハッシュ値
 	/// @param size		型のメモリサイズ
-	constexpr explicit TypeInfo(const std::size_t typeHash, const std::size_t size)
-		: m_typeHash(typeHash), m_typeSize(size)
+	constexpr explicit TypeInfo(const std::size_t hash, const std::size_t size, std::string_view name)
+		: m_typeHash(hash), m_typeSize(size),m_typeName(name)
 	{
 	}
 
 public:
 	/// @brief デフォルトコンストラクタ
-	constexpr TypeInfo() :m_typeHash(-1), m_typeSize(0) {}
+	constexpr TypeInfo() :m_typeHash(-1), m_typeSize(0), m_typeName("default") {}
 
 	/// @brief 型一致比較
 	/// @param other 他の型情報
@@ -109,22 +113,28 @@ public:
 		return m_typeSize;
 	}
 
+	/// @brief  型の名前
+	[[nodiscard]] constexpr std::string_view getName() const
+	{
+		return m_typeName;
+	}
+
 	/// @brief テンプレートで新しい型情報生成
 	/// @tparam T getTypeHash()を保持している型
 	/// @return 新しい型情報
 	template<class T, typename = std::enable_if_t<type::has_get_type_hash<T>>>
 	static constexpr TypeInfo create()
 	{
-		return TypeInfo(T::getTypeHash(), sizeof(T));
+		return TypeInfo(T::getTypeHash(), sizeof(T), T::getTypeName());
 	}
 
 	/// @brief 既存のハッシュ値とサイズから型情報を生成
 	/// @param hash 型のハッシュ値
 	/// @param size 型のメモリサイズ
 	/// @return 型情報
-	static constexpr TypeInfo create(const std::size_t hash, const std::size_t size)
+	static constexpr TypeInfo create(const std::size_t hash, const std::size_t size, std::string_view name)
 	{
-		return TypeInfo(hash, size);
+		return TypeInfo(hash, size, name);
 	}
 
 private:
@@ -132,4 +142,6 @@ private:
 	std::size_t m_typeHash;
 	/// @brief  型のメモリサイズ
 	std::size_t m_typeSize;
+	/// @brief 型名
+	std::string_view m_typeName;
 };

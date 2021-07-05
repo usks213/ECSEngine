@@ -182,7 +182,7 @@ Chunk Chunk::readBinaryStream(BinaryStream& input)
 		std::size_t typeHash, typeSize;
 		input.read(&typeHash);
 		input.read(&typeSize);
-		result.m_Archetype.addType(typeHash, typeSize);
+		result.m_Archetype.addType(typeHash, typeSize, "read");
 	}
 
 	// コンポーネントデータの読み込み
