@@ -22,15 +22,12 @@ namespace ecs {
 	{
 		friend class WorldManager;
 		friend class EntityManager;
+		friend class SystemBase;
 	public:
 		/// @brief コンストラクタ
 		World(WorldManager* pWorldManager);
 		/// @brief デストラクタ
 		virtual ~World();
-
-		/// @brief エンティティマネージャーの取得
-		/// @return エンティティマネージャー
-		[[nodiscard]] EntityManager* getEntityManager() const;
 
 		/// @brief スタート
 		virtual void Start() = 0;
@@ -62,8 +59,22 @@ namespace ecs {
 		/// @param output 読み込み先のストリーム
 		void readBinaryStream(BinaryStream& input);
 
+	public:
+		/// @brief エンティティマネージャーの取得
+		/// @return エンティティマネージャー
+		[[nodiscard]] EntityManager* getEntityManager() const;
+
 		/// @brief ワールドマネージャー取得
-		WorldManager* getWorldManager() { return m_pWorldManager; }
+		/// @return ワールドマネージャー
+		[[nodiscard]] WorldManager* getWorldManager() const { return m_pWorldManager; }
+
+		/// @brief チャンクリストの取得
+		/// @return チャンクリスト
+		std::vector<Chunk>& getChunkList() { return m_ChunkList; }
+
+		/// @brief システムシステムの取得
+		/// @return システムリスト
+		std::vector<std::unique_ptr<SystemBase>>& getSystemList() { return m_SystemList; }
 
 	private:
 

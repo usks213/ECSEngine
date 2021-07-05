@@ -18,6 +18,7 @@
 
 #include <Engine/ECS/System/TransformSystem.h>
 #include <Engine/ECS/System/RenderingSystem.h>
+#include <Engine/ECS/System/ImguiSystem.h>
 
 #include <Engine/Utility/Input.h>
 #include <Engine/Renderer/Base/Geometry.h>
@@ -223,6 +224,7 @@ void DevelopWorld::Start()
 	getEntityManager()->setComponentData(entity, cameraData);
 
 	// ƒVƒXƒeƒ€‚Ì’Ç‰Á
+	addSystem<ImguiSystem>();
 	addSystem<ControllSystem>();
 	addSystem<RotationSystem>();
 	addSystem<TransformSystem>();

@@ -158,6 +158,9 @@
     <ClCompile Include="lib\imgui\imgui_widgets.cpp">
       <Filter>ライブラリ\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\ImguiSystem.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -318,6 +321,9 @@
     </ClInclude>
     <ClInclude Include="lib\imgui\imstb_truetype.h">
       <Filter>ライブラリ\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\ImguiSystem.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
