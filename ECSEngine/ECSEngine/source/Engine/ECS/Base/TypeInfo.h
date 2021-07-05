@@ -31,6 +31,9 @@ public:												   \
 	void _dumyFunction() = delete
 
 
+/// @brief 型を文字列に変換
+#define TypeToString(Type) #Type
+
 /// @brief 型名の最大文字数
 constexpr int MAX_TYPE_NAME = 256;
 
@@ -77,13 +80,16 @@ class TypeInfo
 	/// @param typeHash 型のハッシュ値
 	/// @param size		型のメモリサイズ
 	constexpr explicit TypeInfo(const std::size_t hash, const std::size_t size, std::string_view name)
-		: m_typeHash(hash), m_typeSize(size),m_typeName(name)
+		: m_typeHash(hash), m_typeSize(size), m_typeName()
 	{
+		for (int i = 0; name.data()[i] != '\0'; ++i) {
+			m_typeName[i] = name.data()[i];
+		}
 	}
 
 public:
 	/// @brief デフォルトコンストラクタ
-	constexpr TypeInfo() :m_typeHash(-1), m_typeSize(0), m_typeName("default") {}
+	constexpr TypeInfo() :m_typeHash(-1), m_typeSize(0), m_typeName() {}
 
 	/// @brief 型一致比較
 	/// @param other 他の型情報
@@ -143,5 +149,5 @@ private:
 	/// @brief  型のメモリサイズ
 	std::size_t m_typeSize;
 	/// @brief 型名
-	std::string_view m_typeName;
+	char m_typeName[MAX_TYPE_NAME];
 };

@@ -11,6 +11,7 @@
 
 #include <Engine/ECS/Base/WorldManager.h>
 #include <Engine/ECS/Base/EntityManager.h>
+#include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/RenderingComponentData.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
@@ -167,13 +168,14 @@ void DevelopWorld::Start()
 	auto rdskyID = renderer->createRenderBuffer(shaderUnlitID, meshSky);
 
 	// アーキタイプ
-	Archetype archetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, RenderData>();
+	Archetype archetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, RenderData, Name>();
 
 	// 初期化データ
 	Position pos;
 	Scale scale;
 	Rotation rot;
 	RenderData rd;
+	Name name;
 	rd.materialID = matLitID;
 	rd.meshID = meshID;
 	RenderData rdSky;
@@ -183,17 +185,21 @@ void DevelopWorld::Start()
 	// スカイドーム
 	scale.value = Vector3(500, 500, 500);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	std::strcpy(name.value, "SkyDome");
 
 	auto plane = getEntityManager()->createEntity(archetype);
 	getEntityManager()->setComponentData<Position>(plane, pos);
 	getEntityManager()->setComponentData<Scale>(plane, scale);
 	getEntityManager()->setComponentData<Rotation>(plane, rot);
 	getEntityManager()->setComponentData(plane, rdSky);
+	getEntityManager()->setComponentData(plane, name);
 
 	scale.value = Vector3(1, 1, 1);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	pos.value.y = 0;
 	archetype.addType<ObjectTag>();
+	std::strcpy(name.value, "Sphere");
+
 	// オブジェクトの生成
 	for (int i = 0; i < 10; ++i)
 	{
@@ -204,10 +210,11 @@ void DevelopWorld::Start()
 		getEntityManager()->setComponentData<Scale>(entity, scale);
 		getEntityManager()->setComponentData<Rotation>(entity, rot);
 		getEntityManager()->setComponentData(entity, rd);
+		getEntityManager()->setComponentData(entity, name);
 	}
 
 	// カメラ生成
-	Archetype cameraArchetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, Camera, InputTag>();
+	Archetype cameraArchetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, Camera, InputTag, Name>();
 
 	auto entity = getEntityManager()->createEntity(cameraArchetype);
 	Camera cameraData;
@@ -218,10 +225,13 @@ void DevelopWorld::Start()
 	pos.value.x = 0;
 	pos.value.z = 5;
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	std::strcpy(name.value, "Camera");
+
 	getEntityManager()->setComponentData<Position>(entity, pos);
 	getEntityManager()->setComponentData<Scale>(entity, scale);
 	getEntityManager()->setComponentData<Rotation>(entity, rot);
 	getEntityManager()->setComponentData(entity, cameraData);
+	getEntityManager()->setComponentData(entity, name);
 
 	// システムの追加
 	addSystem<ImguiSystem>();

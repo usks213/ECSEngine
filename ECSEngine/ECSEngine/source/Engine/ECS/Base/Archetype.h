@@ -181,6 +181,21 @@ namespace ecs {
 			return result;
 		}
 
+		/// @brief 指定した型名までのメモリサイズを取得
+		/// @param typeName IComponentData型の名前
+		/// @return Indexまでのバイト数
+		[[nodiscard]] constexpr std::size_t getOffset(std::string_view typeName) const
+		{
+			std::size_t result = 0;
+			for (auto i = 0; i < m_ArchetypeSize; ++i)
+			{
+				if (m_TypeDataList[i].getName() == typeName)
+					return result;
+				result += m_TypeDataList[i].getSize();
+			}
+			return result;
+		}
+
 		/// @brief 指定したインデックスまでのメモリサイズを取得
 		/// @param index N番号
 		/// @return インデックスまでのバイト数
@@ -213,6 +228,20 @@ namespace ecs {
 		[[nodiscard]] constexpr std::size_t getSize(const std::size_t index) const
 		{
 			return m_TypeDataList[index].getSize();
+		}
+
+		/// @brief 指定した型名のメモリサイズを取得
+		/// @param typeName 型名
+		/// @return 型のサイズ
+		[[nodiscard]] constexpr std::size_t getSize(std::string_view typeName) const
+		{
+			std::size_t result = 0;
+			for (auto i = 0; i < m_ArchetypeSize; ++i)
+			{
+				if (m_TypeDataList[i].getName() == typeName)
+					return m_TypeDataList[i].getSize();
+			}
+			return result;
 		}
 
 		/// @brief 指定値のTypeInfoを取得する

@@ -325,6 +325,9 @@
     <ClInclude Include="source\Engine\ECS\System\ImguiSystem.h">
       <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\BasicComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">

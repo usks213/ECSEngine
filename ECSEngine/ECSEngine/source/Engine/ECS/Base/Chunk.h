@@ -117,6 +117,16 @@ namespace ecs {
 			return ComponentArray<T>(reinterpret_cast<TType*>(m_pBegin.get() + offset), m_Size);
 		}
 
+		/// @brief 指定した型名のデータを取得
+		/// @param typeName 型名
+		/// @param index インデックス
+		/// @return 汎用ポインタ
+		void* getComponentData(std::string_view typeName, std::uint32_t index)
+		{
+			auto offset = m_Archetype.getOffset(typeName) * m_Capacity;
+			return m_pBegin.get() + offset + m_Archetype.getSize(typeName) * index;
+		}
+
 		/// @brief Archetypeを取得
 		/// @return archetype
 		[[nodiscard]] const Archetype& getArchetype() const

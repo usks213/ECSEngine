@@ -220,6 +220,7 @@
     <ClInclude Include="source\Engine\ECS\Base\TypeInfo.h" />
     <ClInclude Include="source\Engine\ECS\Base\World.h" />
     <ClInclude Include="source\Engine\ECS\Base\WorldManager.h" />
+    <ClInclude Include="source\Engine\ECS\ComponentData\BasicComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\CameraComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\ComponentTag.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\RenderingComponentData.h" />

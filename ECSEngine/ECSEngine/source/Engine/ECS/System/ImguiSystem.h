@@ -30,6 +30,9 @@ namespace ecs {
 		void onUpdate() override;
 
 	private:
-
+		/// @brief GUI表示・入力
+		/// @param typeName 型名
+		/// @param data データ
+		void DispGui(std::string_view typeName, void* data);
 	};
 }
