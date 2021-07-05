@@ -155,6 +155,8 @@ public:
 		std::string name;	// 変数名
 		std::size_t size;	// 型サイズ
 		std::size_t offset;	// 変数オフセット
+		std::uint8_t stage;	// ステージ
+		std::uint8_t slot;	// スロット
 	};
 	/// @brief CBufferの構造体レイアウト情報
 	struct CBufferLayout

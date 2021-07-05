@@ -49,6 +49,8 @@ public:
 
 	void setD3D11Sampler(std::uint32_t slot, ESamplerState state, EShaderStage stage);
 
+	void setD3D11PrimitiveTopology(EPrimitiveTopology topology);
+
 	void setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer);
 
 	void setD3DTransformBuffer(const Matrix& mtxWorld);
@@ -77,6 +79,8 @@ private:
 	/// @brief 共通ステートの生成
 	/// @return HRESULT
 	HRESULT createCommonState();
+
+	void imguiDebug();
 
 public:
 	ComPtr<ID3D11Device1>				m_d3dDevice;			// デバイス

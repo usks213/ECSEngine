@@ -57,6 +57,12 @@
     <Filter Include="ライブラリ">
       <UniqueIdentifier>{72d042b8-c9eb-4580-88fb-fdeb43bd3185}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ライブラリ\DirectXTex">
+      <UniqueIdentifier>{4b88fa90-d6f3-4811-8462-c0e01ae9ddf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ライブラリ\imgui">
+      <UniqueIdentifier>{5bceab48-b549-4c98-81b0-9f26ac2d6f59}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\App\main.cpp">
@@ -126,10 +132,31 @@
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClCompile>
     <ClCompile Include="lib\DDSTextureLoader\DDSTextureLoader11.cpp">
-      <Filter>ライブラリ</Filter>
+      <Filter>ライブラリ\DirectXTex</Filter>
     </ClCompile>
     <ClCompile Include="lib\WICTextureLoader\WICTextureLoader11.cpp">
-      <Filter>ライブラリ</Filter>
+      <Filter>ライブラリ\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui.cpp">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_demo.cpp">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_draw.cpp">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_impl_dx11.cpp">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_impl_win32.cpp">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_tables.cpp">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\imgui_widgets.cpp">
+      <Filter>ライブラリ\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -259,14 +286,38 @@
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Texture.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClInclude>
-    <ClInclude Include="lib\DirectXTex\DirectXTex.h">
-      <Filter>ライブラリ</Filter>
+    <ClInclude Include="lib\WICTextureLoader\WICTextureLoader11.h">
+      <Filter>ライブラリ\DirectXTex</Filter>
     </ClInclude>
     <ClInclude Include="lib\DDSTextureLoader\DDSTextureLoader11.h">
-      <Filter>ライブラリ</Filter>
+      <Filter>ライブラリ\DirectXTex</Filter>
     </ClInclude>
-    <ClInclude Include="lib\WICTextureLoader\WICTextureLoader11.h">
-      <Filter>ライブラリ</Filter>
+    <ClInclude Include="lib\DirectXTex\DirectXTex.h">
+      <Filter>ライブラリ\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imconfig.h">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui.h">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_impl_dx11.h">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_impl_win32.h">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imgui_internal.h">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imstb_rectpack.h">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imstb_textedit.h">
+      <Filter>ライブラリ\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\imstb_truetype.h">
+      <Filter>ライブラリ\imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -316,7 +367,7 @@
       <Filter>リソース ファイル\Shader</Filter>
     </None>
     <None Include="lib\DirectXTex\DirectXTex.inl">
-      <Filter>ライブラリ</Filter>
+      <Filter>ライブラリ\DirectXTex</Filter>
     </None>
   </ItemGroup>
 </Project>

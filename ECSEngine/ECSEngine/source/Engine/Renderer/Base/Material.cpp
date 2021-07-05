@@ -51,6 +51,9 @@ Material::Material(const MaterialID& id, const std::string& name, const Shader& 
 				{
 					std::memset(cbData.data.get() + var.offset, 0, var.size);
 				}
+
+				// CBuffer変数データ
+				m_cbufferVariable.emplace(var.name, var);
 			}
 		}
 
@@ -89,6 +92,41 @@ void Material::setData(const char* name, const void* data)
 					cbData.isUpdate = true;
 					bBreak = true;
 					break;
+				}
+			}
+			if (bBreak) break;
+		}
+	}
+}
+
+/// @brief データ取得
+void* Material::getData(const char* name)
+{
+	for (const auto& var : m_cbufferVariable)
+	{
+		if (var.second.name == name)
+		{
+			return m_cbufferData[var.second.stage][var.second.slot].data.get() + var.second.offset;
+		}
+	}
+
+	return nullptr;
+
+	// 検索
+	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	{
+		auto stageIndex = static_cast<size_t>(stage);
+		for (const auto& cbLayout : m_pShader->m_cbufferLayouts[stageIndex])
+		{
+			bool bBreak = false;
+			// 変数データ
+			for (const auto& var : cbLayout.second.variables)
+			{
+				// 一致した
+				if (var.name == name)
+				{
+					auto& cbData = m_cbufferData[stageIndex][cbLayout.first];
+					return cbData.data.get() + var.offset;
 				}
 			}
 			if (bBreak) break;

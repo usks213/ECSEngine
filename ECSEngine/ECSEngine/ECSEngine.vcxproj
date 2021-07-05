@@ -164,6 +164,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="lib\DDSTextureLoader\DDSTextureLoader11.cpp" />
+    <ClCompile Include="lib\imgui\imgui.cpp" />
+    <ClCompile Include="lib\imgui\imgui_demo.cpp" />
+    <ClCompile Include="lib\imgui\imgui_draw.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="lib\imgui\imgui_tables.cpp" />
+    <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="lib\WICTextureLoader\WICTextureLoader11.cpp" />
     <ClCompile Include="source\App\main.cpp" />
     <ClCompile Include="source\App\World\DevelopWorld.cpp" />
@@ -191,6 +198,14 @@
   <ItemGroup>
     <ClInclude Include="lib\DDSTextureLoader\DDSTextureLoader11.h" />
     <ClInclude Include="lib\DirectXTex\DirectXTex.h" />
+    <ClInclude Include="lib\imgui\imconfig.h" />
+    <ClInclude Include="lib\imgui\imgui.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="lib\imgui\imgui_internal.h" />
+    <ClInclude Include="lib\imgui\imstb_rectpack.h" />
+    <ClInclude Include="lib\imgui\imstb_textedit.h" />
+    <ClInclude Include="lib\imgui\imstb_truetype.h" />
     <ClInclude Include="lib\WICTextureLoader\WICTextureLoader11.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\App\World\DevelopWorld.h" />

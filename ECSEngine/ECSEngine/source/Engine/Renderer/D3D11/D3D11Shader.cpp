@@ -226,12 +226,16 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 
 			// 共通の定数バッファは飛ばす??
 			std::string cbName = shaderBufferDesc.Name;
-			if (cbName == D3D::SHADER_CB_NAME_SYSTEM		||
-				cbName == D3D::SHADER_CB_NAME_TRANSFORM		||
-				cbName == D3D::SHADER_CB_NAME_MATERIAL) continue;
+			if (cbName == D3D::SHADER_CB_NAME_SYSTEM ||
+				cbName == D3D::SHADER_CB_NAME_TRANSFORM ||
+				cbName == D3D::SHADER_CB_NAME_MATERIAL)
+			{
+				++slotOffset;
+				continue;
+			}
 
 			// レイアウト生成
-			CBufferLayout cbLayout(cbIdx, shaderBufferDesc.Name, shaderBufferDesc.Size);
+			CBufferLayout cbLayout(cbIdx - slotOffset, shaderBufferDesc.Name, shaderBufferDesc.Size);
 			cbLayout.variables.resize(shaderBufferDesc.Variables);
 
 			// CB変数のレイアウト作成
@@ -245,6 +249,8 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 				cbLayout.variables[v].name = varDesc.Name;
 				cbLayout.variables[v].size = varDesc.Size;
 				cbLayout.variables[v].offset = varDesc.StartOffset;
+				cbLayout.variables[v].stage = stageIndex;
+				cbLayout.variables[v].slot = cbIdx - slotOffset;
 				// デフォルト値がある場合
 				if (varDesc.DefaultValue != nullptr)
 				{
@@ -255,7 +261,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 				}
 			}
 			// コンスタントバッファレイアウト格納
-			m_cbufferLayouts[stageIndex].emplace(cbIdx, cbLayout);
+			m_cbufferLayouts[stageIndex].emplace(cbIdx - slotOffset, cbLayout);
 		}
 
 

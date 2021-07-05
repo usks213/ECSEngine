@@ -13,15 +13,23 @@ struct VS_OUTPUT
 	float3 WorldPos : POSITION;
 };
 
+// PBRÉpÉâÉÅÅ[É^
+cbuffer PBRParam : register(b0)
+{
+	float _metallic;
+	float _roughness;
+	float2 _Dumey;
+}
+
 
 float4 PS(VS_OUTPUT input) : SV_Target0
 {
 	float4 Color = _Color;
 	
-	//if (_Flg & TEXTURE_FLG)
-	//{
-	//	Color *= _MainTexture.Sample(_MainSampler, input.TexCoord);
-	//}
+	if (_Flg & TEXTURE_FLG)
+	{
+		Color *= _MainTexture.Sample(_MainSampler, input.TexCoord);
+	}
 	
 	if (_Flg & LIGHT_FLG)
 	{
@@ -34,9 +42,6 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 		float3 tangent = normalize(cross(N, float3(1,1,1)));
 		float3 bitangent = normalize(cross(N, tangent));
 		tangent = normalize(cross(bitangent, N));
-		
-		float roughness = 0.5f;
-		float metallic = 1.0f;
 		
 		// ägéUîΩéÀBRDF
 		//float3 dif = NormalizedDisneyDiffuse(Color.rgb, N, L, V, roughness);
@@ -60,7 +65,7 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 		
 		//Color.rgb = PBR(L, N, V, _directionalLit.diffuse.rgb, Color.rgb, metallic, roughness,_SkyTexture, _SkySampler);
 		//Color.rgb = _SkyTexture.Sample(_SkySampler, SkyMapEquirect(reflect(V,N))).rgb;
-		Color.rgb = shade(Color.rgb, metallic, roughness, N, V, L, 
+		Color.rgb = shade(Color.rgb, _metallic, _roughness, N, V, L, 
 		_directionalLit.diffuse.rgb, _directionalLit.ambient.rgb, _SkyTexture, _SkySampler);
 	}
 	

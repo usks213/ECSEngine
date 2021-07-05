@@ -10,6 +10,8 @@
 #include <Engine/Utility/Mathf.h>
 #include <vector>
 #include <string>
+#include "CommonState.h"
+
 
 /// @brief ÉÅÉbÉVÉÖID
 using MeshID = std::uint32_t;
@@ -24,7 +26,8 @@ public:
 		m_name(name),
 		m_id(id),
 		m_vertexCount(0),
-		m_indexCount(0)
+		m_indexCount(0),
+		m_topology(EPrimitiveTopology::TRIANGLE_STRIP)
 	{}
 
 public:
@@ -49,4 +52,6 @@ public:
 	std::uint32_t				m_indexCount;
 	std::vector<std::uint32_t>  m_indexData;
 	AABB						m_aabb;
+
+	EPrimitiveTopology			m_topology;
 };

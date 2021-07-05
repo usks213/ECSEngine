@@ -69,6 +69,9 @@ public:
 	std::array<std::unordered_map<std::uint32_t, ESamplerState>,
 		static_cast<size_t>(EShaderStage::MAX)>	m_samplerData;
 
+	/// @brief CBuffer変数データ
+	std::unordered_map<std::string, Shader::CBufferVariable> m_cbufferVariable;
+
 public:
     /// @brief float設定
 	void setFloat(const char* name, const float& data) { setData(name, &data); }
@@ -99,6 +102,9 @@ public:
 
     /// @brief サンプラ取得
     ESamplerState getSampler(const char* name);
+
+	/// @brief データ取得
+	void* getData(const char* name);
 
 protected:
 	/// @brief データ設定

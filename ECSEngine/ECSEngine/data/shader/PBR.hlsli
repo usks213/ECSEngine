@@ -150,6 +150,7 @@ float3 LitDif, float3 LitAmb, Texture2D AmbiTex, SamplerState AmbiSampler)
 	float3 kd = lerp3(float3(1.0f, 1.0f, 1.0f) - F, float3(0.0f, 0.0f, 0.0f), metalness);
 
 	float3 diffuseBRDF = kd * albedo / _PI;
+	// CookTorrance
 	float3 specularBRDF = (F * D * G) / max(0.0001f, 4.0f * NdotL * NdotV);
 
 	float3 direct = (diffuseBRDF + specularBRDF) * LitDif * NdotL;

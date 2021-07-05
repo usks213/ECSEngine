@@ -19,6 +19,13 @@
 #include "D3D11RenderBuffer.h"
 #include "D3D11Texture.h"
 
+//#ifdef _DEBUG
+//#include "ImGuiUtils.h"
+//#include "ImGuizmo.h"
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
+//#endif
 
 // ライブラリリンク
 #pragma comment(lib, "D3D11.lib")
@@ -60,6 +67,20 @@ namespace {
 		&ID3D11DeviceContext1::HSSetSamplers,
 		&ID3D11DeviceContext1::PSSetSamplers,
 		&ID3D11DeviceContext1::CSSetSamplers, };
+
+	D3D11_PRIMITIVE_TOPOLOGY getD3D11PrimitiveTopology(EPrimitiveTopology topology) {
+		static D3D11_PRIMITIVE_TOPOLOGY d3dTopologies[static_cast<size_t>(EPrimitiveTopology::MAX)] = {
+			D3D_PRIMITIVE_TOPOLOGY_UNDEFINED,
+			D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+			D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
+			D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
+			D3D_PRIMITIVE_TOPOLOGY_LINELIST,
+			D3D_PRIMITIVE_TOPOLOGY_LINESTRIP,
+			D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST
+		};
+
+		return d3dTopologies[static_cast<size_t>(topology)];
+	}
 }
 
 
@@ -134,6 +155,9 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 
 
 	//--- imgui
+	ImGui::CreateContext();
+	ImGui_ImplWin32_Init(hWnd);
+	ImGui_ImplDX11_Init(m_d3dDevice.Get(), m_d3dContext.Get());
 
 	
 	return S_OK;
@@ -143,7 +167,9 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 void D3D11RendererManager::finalize()
 {
 	//--- imgui
-
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 
 }
 
@@ -151,7 +177,12 @@ void D3D11RendererManager::finalize()
 void D3D11RendererManager::clear()
 {
 	//--- imgui
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
 
+	// debug表示
+	imguiDebug();
 
 	// バッファのクリア
 	m_d3dAnnotation->BeginEvent(L"Clear");
@@ -172,11 +203,49 @@ void D3D11RendererManager::clear()
 void D3D11RendererManager::present()
 {
 	//--- imgui
-
+	ImGui::Render();
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	//m_swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING); // ティアリング許容描画
 	//m_swapChain->Present(0, 0);		// 非垂直同期描画
 	m_swapChain->Present(1, 0);	// 垂直同期描画
+}
+
+/// @brief Imgui表示
+void D3D11RendererManager::imguiDebug()
+{
+	ImGui::Begin("Material");
+
+	// マテリアル
+	for (const auto& mat : m_materialPool)
+	{
+		if (ImGui::TreeNode(mat.second->m_name.c_str())) {
+			auto* d3dMat = static_cast<D3D11Material*>(mat.second.get());
+
+			ImGui::Text("MaterialID:%u", mat.second->m_id);
+			ImGui::SliderFloat4("Color", (float*)&d3dMat->m_materialBuffer._Color, 0.0f, 1.0f);
+			//ImGui::InputText("textbox 1", text1, sizeof(text1));
+
+			for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+			{
+				//--- CBuffer
+				auto stageIndex = static_cast<size_t>(stage);
+				for (const auto& cbLayout : d3dMat->m_pShader->m_cbufferLayouts[stageIndex])
+				{
+					// 変数データ
+					for (const auto& var : cbLayout.second.variables)
+					{
+						float temp = *(float*)mat.second->getData(var.name.c_str());
+						if(ImGui::SliderFloat(var.name.c_str(), &temp, 0.0f, 1.0f))
+							mat.second->setFloat(var.name.c_str(), temp);
+					}
+				}
+			}
+			ImGui::TreePop();
+		}
+	}
+
+	ImGui::End();
 }
 
 /// @brief デバイスの生成
@@ -704,6 +773,14 @@ void D3D11RendererManager::setD3D11Sampler(std::uint32_t slot, ESamplerState sta
 	m_curSamplerState[stageIndex][slot] = state;
 }
 
+void D3D11RendererManager::setD3D11PrimitiveTopology(EPrimitiveTopology topology)
+{
+	if (m_curPrimitiveTopology == topology) return;
+
+	m_d3dContext->IASetPrimitiveTopology(getD3D11PrimitiveTopology(topology));
+	m_curPrimitiveTopology = topology;
+}
+
 void D3D11RendererManager::setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer)
 {
 	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
@@ -754,7 +831,7 @@ void D3D11RendererManager::render(const MaterialID& materialID, const MeshID& me
 	}
 
 	// プリミティブ指定
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	setD3D11PrimitiveTopology(renderBuffer->m_topology);
 
 	// ポリゴンの描画
 	if (renderBuffer->m_indexData.count > 0)

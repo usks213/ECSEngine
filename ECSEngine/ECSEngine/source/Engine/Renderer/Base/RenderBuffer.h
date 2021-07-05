@@ -36,7 +36,8 @@ public:
 		m_shaderID(shader.m_id),
 		m_meshID(mesh.m_id),
 		m_vertexData(shader, mesh.m_vertexCount),
-		m_indexData(mesh.m_indexCount, sizeof(std::uint32_t))
+		m_indexData(mesh.m_indexCount, sizeof(std::uint32_t)),
+		m_topology(mesh.m_topology)
 	{
 		// 頂点データの生成
 		const auto& verData = mesh.m_vertexData;
@@ -80,10 +81,11 @@ public:
 
 
 public:
-	RenderBufferID	m_id;
-	ShaderID		m_shaderID;
-	MeshID			m_meshID;
+	RenderBufferID		m_id;
+	ShaderID			m_shaderID;
+	MeshID				m_meshID;
 
-	VertexData		m_vertexData;
-	IndexData		m_indexData;
+	VertexData			m_vertexData;
+	IndexData			m_indexData;
+	EPrimitiveTopology	m_topology;
 };

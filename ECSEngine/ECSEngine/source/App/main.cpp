@@ -19,6 +19,10 @@
 
 #include <App/World/DevelopWorld.h>
 
+// imgui
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
 
 //-------- ライブラリのリンク
 #pragma comment(lib, "imm32")
@@ -32,7 +36,8 @@
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 // ウィンドウ初期化
 int OnCreate(HWND hWnd, LPCREATESTRUCT lpcs);
-
+// imgui
+IMGUI_IMPL_API LRESULT   ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 /// @brief エントリポイント
@@ -109,8 +114,8 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 /// @return 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	/*if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
-		true;*/
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+		true;
 
 	switch (uMsg) {
 	case WM_CREATE:					//----- ウィンドウが生成された

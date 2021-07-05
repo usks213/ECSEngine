@@ -19,15 +19,15 @@ struct VERTEX_3D
 
 void Geometry::Cube(Mesh& out)
 {
-	const float	SIZE_X = (0.5f); // 立方体のサイズ(X方向)
-	const float	SIZE_Y = (0.5f); // 立方体のサイズ(Y方向)
-	const float	SIZE_Z = (0.5f); // 立方体のサイズ(Z方向)
+	const float	SIZE_X = (-0.5f); // 立方体のサイズ(X方向)
+	const float	SIZE_Y = (-0.5f); // 立方体のサイズ(Y方向)
+	const float	SIZE_Z = (-0.5f); // 立方体のサイズ(Z方向)
 
 	const int CUBE_VERTEX = (24);
 	const int CUBE_INDEX = (36);
 
 	// プリミティブ設定
-	//m_mesh->primitiveType = PT_TRIANGLE;
+	out.m_topology = EPrimitiveTopology::TRIANGLE_LIST;
 
 	VERTEX_3D	vertexWk[CUBE_VERTEX];	// 頂点情報格納ワーク
 	int			indexWk[CUBE_INDEX];	// インデックス格納ワーク
@@ -148,7 +148,7 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 	float nNumBlockY = nSplit;
 
 	// プリミティブ種別設定
-	//m_mesh->primitiveType = PT_TRIANGLESTRIP;
+	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
 	// 頂点数の設定
 	int nNumVertex = (nNumBlockX + 1) * (nNumBlockY + 1);
 	// インデックス数の設定(縮退ポリゴン用を考慮する)
@@ -192,8 +192,8 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 			// 反射光の設定
 			pVtx->diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 			// テクスチャ座標の設定
-			pVtx->tex.x = fTexSize * x;
-			pVtx->tex.y = fTexSize * y;
+			pVtx->tex.x = fTexSize * y;
+			pVtx->tex.y = fTexSize * x;
 			++pVtx;
 		}
 	}
@@ -227,6 +227,92 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 
 	// インデックス
 	out.m_indexCount = nNumIndex;
+	for (int i = 0; i < out.m_indexCount; ++i)
+	{
+		out.m_indexData.push_back(pIndexWk[i]);
+	}
+
+	// 一時配列の解放
+	delete[] pVertexWk;
+	delete[] pIndexWk;
+}
+
+void Geometry::SkyDome(Mesh& out, int nSegment, float fTexSplit)
+{
+	// プリミティブ種別設定
+	out.m_topology = EPrimitiveTopology::TRIANGLE_LIST;
+	float fScale = 0.5f;
+
+	//頂点バッファ作成
+	out.m_vertexCount = (nSegment + 1) * (nSegment / 2 + 1);
+	VERTEX_3D* pVertexWk = new VERTEX_3D[out.m_vertexCount];
+
+	for (int i = 0; i <= (nSegment / 2); ++i) {
+		float irad = XM_PI * 2.0f / (float)nSegment * (float)i;
+		float y = (float)cos(irad);
+		float r = (float)sin(irad);
+		float v = (float)i / (float)(nSegment / 2) * fTexSplit;
+		for (int j = 0; j <= nSegment; ++j) {
+			float jrad = XM_PI * 2.0f / (float)nSegment * (float)j;
+			float x = r * (float)cos(jrad - XM_PI * 0.5f);
+			float z = r * (float)sin(jrad - XM_PI * 0.5f);
+			float u = (float)j / (float)nSegment * fTexSplit;
+			int   inx = i * (nSegment + 1) + j;
+			pVertexWk[inx].vtx.x = x * -fScale;
+			pVertexWk[inx].vtx.y = y * fScale;
+			pVertexWk[inx].vtx.z = z * -fScale;
+			pVertexWk[inx].nor.x = x;
+			pVertexWk[inx].nor.y = y;
+			pVertexWk[inx].nor.z = z;
+			pVertexWk[inx].tex.x = u;
+			pVertexWk[inx].tex.y = v;
+			pVertexWk[inx].diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
+		}
+	}
+
+	// インデックスバッファの作成
+	out.m_indexCount = nSegment * 3 + nSegment * (nSegment / 2 - 1) * 6 + nSegment * 3;
+	int* pIndexWk = new int[out.m_indexCount];
+
+	int icount = 0;
+	int i = 0;
+	for (int j = 0; j < nSegment; ++j) {
+		pIndexWk[icount] = i * (nSegment + 1) + j;
+		pIndexWk[icount + 1] = (i + 1) * (nSegment + 1) + j + 1;
+		pIndexWk[icount + 2] = (i + 1) * (nSegment + 1) + j;
+		icount += 3;
+	}
+	for (i = 1; i < nSegment / 2; ++i) {
+		for (int j = 0; j < nSegment; ++j) {
+			pIndexWk[icount] = i * (nSegment + 1) + j;
+			pIndexWk[icount + 1] = i * (nSegment + 1) + j + 1;
+			pIndexWk[icount + 2] = (i + 1) * (nSegment + 1) + j;
+			icount += 3;
+			pIndexWk[icount] = i * (nSegment + 1) + j + 1;
+			pIndexWk[icount + 1] = (i + 1) * (nSegment + 1) + j + 1;
+			pIndexWk[icount + 2] = (i + 1) * (nSegment + 1) + j;
+			icount += 3;
+		}
+	}
+	i = nSegment / 2;
+	for (int j = 0; j < nSegment; ++j) {
+		pIndexWk[icount] = i * (nSegment + 1) + j;
+		pIndexWk[icount + 1] = (i + 1) * (nSegment + 1) + j + 1;
+		pIndexWk[icount + 2] = (i + 1) * (nSegment + 1) + j;
+		icount += 3;
+	}
+
+	// 頂点バッファ/インデックス バッファ生成
+	// 頂点生成
+	for (int i = 0; i < out.m_vertexCount; ++i)
+	{
+		out.m_vertexData.positions.push_back(pVertexWk[i].vtx);
+		out.m_vertexData.normals.push_back(pVertexWk[i].nor);
+		out.m_vertexData.texcoord0s.push_back(pVertexWk[i].tex);
+		out.m_vertexData.colors.push_back(pVertexWk[i].diffuse);
+	}
+
+	// インデックス
 	for (int i = 0; i < out.m_indexCount; ++i)
 	{
 		out.m_indexData.push_back(pIndexWk[i]);

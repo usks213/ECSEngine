@@ -27,13 +27,6 @@
 
 using namespace ecs;
 
-struct VERTEX_3D
-{
-	Vector3 vtx;		// 頂点座標
-	Vector3 nor;		// 法線ベクトル
-	Vector4 diffuse;	// 拡散反射光
-	Vector2 tex;		// テクスチャ座標
-};
 
 struct MaterialComponentData : public IComponentData
 {
@@ -57,7 +50,7 @@ public:
 	{}
 	void onUpdate() override {
 		foreach<Rotation, ObjectTag>([](Rotation& rot, ObjectTag& tag) {
-			rot.value *= Quaternion::CreateFromYawPitchRoll(0.1f, 0, 0);
+			rot.value *= Quaternion::CreateFromYawPitchRoll(0.01f, 0, 0);
 			//rot.value.x += 0.1f;
 			});
 	}
@@ -134,62 +127,43 @@ void DevelopWorld::Start()
 	ShaderDesc shaderDesc;
 	shaderDesc.m_name = "Lit";
 	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
-	ShaderID shaderID = renderer->createShader(shaderDesc);
+	ShaderID shaderLitID = renderer->createShader(shaderDesc);
+
+	shaderDesc.m_name = "Unlit";
+	ShaderID shaderUnlitID = renderer->createShader(shaderDesc);
 
 	// マテリアルの作成
-	auto matID = renderer->createMaterial("TestMat", shaderID);
-	Material* mat = renderer->getMaterial(matID);
-	mat->m_rasterizeState = ERasterizeState::CULL_NONE;
+	auto matLitID = renderer->createMaterial("Lit", shaderLitID);
+	Material* mat = renderer->getMaterial(matLitID);
+	//mat->m_rasterizeState = ERasterizeState::CULL_FRONT;
+
+	auto matUnlitID = renderer->createMaterial("Unlit", shaderUnlitID);
+	Material* unlit = renderer->getMaterial(matUnlitID);
+	//unlit->m_rasterizeState = ERasterizeState::CULL_FRONT;
+
 
 	// テクスチャの読み込み
 	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
+	//auto texID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(D3D::SHADER_TEX_SLOT_MAIN, texID, EShaderStage::PS);
 
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, EShaderStage::PS);
 
-	// 頂点座標の設定
-	VERTEX_3D pVtx[4];
-	// 頂点座標の設定
-	pVtx[0].vtx = Vector3(-1.0f / 2, -1.0f / 2, 0.0f);
-	pVtx[1].vtx = Vector3(-1.0f / 2, 1.0f / 2, 0.0f);
-	pVtx[2].vtx = Vector3(1.0f / 2, -1.0f / 2, 0.0f);
-	pVtx[3].vtx = Vector3(1.0f / 2, 1.0f / 2, 0.0f);
-	// 法線の設定
-	pVtx[0].nor = Vector3(0.0f, 0.0f, -1.0f);
-	pVtx[1].nor = Vector3(0.0f, 0.0f, -1.0f);
-	pVtx[2].nor = Vector3(0.0f, 0.0f, -1.0f);
-	pVtx[3].nor = Vector3(0.0f, 0.0f, -1.0f);
-	// 反射光の設定
-	pVtx[0].diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	pVtx[1].diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	pVtx[2].diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	pVtx[3].diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	// テクスチャ座標の設定
-	pVtx[0].tex = Vector2(0.0f, 1.0f);
-	pVtx[1].tex = Vector2(0.0f, 0.0f);
-	pVtx[2].tex = Vector2(1.0f, 1.0f);
-	pVtx[3].tex = Vector2(1.0f, 0.0f);
-
 	// メッシュの生成
 	MeshID meshID = renderer->createMesh("TestMesh");
 	auto* pMesh = renderer->getMesh(meshID);
-
-	// スフィア
-	Geometry::Sphere(*pMesh, 23, 1.0f, 1.0f / 10);
+	Geometry::Sphere(*pMesh, 36, 1.0f, 1.0f / 18);
 	//Geometry::Cube(*pMesh);
 
-	//pMesh->m_vertexCount = 4;
-	//for (int i = 0; i < 4; ++i)
-	//{
-	//	pMesh->m_vertexData.positions.push_back(pVtx[i].vtx);
-	//	pMesh->m_vertexData.normals.push_back(pVtx[i].nor);
-	//	pMesh->m_vertexData.texcoord0s.push_back(pVtx[i].tex);
-	//	pMesh->m_vertexData.colors.push_back(pVtx[i].diffuse);
-	//}
+	MeshID meshSky = renderer->createMesh("SkyDome");
+	auto* pSky = renderer->getMesh(meshSky);
+	Geometry::SkyDome(*pSky, 36, 1.0f);
+
 
 	// レンダーバッファの生成
-	auto rdID = renderer->createRenderBuffer(shaderID, meshID);
+	auto rdID = renderer->createRenderBuffer(shaderLitID, meshID);
+	auto rdskyID = renderer->createRenderBuffer(shaderUnlitID, meshSky);
 
 	// アーキタイプ
 	Archetype archetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, RenderData>();
@@ -199,22 +173,25 @@ void DevelopWorld::Start()
 	Scale scale;
 	Rotation rot;
 	RenderData rd;
-	rd.materialID = matID;
+	rd.materialID = matLitID;
 	rd.meshID = meshID;
+	RenderData rdSky;
+	rdSky.materialID = matUnlitID;
+	rdSky.meshID = meshSky;
 
-	// 床
-	scale.value = Vector3(10, 10, 1);
-	rot.value = Quaternion::CreateFromYawPitchRoll(0, -3.141592f / 2, 0);
+	// スカイドーム
+	scale.value = Vector3(500, 500, 500);
+	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 
 	auto plane = getEntityManager()->createEntity(archetype);
 	getEntityManager()->setComponentData<Position>(plane, pos);
 	getEntityManager()->setComponentData<Scale>(plane, scale);
 	getEntityManager()->setComponentData<Rotation>(plane, rot);
-	getEntityManager()->setComponentData(plane, rd);
+	getEntityManager()->setComponentData(plane, rdSky);
 
 	scale.value = Vector3(1, 1, 1);
-	rot.value = Quaternion::CreateFromYawPitchRoll(3.14 / 2, 0, 0);
-	pos.value.y = 5;
+	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	pos.value.y = 0;
 	archetype.addType<ObjectTag>();
 	// オブジェクトの生成
 	for (int i = 0; i < 10; ++i)
@@ -247,7 +224,7 @@ void DevelopWorld::Start()
 
 	// システムの追加
 	addSystem<ControllSystem>();
-	//addSystem<RotationSystem>();
+	addSystem<RotationSystem>();
 	addSystem<TransformSystem>();
 	addSystem<RenderingSystem>();
 }
