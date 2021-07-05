@@ -74,29 +74,40 @@ Material::Material(const MaterialID& id, const std::string& name, const Shader& 
 /// @brief データ設定
 void Material::setData(const char* name, const void* data)
 {
-	// 検索
-	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (const auto& var : m_cbufferVariable)
 	{
-		auto stageIndex = static_cast<size_t>(stage);
-		for (const auto& cbLayout : m_pShader->m_cbufferLayouts[stageIndex])
+		if (var.second.name == name)
 		{
-			bool bBreak = false;
-			// 変数データ
-			for (const auto& var : cbLayout.second.variables)
-			{
-				// 一致した
-				if (var.name == name)
-				{
-					auto& cbData = m_cbufferData[stageIndex][cbLayout.first];
-					std::memcpy(cbData.data.get() + var.offset, data, var.size);
-					cbData.isUpdate = true;
-					bBreak = true;
-					break;
-				}
-			}
-			if (bBreak) break;
+			auto& cbData = m_cbufferData[var.second.stage][var.second.slot];
+			std::memcpy(cbData.data.get() + var.second.offset, data, var.second.size);
+			cbData.isUpdate = true;
+			break;
 		}
 	}
+
+	//// 検索
+	//for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	//{
+	//	auto stageIndex = static_cast<size_t>(stage);
+	//	for (const auto& cbLayout : m_pShader->m_cbufferLayouts[stageIndex])
+	//	{
+	//		bool bBreak = false;
+	//		// 変数データ
+	//		for (const auto& var : cbLayout.second.variables)
+	//		{
+	//			// 一致した
+	//			if (var.name == name)
+	//			{
+	//				auto& cbData = m_cbufferData[stageIndex][cbLayout.first];
+	//				std::memcpy(cbData.data.get() + var.offset, data, var.size);
+	//				cbData.isUpdate = true;
+	//				bBreak = true;
+	//				break;
+	//			}
+	//		}
+	//		if (bBreak) break;
+	//	}
+	//}
 }
 
 /// @brief データ取得
@@ -112,26 +123,26 @@ void* Material::getData(const char* name)
 
 	return nullptr;
 
-	// 検索
-	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
-	{
-		auto stageIndex = static_cast<size_t>(stage);
-		for (const auto& cbLayout : m_pShader->m_cbufferLayouts[stageIndex])
-		{
-			bool bBreak = false;
-			// 変数データ
-			for (const auto& var : cbLayout.second.variables)
-			{
-				// 一致した
-				if (var.name == name)
-				{
-					auto& cbData = m_cbufferData[stageIndex][cbLayout.first];
-					return cbData.data.get() + var.offset;
-				}
-			}
-			if (bBreak) break;
-		}
-	}
+	//// 検索
+	//for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	//{
+	//	auto stageIndex = static_cast<size_t>(stage);
+	//	for (const auto& cbLayout : m_pShader->m_cbufferLayouts[stageIndex])
+	//	{
+	//		bool bBreak = false;
+	//		// 変数データ
+	//		for (const auto& var : cbLayout.second.variables)
+	//		{
+	//			// 一致した
+	//			if (var.name == name)
+	//			{
+	//				auto& cbData = m_cbufferData[stageIndex][cbLayout.first];
+	//				return cbData.data.get() + var.offset;
+	//			}
+	//		}
+	//		if (bBreak) break;
+	//	}
+	//}
 }
 
 /// @brief テクスチャ設定

@@ -221,25 +221,36 @@ void D3D11RendererManager::imguiDebug()
 	{
 		if (ImGui::TreeNode(mat.second->m_name.c_str())) {
 			auto* d3dMat = static_cast<D3D11Material*>(mat.second.get());
-
+			//--- ID
 			ImGui::Text("MaterialID:%u", mat.second->m_id);
+			//--- Flg
+			{
+				// Tex
+				bool temp = d3dMat->m_materialBuffer._Flg & (UINT)D3D::Material_Flg::TEXTURE;
+				if (ImGui::Checkbox("Texture", &temp))
+					d3dMat->m_materialBuffer._Flg ^= (UINT)D3D::Material_Flg::TEXTURE;
+				// Light
+				temp = d3dMat->m_materialBuffer._Flg & (UINT)D3D::Material_Flg::LIGHT;
+				if (ImGui::Checkbox("Lighting", &temp))
+					d3dMat->m_materialBuffer._Flg ^= (UINT)D3D::Material_Flg::LIGHT;
+				// Shadow
+				temp = d3dMat->m_materialBuffer._Flg & (UINT)D3D::Material_Flg::SHADOW;
+				if (ImGui::Checkbox("Shadow", &temp))
+					d3dMat->m_materialBuffer._Flg ^= (UINT)D3D::Material_Flg::SHADOW;
+				// Fog
+				temp = d3dMat->m_materialBuffer._Flg & (UINT)D3D::Material_Flg::FOG;
+				if (ImGui::Checkbox("Fog", &temp))
+					d3dMat->m_materialBuffer._Flg ^= (UINT)D3D::Material_Flg::FOG;
+			}
+			//Color
 			ImGui::SliderFloat4("Color", (float*)&d3dMat->m_materialBuffer._Color, 0.0f, 1.0f);
 			//ImGui::InputText("textbox 1", text1, sizeof(text1));
 
-			for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+			for (const auto& var : mat.second->m_cbufferVariable)
 			{
-				//--- CBuffer
-				auto stageIndex = static_cast<size_t>(stage);
-				for (const auto& cbLayout : d3dMat->m_pShader->m_cbufferLayouts[stageIndex])
-				{
-					// •Ï”ƒf[ƒ^
-					for (const auto& var : cbLayout.second.variables)
-					{
-						float temp = *(float*)mat.second->getData(var.name.c_str());
-						if(ImGui::SliderFloat(var.name.c_str(), &temp, 0.0f, 1.0f))
-							mat.second->setFloat(var.name.c_str(), temp);
-					}
-				}
+				float temp = *(float*)mat.second->getData(var.second.name.c_str());
+				if (ImGui::SliderFloat(var.second.name.c_str(), &temp, 0.0f, 1.0f))
+					mat.second->setFloat(var.second.name.c_str(), temp);
 			}
 			ImGui::TreePop();
 		}
