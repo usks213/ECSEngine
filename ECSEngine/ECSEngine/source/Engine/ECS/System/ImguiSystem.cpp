@@ -37,8 +37,8 @@ void ImguiSystem::onDestroy()
 /// @brief XV
 void ImguiSystem::onUpdate()
 {
-	ImGui::Begin("Entity");
-
+	ImGui::Begin("Entity", 0, ImGuiConfigFlags_DockingEnable);
+	ImGuiConfigFlags_DockingEnable;
 	for (auto* chunk : getEntityManager()->getChunkList<Name>())
 	{
 		auto names = chunk->getComponentArray<Name>();
