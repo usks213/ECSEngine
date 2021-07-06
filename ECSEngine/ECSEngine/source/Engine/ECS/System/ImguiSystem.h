@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Engine/ECS/Base/SystemBase.h>
+#include <Engine/ECS/ComponentData/CameraComponentData.h>
 
 namespace ecs {
 
@@ -34,5 +35,7 @@ namespace ecs {
 		/// @param typeName å^ñº
 		/// @param data ÉfÅ[É^
 		void DispGui(std::string_view typeName, void* data);
+
+		Camera* m_MainCamera;
 	};
 }

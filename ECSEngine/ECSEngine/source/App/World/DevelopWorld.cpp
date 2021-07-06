@@ -59,23 +59,61 @@ public:
 };
 
 class ControllSystem : public ecs::SystemBase {
+private:
+	POINT m_oldMousePos;
 public:
 	explicit ControllSystem(World* pWorld) :
 		SystemBase(pWorld)
-	{}
+	{
+		POINT* mousePos = GetMousePosition();
+		m_oldMousePos = *mousePos;
+	}
 	void onUpdate() override {
 		foreach<Position, Rotation, WorldMatrix, InputTag>
-			([](Position& pos, Rotation& rot, WorldMatrix& mtx, InputTag& tag)
+			([this](Position& pos, Rotation& rot, WorldMatrix& mtx, InputTag& tag)
 				{
+					POINT* mousePos = GetMousePosition();
+					POINT mouseDist = {
+						mousePos->x - m_oldMousePos.x,
+						mousePos->y - m_oldMousePos.y,
+					};
+					float SCREEN_WIDTH = m_pWorld->getWorldManager()->getEngine()->getWindowWidth();
+					float SCREEN_HEIGHT = m_pWorld->getWorldManager()->getEngine()->getWindowHeight();
+
 					// 向き
+					Vector3 vPos = mtx.value.Translation();
 					Vector3 right = mtx.value.Right();
 					Vector3 up = Vector3(0, 1, 0);
 					Vector3 forward = mtx.value.Forward();
+					Vector3 vLook = vPos + forward;
+					float focus = 0.0f;
+					mtx.value.Up(up);
 
 					// 速度
 					float moveSpeed = 1.0f / 60.0f * 5;
 					float rotSpeed = 3.141592f / 60.0f;
 
+					// 左ボタン(カメラ回り込み
+					if (GetKeyPress(VK_RBUTTON))
+					{
+						// 回転量
+						float angleX = 360.f * mouseDist.x / SCREEN_WIDTH * 0.5f;	// 画面一周で360度回転(画面サイズの半分で180度回転)
+						float angleY = 180.f * mouseDist.y / SCREEN_HEIGHT * 0.5f;	// 画面一周で180度回転(画面サイズの半分で90度回転)
+
+						rot.value *= Quaternion::CreateFromAxisAngle(up, XMConvertToRadians(-angleX));
+						rot.value *= Quaternion::CreateFromAxisAngle(right, XMConvertToRadians(-angleY));
+
+						//// 回転量をもとに、各軸の回転行列を計算
+						//DirectX::XMVECTOR rotPos = DirectX::XMVectorSubtract(vPos, vLook);
+						//DirectX::XMMATRIX rotY = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(angleX));
+						//DirectX::XMVECTOR rotAxis = DirectX::XMVector3TransformCoord(right, rotY);
+						//DirectX::XMMATRIX rotX = DirectX::XMMatrixRotationAxis(rotAxis, DirectX::XMConvertToRadians(angleY));
+
+						//// 注視点を原点として回転
+						//rotPos = DirectX::XMVector3TransformCoord(rotPos, rotY);
+						//rotPos = DirectX::XMVector3TransformCoord(rotPos, rotX);
+						//pos.value = DirectX::XMVectorAdd(rotPos, vLook);
+					}
 					// 回転
 					if (GetKeyPress(VK_RIGHT))
 					{
@@ -95,26 +133,30 @@ public:
 					}
 
 					// 移動
-					if (GetKeyPress(VK_SHIFT))
+					if (GetMouseButton(MOUSEBUTTON_R))
 					{
-						moveSpeed *= 2;
+						if (GetKeyPress(VK_SHIFT))
+						{
+							moveSpeed *= 2;
+						}
+						if (GetKeyPress(VK_D))
+						{
+							pos.value += right * moveSpeed;
+						}
+						if (GetKeyPress(VK_A))
+						{
+							pos.value += right * -moveSpeed;
+						}
+						if (GetKeyPress(VK_W))
+						{
+							pos.value += forward * moveSpeed;
+						}
+						if (GetKeyPress(VK_S))
+						{
+							pos.value += forward * -moveSpeed;
+						}
 					}
-					if (GetKeyPress(VK_D))
-					{
-						pos.value += right * moveSpeed;
-					}
-					if (GetKeyPress(VK_A))
-					{
-						pos.value += right * -moveSpeed;
-					}
-					if (GetKeyPress(VK_W))
-					{
-						pos.value += forward * moveSpeed;
-					}
-					if (GetKeyPress(VK_S))
-					{
-						pos.value += forward * -moveSpeed;
-					}
+					m_oldMousePos = *mousePos;
 				});
 	}
 };

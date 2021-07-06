@@ -63,6 +63,9 @@
     <Filter Include="ライブラリ\imgui">
       <UniqueIdentifier>{5bceab48-b549-4c98-81b0-9f26ac2d6f59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ライブラリ\imgui\ImGuizmo">
+      <UniqueIdentifier>{8b356034-59b5-46df-bdd5-29802887eb64}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\App\main.cpp">
@@ -160,6 +163,21 @@
     </ClCompile>
     <ClCompile Include="source\Engine\ECS\System\ImguiSystem.cpp">
       <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\ImGuizmo\GraphEditor.cpp">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\ImGuizmo\ImCurveEdit.cpp">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\ImGuizmo\ImGradient.cpp">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\ImGuizmo\ImGuizmo.cpp">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\ImGuizmo\ImSequencer.cpp">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -327,6 +345,24 @@
     </ClInclude>
     <ClInclude Include="source\Engine\ECS\ComponentData\BasicComponentData.h">
       <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ImGuizmo\GraphEditor.h">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ImGuizmo\ImCurveEdit.h">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ImGuizmo\ImGradient.h">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ImGuizmo\ImGuizmo.h">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ImGuizmo\ImSequencer.h">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\ImGuizmo\ImZoomSlider.h">
+      <Filter>ライブラリ\imgui\ImGuizmo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

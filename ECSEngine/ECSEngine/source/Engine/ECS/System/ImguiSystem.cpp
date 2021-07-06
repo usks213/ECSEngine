@@ -8,7 +8,10 @@
 
 #include "ImguiSystem.h"
 #include "imgui.h"
+#include "ImGuizmo.h"
+
 #include <string>
+#include <Engine/Engine.h>
 
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
@@ -20,6 +23,7 @@ using namespace ecs;
 
 /// @brief 型チェック
 #define CheckType(Type) typeName == TypeToString(Type)
+void EditTransform(Camera& camera, Matrix& matrix);
 
 
  /// @brief 生成時
@@ -37,8 +41,14 @@ void ImguiSystem::onDestroy()
 /// @brief 更新
 void ImguiSystem::onUpdate()
 {
-	ImGui::Begin("Entity", 0, ImGuiConfigFlags_DockingEnable);
-	ImGuiConfigFlags_DockingEnable;
+	ImGui::SetNextWindowBgAlpha(0.4f);
+	ImGui::Begin("Entity");
+
+	foreach<Camera>([this](Camera& camera)
+		{
+			m_MainCamera = &camera;
+		});
+
 	for (auto* chunk : getEntityManager()->getChunkList<Name>())
 	{
 		auto names = chunk->getComponentArray<Name>();
@@ -69,7 +79,7 @@ void ImguiSystem::DispGui(std::string_view typeName, void* data)
 {
 	if (CheckType(Position))
 	{
-		ImGui::InputFloat3(typeName.data(), (float*)data);
+		ImGui::DragFloat3(typeName.data(), (float*)data);
 	}
 	else if (CheckType(Rotation))
 	{
@@ -99,13 +109,78 @@ void ImguiSystem::DispGui(std::string_view typeName, void* data)
 		tz = XMConvertToDegrees(tz);
 		Vector3 temp(tx, ty, tz);
 
-		ImGui::SliderFloat3(typeName.data(), (float*)&temp, -180.0f, 180.0f);
+		ImGui::DragFloat3(typeName.data(), (float*)&temp);
 		Quaternion q = Quaternion::CreateFromYawPitchRoll(
 			XMConvertToRadians(temp.y), XMConvertToRadians(temp.x), XMConvertToRadians(temp.z));
 		rot->value = q;
 	}
 	else if (CheckType(Scale))
 	{
-		ImGui::InputFloat3(typeName.data(), (float*)data);
+		ImGui::DragFloat3(typeName.data(), (float*)data);
 	}
+	else if (CheckType(WorldMatrix))
+	{
+		//EditTransform(*m_MainCamera, ((WorldMatrix*)data)->value);
+	}
+}
+
+void EditTransform(Camera& camera,  Matrix& matrix)
+{
+	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
+	static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+	if (ImGui::IsKeyPressed(90))
+		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+	if (ImGui::IsKeyPressed(69))
+		mCurrentGizmoOperation = ImGuizmo::ROTATE;
+	if (ImGui::IsKeyPressed(82)) // r Key
+		mCurrentGizmoOperation = ImGuizmo::SCALE;
+	if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+		mCurrentGizmoOperation = ImGuizmo::ROTATE;
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+		mCurrentGizmoOperation = ImGuizmo::SCALE;
+	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+	ImGuizmo::DecomposeMatrixToComponents(&matrix.m[0][0], matrixTranslation, matrixRotation, matrixScale);
+	ImGui::InputFloat3("Tr", matrixTranslation);
+	ImGui::InputFloat3("Rt", matrixRotation);
+	ImGui::InputFloat3("Sc", matrixScale);
+	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &matrix.m[0][0]);
+
+	if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+	{
+		if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+			mCurrentGizmoMode = ImGuizmo::LOCAL;
+		ImGui::SameLine();
+		if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+			mCurrentGizmoMode = ImGuizmo::WORLD;
+	}
+	static bool useSnap(false);
+	if (ImGui::IsKeyPressed(83))
+		useSnap = !useSnap;
+	ImGui::Checkbox("", &useSnap);
+	ImGui::SameLine();
+	//Vector3 snap;
+	//switch (mCurrentGizmoOperation)
+	//{
+	//case ImGuizmo::TRANSLATE:
+	//	snap = config.mSnapTranslation;
+	//	ImGui::InputFloat3("Snap", &snap.x);
+	//	break;
+	//case ImGuizmo::ROTATE:
+	//	snap = config.mSnapRotation;
+	//	ImGui::InputFloat("Angle Snap", &snap.x);
+	//	break;
+	//case ImGuizmo::SCALE:
+	//	snap = config.mSnapScale;
+	//	ImGui::InputFloat("Scale Snap", &snap.x);
+	//	break;
+	//}
+
+	ImGuiIO& io = ImGui::GetIO();
+	ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+	ImGuizmo::Manipulate(&camera.view.m[0][0], &camera.projection.m[0][0], mCurrentGizmoOperation, mCurrentGizmoMode, &matrix.m[0][0]);
+
 }

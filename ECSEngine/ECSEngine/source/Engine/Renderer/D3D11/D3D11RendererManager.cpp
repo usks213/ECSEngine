@@ -20,11 +20,11 @@
 #include "D3D11Texture.h"
 
 //#ifdef _DEBUG
-//#include "ImGuiUtils.h"
-//#include "ImGuizmo.h"
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
+#include "ImGuizmo.h"
+//#include "ImGuiUtils.h"
 //#endif
 
 // ライブラリリンク
@@ -155,11 +155,26 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 
 
 	//--- imgui
+	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	// style
+	//ImGui::StyleColorsDark();
+	ImGui::StyleColorsClassic();
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 0.0f;
+	}
+	// setup platform/renderer
 	ImGui_ImplWin32_Init(hWnd);
 	ImGui_ImplDX11_Init(m_d3dDevice.Get(), m_d3dContext.Get());
 
-	
 	return S_OK;
 }
 
@@ -180,6 +195,7 @@ void D3D11RendererManager::clear()
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 
 	// debug表示
 	imguiDebug();
@@ -191,8 +207,11 @@ void D3D11RendererManager::clear()
 
 	float ClearColor[4] = { 0.117647f, 0.254902f, 0.352941f, 1.0f };
 	m_d3dContext->ClearRenderTargetView(m_backBufferRTV.Get(), ClearColor);
+	m_d3dContext->ClearRenderTargetView(m_diffuseRTV.Get(), ClearColor);
 	m_d3dContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 	m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
+	//m_d3dContext->OMSetRenderTargets(1, m_diffuseRTV.GetAddressOf(), m_depthStencilView.Get());
 
 	m_d3dContext->RSSetViewports(1, &m_vireport);
 
@@ -202,9 +221,18 @@ void D3D11RendererManager::clear()
 /// @brief スワップ
 void D3D11RendererManager::present()
 {
+	// バックバッファに戻す
+	//m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
+
 	//--- imgui
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	ImGuiIO& io = ImGui::GetIO();
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
 
 	//m_swapChain->Present(0, DXGI_PRESENT_ALLOW_TEARING); // ティアリング許容描画
 	//m_swapChain->Present(0, 0);		// 非垂直同期描画
@@ -214,9 +242,48 @@ void D3D11RendererManager::present()
 /// @brief Imgui表示
 void D3D11RendererManager::imguiDebug()
 {
-	ImGui::Begin("Material");
+	// 全体ウィンドウ
+	RECT rcWin, rcClnt;
+	GetClientRect(m_hWnd, &rcClnt);
+	GetWindowRect(m_hWnd, &rcWin);
+	int titleSizeX = (rcWin.right - rcWin.left) - (rcClnt.right - rcClnt.left);
+	int titleSizeY = (rcWin.bottom - rcWin.top) - (rcClnt.bottom - rcClnt.top);
+
+	ImGui::SetNextWindowPos(ImVec2(rcWin.left + titleSizeX / 2, rcWin.top + titleSizeX * 2), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(m_pEngine->getWindowWidth() - 1, m_pEngine->getWindowHeight() - 1), ImGuiCond_Always);
+	if (!ImGui::Begin("Fixed Overlay",0,
+		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground))
+	{
+		ImGui::End();
+		return;
+	}
+	// メニューバー
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+	ImGui::End();
+
+
+	// Scene
+	ImGui::SetNextWindowBgAlpha(0.0f);
+	ImGui::Begin("Scene",0, ImGuiWindowFlags_::ImGuiWindowFlags_NoMove | 
+		ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar);
+	//ImGui::Image(m_diffuseSRV.Get(), ImVec2(m_pEngine->getWindowWidth() * 0.6f, 
+		//m_pEngine->getWindowHeight() * 0.6f));
+	ImGui::End();
+
 
 	// マテリアル
+	ImGui::SetNextWindowBgAlpha(0.4f);
+	ImGui::Begin("Material");
 	for (const auto& mat : m_materialPool)
 	{
 		if (ImGui::TreeNode(mat.second->m_name.c_str())) {
@@ -437,6 +504,32 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 		MessageBoxW(hWnd, L"CreateRenderTargetView", L"Err", MB_ICONSTOP);
 		return hr;
 	}
+
+	
+	//--- 拡散反射光バッファ
+	// テクスチャ2D
+	D3D11_TEXTURE2D_DESC renderTexture;
+	m_backBufferRT->GetDesc(&renderTexture);
+	renderTexture.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+	hr = m_d3dDevice->CreateTexture2D(
+		&renderTexture,
+		nullptr,
+		m_diffuseRT.ReleaseAndGetAddressOf()
+	);
+	CHECK_FAILED(hr);
+	// レンダラーターゲットビュー
+	hr = m_d3dDevice->CreateRenderTargetView(
+		m_diffuseRT.Get(),
+		&rtvDesc,
+		m_diffuseRTV.ReleaseAndGetAddressOf());
+	// シェーダーリソース
+	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D, m_backBufferFormat);
+	if (m_bUseMSAA) srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+	hr = m_d3dDevice->CreateShaderResourceView(
+		m_diffuseRT.Get(),
+		NULL,
+		m_diffuseSRV.ReleaseAndGetAddressOf()
+	);
 
 
 	//--- 深度ステンシル ---

@@ -98,7 +98,7 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,7 +116,7 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -134,7 +134,7 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,7 +152,7 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -164,6 +164,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="lib\DDSTextureLoader\DDSTextureLoader11.cpp" />
+    <ClCompile Include="lib\ImGuizmo\GraphEditor.cpp" />
+    <ClCompile Include="lib\ImGuizmo\ImCurveEdit.cpp" />
+    <ClCompile Include="lib\ImGuizmo\ImGradient.cpp" />
+    <ClCompile Include="lib\ImGuizmo\ImGuizmo.cpp" />
+    <ClCompile Include="lib\ImGuizmo\ImSequencer.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
     <ClCompile Include="lib\imgui\imgui_demo.cpp" />
     <ClCompile Include="lib\imgui\imgui_draw.cpp" />
@@ -199,6 +204,12 @@
   <ItemGroup>
     <ClInclude Include="lib\DDSTextureLoader\DDSTextureLoader11.h" />
     <ClInclude Include="lib\DirectXTex\DirectXTex.h" />
+    <ClInclude Include="lib\ImGuizmo\GraphEditor.h" />
+    <ClInclude Include="lib\ImGuizmo\ImCurveEdit.h" />
+    <ClInclude Include="lib\ImGuizmo\ImGradient.h" />
+    <ClInclude Include="lib\ImGuizmo\ImGuizmo.h" />
+    <ClInclude Include="lib\ImGuizmo\ImSequencer.h" />
+    <ClInclude Include="lib\ImGuizmo\ImZoomSlider.h" />
     <ClInclude Include="lib\imgui\imconfig.h" />
     <ClInclude Include="lib\imgui\imgui.h" />
     <ClInclude Include="lib\imgui\imgui_impl_dx11.h" />
