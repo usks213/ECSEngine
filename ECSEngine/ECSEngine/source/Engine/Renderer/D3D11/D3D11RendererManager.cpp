@@ -249,36 +249,37 @@ void D3D11RendererManager::imguiDebug()
 	int titleSizeX = (rcWin.right - rcWin.left) - (rcClnt.right - rcClnt.left);
 	int titleSizeY = (rcWin.bottom - rcWin.top) - (rcClnt.bottom - rcClnt.top);
 
-	ImGui::SetNextWindowPos(ImVec2(rcWin.left + titleSizeX / 2, rcWin.top + titleSizeX * 2), ImGuiCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(m_pEngine->getWindowWidth() - 1, m_pEngine->getWindowHeight() - 1), ImGuiCond_Always);
-	if (!ImGui::Begin("Fixed Overlay",0,
-		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground))
-	{
-		ImGui::End();
-		return;
-	}
-	// メニューバー
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
+	//ImGui::SetNextWindowBgAlpha(0.0f);
+	//ImGui::SetNextWindowPos(ImVec2(rcWin.left + titleSizeX / 2, rcWin.top + titleSizeX * 2), ImGuiCond_Always);
+	//ImGui::SetNextWindowSize(ImVec2(m_pEngine->getWindowWidth() - 1, m_pEngine->getWindowHeight() - 1), ImGuiCond_Always);
+	//if (!ImGui::Begin("Fixed Overlay",0,
+	//	ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+	//	ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground))
+	//{
+	//	ImGui::End();
+	//	return;
+	//}
+	//// メニューバー
+	//if (ImGui::BeginMainMenuBar())
+	//{
+	//	if (ImGui::BeginMenu("File"))
+	//	{
 
-			ImGui::EndMenu();
-		}
+	//		ImGui::EndMenu();
+	//	}
 
-		ImGui::EndMainMenuBar();
-	}
-	ImGui::End();
+	//	ImGui::EndMainMenuBar();
+	//}
+	//ImGui::End();
 
 
-	// Scene
-	ImGui::SetNextWindowBgAlpha(0.0f);
-	ImGui::Begin("Scene",0, ImGuiWindowFlags_::ImGuiWindowFlags_NoMove | 
-		ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar);
-	//ImGui::Image(m_diffuseSRV.Get(), ImVec2(m_pEngine->getWindowWidth() * 0.6f, 
-		//m_pEngine->getWindowHeight() * 0.6f));
-	ImGui::End();
+	//// Scene
+	//ImGui::SetNextWindowBgAlpha(0.0f);
+	//ImGui::Begin("Scene",0, ImGuiWindowFlags_::ImGuiWindowFlags_NoMove | 
+	//	ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar);
+	////ImGui::Image(m_diffuseSRV.Get(), ImVec2(m_pEngine->getWindowWidth() * 0.6f, 
+	//	//m_pEngine->getWindowHeight() * 0.6f));
+	//ImGui::End();
 
 
 	// マテリアル
@@ -845,6 +846,26 @@ void D3D11RendererManager::setD3D11MaterialResource(const D3D11Material& d3dMate
 
 }
 
+void D3D11RendererManager::setD3D11RenderBuffer(const RenderBufferID& renderBufferID)
+{
+	auto* context = m_d3dContext.Get();
+
+	// データの取得
+	auto* renderBuffer = static_cast<D3D11RenderBuffer*>(getRenderBuffer(renderBufferID));
+
+	// 頂点バッファをセット
+	UINT stride = static_cast<UINT>(renderBuffer->m_vertexData.size);
+	UINT offset = 0;
+	context->IASetVertexBuffers(0, 1, renderBuffer->m_vertexBuffer.GetAddressOf(), &stride, &offset);
+	// インデックスバッファをセット
+	if (renderBuffer->m_indexData.count > 0) {
+		context->IASetIndexBuffer(renderBuffer->m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	}
+
+	// プリミティブ指定
+	setD3D11PrimitiveTopology(renderBuffer->m_topology);
+}
+
 void D3D11RendererManager::setD3D11Texture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage)
 {
 	auto stageIndex = static_cast<std::size_t>(stage);
@@ -915,27 +936,12 @@ void D3D11RendererManager::setTexture(std::uint32_t slot, const TextureID& textu
 }
 
 
-void D3D11RendererManager::render(const MaterialID& materialID, const MeshID& meshID)
+void D3D11RendererManager::d3dRender(const RenderBufferID& renderBufferID)
 {
 	auto* context = m_d3dContext.Get();
 
 	// データの取得
-	auto* material = static_cast<D3D11Material*>(getMaterial(materialID));
-	auto* shader = static_cast<D3D11Shader*>(getShader(material->m_shaderID));
-	const auto& rdID = createRenderBuffer(shader->m_id, meshID);
-	auto* renderBuffer = static_cast<D3D11RenderBuffer*>(getRenderBuffer(rdID));
-
-	// 頂点バッファをセット
-	UINT stride = static_cast<UINT>(renderBuffer->m_vertexData.size);
-	UINT offset = 0;
-	context->IASetVertexBuffers(0, 1, renderBuffer->m_vertexBuffer.GetAddressOf(), &stride, &offset);
-	// インデックスバッファをセット
-	if (renderBuffer->m_indexData.count > 0) {
-		context->IASetIndexBuffer(renderBuffer->m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-	}
-
-	// プリミティブ指定
-	setD3D11PrimitiveTopology(renderBuffer->m_topology);
+	auto* renderBuffer = static_cast<D3D11RenderBuffer*>(getRenderBuffer(renderBufferID));
 
 	// ポリゴンの描画
 	if (renderBuffer->m_indexData.count > 0)
@@ -1002,9 +1008,9 @@ MeshID D3D11RendererManager::createMesh(std::string name)
 RenderBufferID D3D11RendererManager::createRenderBuffer(ShaderID shaderID, MeshID meshID)
 {
 	// IDの生成
-	RenderBufferID id;
-	std::memcpy(&id, &shaderID, sizeof(std::uint32_t));
-	std::memcpy(&id + sizeof(std::uint32_t), &meshID, sizeof(std::uint32_t));
+	RenderBufferID id = shaderID ^ meshID;
+	//std::memcpy(&id, &shaderID, sizeof(std::uint32_t));
+	//std::memcpy(&id + sizeof(std::uint32_t), &meshID, sizeof(std::uint32_t));
 	
 	// 既にある
 	const auto& itr = m_renderBufferPool.find(id);
@@ -1039,3 +1045,19 @@ TextureID D3D11RendererManager::createTextureFromFile(std::string filePath)
 	return id;
 }
 
+BatchGroupID D3D11RendererManager::creatBatchGroup(MaterialID materialID, MeshID meshID)
+{
+	// IDの生成
+	BatchGroupID id = materialID ^ meshID;
+	//std::memcpy(&id, &materialID, sizeof(std::uint32_t));
+	//std::memcpy(&id + sizeof(std::uint32_t), &meshID, sizeof(std::uint32_t));
+
+	// 既にある
+	const auto& itr = m_batchGroupPool.find(id);
+	if (m_batchGroupPool.end() != itr) return id;
+
+	// 新規生成
+	m_batchGroupPool[id] = std::make_unique<BatchGroup>(id, materialID, meshID);
+
+	return id;
+}

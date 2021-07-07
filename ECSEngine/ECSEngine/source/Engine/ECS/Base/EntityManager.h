@@ -82,6 +82,26 @@ namespace ecs {
 			return getChunkList(archetype);
 		}
 
+		/// @brief 指定した型(可変)が含まれるすべてのチャンクを取得
+		/// @param tagName タグ名
+		/// @return チャンクのリスト
+		[[nodiscard]] std::vector<Chunk*> getChunkListByTag(std::string_view tagName) const
+		{
+			Archetype archetype;
+			archetype.addTag(tagName);
+			return getChunkList(archetype);
+		}
+
+		/// @brief 指定した型(可変)が含まれるすべてのチャンクを取得
+		/// @param tagHash ハッシュ値
+		/// @return チャンクのリスト
+		[[nodiscard]] std::vector<Chunk*> getChunkListByTag(std::size_t tagHash) const
+		{
+			Archetype archetype;
+			archetype.addTag(tagHash);
+			return getChunkList(archetype);
+		}
+
 		/// @brief 指定したアーキタイプのチャンクを生成または取得
 		/// @param archetype アーキタイプ
 		/// @return チャンクのインデックス

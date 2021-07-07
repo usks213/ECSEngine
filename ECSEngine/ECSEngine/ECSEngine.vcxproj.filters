@@ -364,6 +364,9 @@
     <ClInclude Include="lib\ImGuizmo\ImZoomSlider.h">
       <Filter>ライブラリ\imgui\ImGuizmo</Filter>
     </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\BatchGroup.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">

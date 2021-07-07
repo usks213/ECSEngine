@@ -204,14 +204,16 @@ void DevelopWorld::Start()
 	auto* pSky = renderer->getMesh(meshSky);
 	Geometry::SkyDome(*pSky, 36, 1.0f);
 
-
 	// レンダーバッファの生成
 	auto rdID = renderer->createRenderBuffer(shaderLitID, meshID);
 	auto rdskyID = renderer->createRenderBuffer(shaderUnlitID, meshSky);
 
+	// バッチデータの作成
+	auto objBitchID = renderer->creatBatchGroup(matLitID, meshID);
+
+
 	// アーキタイプ
 	Archetype archetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, RenderData, Name>();
-
 	// 初期化データ
 	Position pos;
 	Scale scale;
@@ -239,20 +241,32 @@ void DevelopWorld::Start()
 	scale.value = Vector3(1, 1, 1);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	pos.value.y = 0;
+	archetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, Name>();
 	archetype.addType<ObjectTag>();
+	archetype.addTag(objBitchID);
+
 	std::strcpy(name.value, "Sphere");
 
 	// オブジェクトの生成
-	for (int i = 0; i < 10; ++i)
+	int num = 3;
+	for (int x = 0; x < num; ++x)
 	{
-		auto entity = getEntityManager()->createEntity(archetype);
+		for (int y = 0; y < num; ++y)
+		{
+			for (int z = 0; z < num; ++z)
+			{
+				auto entity = getEntityManager()->createEntity(archetype);
 
-		pos.value.x = -5 + i*3;
-		getEntityManager()->setComponentData<Position>(entity, pos);
-		getEntityManager()->setComponentData<Scale>(entity, scale);
-		getEntityManager()->setComponentData<Rotation>(entity, rot);
-		getEntityManager()->setComponentData(entity, rd);
-		getEntityManager()->setComponentData(entity, name);
+				pos.value.x = x * 2;
+				pos.value.y = y * 2;
+				pos.value.z = z * 2;
+				getEntityManager()->setComponentData<Position>(entity, pos);
+				getEntityManager()->setComponentData<Scale>(entity, scale);
+				getEntityManager()->setComponentData<Rotation>(entity, rot);
+				//getEntityManager()->setComponentData(entity, rd);
+				getEntityManager()->setComponentData(entity, name);
+			}
+		}
 	}
 
 	// カメラ生成
@@ -264,8 +278,9 @@ void DevelopWorld::Start()
 	cameraData.fovY = 45;
 	cameraData.nearZ = 1.0f;
 	cameraData.farZ = 1000.0f;
-	pos.value.x = 0;
-	pos.value.z = 5;
+	pos.value.x = -5;
+	pos.value.z = -5;
+	pos.value.y = 5;
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	std::strcpy(name.value, "Camera");
 

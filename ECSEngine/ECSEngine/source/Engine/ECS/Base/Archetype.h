@@ -151,6 +151,24 @@ namespace ecs {
 			return *this;
 		}
 
+		/// @brief 名前からタグを追加
+		/// @detail size=0
+		/// @param typeName タグ名
+		/// @return 自身の参照
+		constexpr Archetype& addTag(std::string_view typeName)
+		{
+			return addType(TypeNameToTypeHash(typeName), 0, typeName);
+		}
+
+		/// @brief ハッシュ値でタグを追加
+		/// @detail size=0, name=typeHash
+		/// @param typeHash 型のハッシュ値
+		/// @return 自身の参照
+		constexpr Archetype& addTag(const std::size_t typeHash)
+		{
+			return addType(typeHash, 0, std::to_string(typeHash));
+		}
+
 		/// @brief 指定した型が何番目にあるか
 		/// @tparam Type IComponentData型
 		/// @return 一致した番号
@@ -190,6 +208,21 @@ namespace ecs {
 			for (auto i = 0; i < m_ArchetypeSize; ++i)
 			{
 				if (m_TypeDataList[i].getName() == typeName)
+					return result;
+				result += m_TypeDataList[i].getSize();
+			}
+			return result;
+		}
+
+		/// @brief 指定したハッシュ値までのメモリサイズを取得
+		/// @param typeHash タイプハッシュ
+		/// @return Indexまでのバイト数
+		[[nodiscard]] constexpr std::size_t getOffset(std::size_t typeHash) const
+		{
+			std::size_t result = 0;
+			for (auto i = 0; i < m_ArchetypeSize; ++i)
+			{
+				if (m_TypeDataList[i].getHash() == typeHash)
 					return result;
 				result += m_TypeDataList[i].getSize();
 			}
@@ -239,6 +272,20 @@ namespace ecs {
 			for (auto i = 0; i < m_ArchetypeSize; ++i)
 			{
 				if (m_TypeDataList[i].getName() == typeName)
+					return m_TypeDataList[i].getSize();
+			}
+			return result;
+		}
+
+		/// @brief 指定したハッシュ値のメモリサイズを取得
+		/// @param typeHash ハッシュ値
+		/// @return 型のサイズ
+		[[nodiscard]] constexpr std::size_t getSizeByHash(std::size_t typeHash) const
+		{
+			std::size_t result = 0;
+			for (auto i = 0; i < m_ArchetypeSize; ++i)
+			{
+				if (m_TypeDataList[i].getHash() == typeHash)
 					return m_TypeDataList[i].getSize();
 			}
 			return result;

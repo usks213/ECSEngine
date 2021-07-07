@@ -242,6 +242,7 @@
     <ClInclude Include="source\Engine\Engine.h" />
     <ClInclude Include="source\Engine\OS\Base\WindowManager.h" />
     <ClInclude Include="source\Engine\OS\Win\WindowsWindow.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\BatchGroup.h" />
     <ClInclude Include="source\Engine\Renderer\Base\CommonState.h" />
     <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Geometry.h" />

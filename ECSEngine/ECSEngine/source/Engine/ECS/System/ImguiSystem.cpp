@@ -61,6 +61,7 @@ void ImguiSystem::onUpdate()
 				for (int i = 0; i < archetype.getArchetypeSize(); ++i)
 				{
 					const auto& type = archetype.getTypeInfo(i);
+					ImGui::Text(type.getName().data());
 					DispGui(type.getName(), chunk->getComponentData(type.getName(), index));
 				}
 				ImGui::TreePop();

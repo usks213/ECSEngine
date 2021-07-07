@@ -11,8 +11,8 @@
 #include "Mesh.h"
 #include "Vertex.h"
 
-/// @brief 64 = 32:ShaderID + 32:MaterialID
-using RenderBufferID = std::uint64_t;
+/// @brief 64 = 32:ShaderID + 32:MeshID
+using RenderBufferID = std::uint32_t;
 /// @brief 存在しないレンダーバッファID
 constexpr RenderBufferID NONE_RENDERBUFFER_ID = std::numeric_limits<RenderBufferID>::max();
 

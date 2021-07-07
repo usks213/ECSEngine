@@ -7,6 +7,8 @@
  *********************************************************************/
 
 #include "RenderingSystem.h"
+#include <Engine/ECS/Base/EntityManager.h>
+
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/RenderingComponentData.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
@@ -101,15 +103,43 @@ void RenderingSystem::onUpdate()
 	renderer->setD3DSystemBuffer(sysBuffer);
 
 
+	// バッチ描画
+	for (const auto& bitchID : renderer->m_batchGroupPool)
+	{
+		auto* pBitch = renderer->getBatchGroup(bitchID.first);
+		const auto* mat = renderer->getMaterial(pBitch->m_materialID);
+		const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, pBitch->m_meshID);
+
+		renderer->setD3D11Material(pBitch->m_materialID);
+		renderer->setD3D11RenderBuffer(rdID);
+
+		
+		for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
+		{
+			auto mtxArray = chunk->getComponentArray<WorldMatrix>();
+			for (int i = 0; i < mtxArray.Count(); ++i)
+			{
+				renderer->setD3DTransformBuffer(mtxArray[i].value);
+				renderer->d3dRender(rdID);
+			}
+		}
+	}
+
+
 	// オブジェクト描画
 	foreach<RenderData, WorldMatrix>(
 		[&renderer](RenderData& rd, WorldMatrix& mtxWorld)
 		{
+			const auto* mat = renderer->getMaterial(rd.materialID);
+			const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, rd.meshID);
+
 			renderer->setD3D11Material(rd.materialID);
 
 			renderer->setD3DTransformBuffer(mtxWorld.value);
 
-			renderer->render(rd.materialID, rd.meshID);
+			renderer->setD3D11RenderBuffer(rdID);
+
+			renderer->d3dRender(rdID);
 		});
 }
 

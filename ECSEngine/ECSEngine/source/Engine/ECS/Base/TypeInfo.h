@@ -8,6 +8,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 
 /// @brief å^èÓïÒïtâ¡
 #define DECLARE_TYPE_INFO(T) 						   \
@@ -37,6 +38,19 @@ public:												   \
 /// @brief å^ñºÇÃç≈ëÂï∂éöêî
 constexpr int MAX_TYPE_NAME = 256;
 
+
+constexpr std::size_t TypeNameToTypeHash(std::string_view typeName)
+{
+	auto fnvOffsetBasis = 14695981039346656037ULL;
+	constexpr auto cFnvPrime = 1099511628211ULL;
+
+	for (auto idx : typeName)
+	{
+		fnvOffsetBasis ^= static_cast<size_t>(idx);
+		fnvOffsetBasis *= cFnvPrime;
+	}
+	return fnvOffsetBasis;
+}
 
 namespace type
 {

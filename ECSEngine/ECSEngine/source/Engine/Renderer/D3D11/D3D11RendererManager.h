@@ -45,6 +45,8 @@ public:
 
 	void setD3D11MaterialResource(const D3D11Material& d3dMaterial, const D3D11Shader& d3dShader);
 
+	void setD3D11RenderBuffer(const RenderBufferID& renderBufferID);
+
 	void setD3D11Texture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage);
 
 	void setD3D11Sampler(std::uint32_t slot, ESamplerState state, EShaderStage stage);
@@ -55,19 +57,18 @@ public:
 
 	void setD3DTransformBuffer(const Matrix& mtxWorld);
 
+	void d3dRender(const RenderBufferID& renderBufferID);
+
 public:
 	void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) override;
 
-	/// @brief 描画
-	/// @param materialID マテリアルID
-	/// @param meshID メッシュID
-	void render(const MaterialID& materialID, const MeshID& meshID) override;
 
 	ShaderID createShader(ShaderDesc desc) override;
 	MaterialID createMaterial(std::string name, ShaderID shaderID) override;
 	MeshID createMesh(std::string name) override;
 	RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) override;
 	TextureID createTextureFromFile(std::string filePath) override;
+	BatchGroupID creatBatchGroup(MaterialID materialID, MeshID meshID) override;
 
 private:
 	/// @brief デバイスの生成

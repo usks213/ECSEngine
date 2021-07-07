@@ -50,3 +50,10 @@ Texture* RendererManager::getTexture(TextureID id)
 	return itr->second.get();
 }
 
+BatchGroup* RendererManager::getBatchGroup(BatchGroupID id)
+{
+	const auto& itr = m_batchGroupPool.find(id);
+	if (m_batchGroupPool.end() == itr) return nullptr;
+
+	return itr->second.get();
+}

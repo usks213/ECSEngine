@@ -127,6 +127,16 @@ namespace ecs {
 			return m_pBegin.get() + offset + m_Archetype.getSize(typeName) * index;
 		}
 
+		/// @brief 指定したハッシュ値のデータを取得
+		/// @param typeHash ハッシュ値
+		/// @param index インデックス
+		/// @return 汎用ポインタ
+		void* getComponentData(std::size_t typeHash, std::uint32_t index)
+		{
+			auto offset = m_Archetype.getOffset(typeHash) * m_Capacity;
+			return m_pBegin.get() + offset + m_Archetype.getSizeByHash(typeHash) * index;
+		}
+
 		/// @brief Archetypeを取得
 		/// @return archetype
 		[[nodiscard]] const Archetype& getArchetype() const
