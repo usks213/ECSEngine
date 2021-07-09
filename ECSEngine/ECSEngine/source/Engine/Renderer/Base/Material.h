@@ -59,6 +59,12 @@ public:
 		bool							isUpdate;	//trueなら更新した
 	};
 
+	/// @brief Textureデータ
+	struct TextureData
+	{
+
+	};
+
 	/// @brief 全ステージ、スロット分のCBufferデータ
 	std::array<std::unordered_map<std::uint32_t, CBuffer>,
 		static_cast<size_t>(EShaderStage::MAX)>	m_cbufferData;

@@ -248,7 +248,7 @@ void DevelopWorld::Start()
 	std::strcpy(name.value, "Sphere");
 
 	// オブジェクトの生成
-	int num = 3;
+	int num = 10;
 	for (int x = 0; x < num; ++x)
 	{
 		for (int y = 0; y < num; ++y)

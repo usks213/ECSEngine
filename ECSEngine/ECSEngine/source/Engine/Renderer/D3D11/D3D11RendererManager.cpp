@@ -314,12 +314,21 @@ void D3D11RendererManager::imguiDebug()
 			ImGui::SliderFloat4("Color", (float*)&d3dMat->m_materialBuffer._Color, 0.0f, 1.0f);
 			//ImGui::InputText("textbox 1", text1, sizeof(text1));
 
+			// CBuffer変数
 			for (const auto& var : mat.second->m_cbufferVariable)
 			{
 				float temp = *(float*)mat.second->getData(var.second.name.c_str());
 				if (ImGui::SliderFloat(var.second.name.c_str(), &temp, 0.0f, 1.0f))
 					mat.second->setFloat(var.second.name.c_str(), temp);
 			}
+
+			// テクスチャ
+
+
+			// サンプラー
+
+
+
 			ImGui::TreePop();
 		}
 	}
