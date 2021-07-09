@@ -47,8 +47,6 @@ public:
 	ERasterizeState		m_rasterizeState;
 	/// @brief シェーダID
 	ShaderID			m_shaderID;
-	/// @brief シェーダー
-	Shader*				m_pShader;
 
 	/// @brief CBufferデータ
 	struct CBuffer
@@ -62,17 +60,24 @@ public:
 	/// @brief Textureデータ
 	struct TextureData
 	{
+		std::string name;
+		TextureID	id;
+	};
 
+	struct SamplerData
+	{
+		std::string		name;
+		ESamplerState	state;
 	};
 
 	/// @brief 全ステージ、スロット分のCBufferデータ
 	std::array<std::unordered_map<std::uint32_t, CBuffer>,
 		static_cast<size_t>(EShaderStage::MAX)>	m_cbufferData;
-	/// @brief 全ステージ、スロットのバインドするテクスチャID
-	std::array<std::unordered_map<std::uint32_t, TextureID>,
+	/// @brief 全ステージ、スロットのバインドするテクスチャ
+	std::array<std::unordered_map<std::uint32_t, TextureData>,
 		static_cast<size_t>(EShaderStage::MAX)>	m_textureData;
 	/// @brief 全ステージ、スロット分のサンプラステート
-	std::array<std::unordered_map<std::uint32_t, ESamplerState>,
+	std::array<std::unordered_map<std::uint32_t, SamplerData>,
 		static_cast<size_t>(EShaderStage::MAX)>	m_samplerData;
 
 	/// @brief CBuffer変数データ

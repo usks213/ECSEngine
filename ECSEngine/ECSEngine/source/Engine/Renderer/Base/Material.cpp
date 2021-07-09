@@ -17,8 +17,7 @@ Material::Material(const MaterialID& id, const std::string& name, const Shader& 
 	m_blendState(EBlendState::NONE),
 	m_depthStencilState(EDepthStencilState::ENABLE_TEST_AND_ENABLE_WRITE),
 	m_rasterizeState(ERasterizeState::CULL_BACK),
-	m_shaderID(shader.m_id),
-	m_pShader(const_cast<Shader*>(&shader))
+	m_shaderID(shader.m_id)
 {
 	// シェーダからマテリアルデータを生成
 	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
@@ -60,13 +59,15 @@ Material::Material(const MaterialID& id, const std::string& name, const Shader& 
 		//--- テクスチャ初期化
 		for (const auto& tex : shader.m_textureBindDatas[stageIndex])
 		{
-			m_textureData[stageIndex][tex.second.slot] = NONE_TEXTURE_ID;
+			m_textureData[stageIndex][tex.second.slot].name = tex.second.name;
+			m_textureData[stageIndex][tex.second.slot].id = NONE_TEXTURE_ID;
 		}
 
 		//--- サンプラ
 		for (const auto& smp : shader.m_samplerBindDatas[stageIndex])
 		{
-			m_samplerData[stageIndex][smp.second.slot] = ESamplerState::NONE;
+			m_samplerData[stageIndex][smp.second.slot].name = smp.second.name;
+			m_samplerData[stageIndex][smp.second.slot].state = ESamplerState::NONE;
 		}
 	}
 }
@@ -152,12 +153,11 @@ void Material::setTexture(const char* name, const TextureID textureID)
 	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<size_t>(stage);
-		for (const auto& texBind : m_pShader->m_textureBindDatas[stageIndex])
+		for (auto& texData : m_textureData[stageIndex])
 		{
-			if (texBind.second.name == name)
+			if (texData.second.name == name)
 			{
-				auto& texData = m_textureData[stageIndex][texBind.first];
-				texData = textureID;
+				texData.second.id = textureID;
 				return;
 			}
 		}
@@ -171,12 +171,11 @@ TextureID Material::getTexture(const char* name)
 	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<size_t>(stage);
-		for (const auto& texBind : m_pShader->m_textureBindDatas[stageIndex])
+		for (const auto& texData : m_textureData[stageIndex])
 		{
-			if (texBind.second.name == name)
+			if (texData.second.name == name)
 			{
-				auto& texData = m_textureData[stageIndex][texBind.first];
-				return texData;
+				return texData.second.id;
 			}
 		}
 	}
@@ -189,12 +188,11 @@ void Material::setSampler(const char* name, const ESamplerState sampler)
 	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<size_t>(stage);
-		for (const auto& samBind : m_pShader->m_samplerBindDatas[stageIndex])
+		for (auto& samData : m_samplerData[stageIndex])
 		{
-			if (samBind.second.name == name)
+			if (samData.second.name == name)
 			{
-				auto& samData = m_samplerData[stageIndex][samBind.first];
-				samData = sampler;
+				samData.second.state = sampler;
 				return;
 			}
 		}
@@ -208,12 +206,11 @@ ESamplerState Material::getSampler(const char* name)
 	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<size_t>(stage);
-		for (const auto& samBind : m_pShader->m_samplerBindDatas[stageIndex])
+		for (auto& samData : m_samplerData[stageIndex])
 		{
-			if (samBind.second.name == name)
+			if (samData.second.name == name)
 			{
-				auto& samData = m_samplerData[stageIndex][samBind.first];
-				return samData;
+				return samData.second.state;
 			}
 		}
 	}

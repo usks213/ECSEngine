@@ -322,12 +322,51 @@ void D3D11RendererManager::imguiDebug()
 					mat.second->setFloat(var.second.name.c_str(), temp);
 			}
 
-			// テクスチャ
+			for(auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+			{
+				auto stageIndex = static_cast<size_t>(stage);
+				// テクスチャ
+				for (auto& tex : d3dMat->m_textureData[stageIndex])
+				{
+					static bool texWind;
+					static std::string texName;
+
+					TextureID id = tex.second.id;
+					auto* pTex = static_cast<D3D11Texture*>(getTexture(id));
+					ID3D11ShaderResourceView* pSRV = nullptr;
+					if (pTex) pSRV = pTex->m_srv.Get();
+
+					ImGui::Text(tex.second.name.c_str());
+					if (ImGui::ImageButton(pSRV, ImVec2(100, 100)))
+					{
+						texWind ^= 1;
+						texName = d3dMat->m_name + ":" + tex.second.name;
+					}
+
+					if (texWind && texName == std::string(d3dMat->m_name + ":" + tex.second.name))
+					{
+						//ImGui::SetNextWindowSize(ImVec2(150, 400));
+						ImGui::SetNextWindowBgAlpha(0.8f);
+						ImGui::Begin(texName.c_str());
+
+						for (const auto& tex2 : m_texturePool)
+						{
+							ImGui::Text(tex2.second->m_name.c_str());
+							auto* pTex = static_cast<D3D11Texture*>(tex2.second.get());
+							if (ImGui::ImageButton(pTex->m_srv.Get(), ImVec2(100, 100)))
+							{
+								texWind ^= 1;
+								tex.second.id = id = tex2.first;
+							}
+						}
+						ImGui::End();
+					}
+				}
+
+				// サンプラー
 
 
-			// サンプラー
-
-
+			}
 
 			ImGui::TreePop();
 		}
@@ -843,13 +882,13 @@ void D3D11RendererManager::setD3D11MaterialResource(const D3D11Material& d3dMate
 		// テクスチャ更新
 		for (const auto& tex : d3dMat.m_textureData[stageIndex])
 		{
-			setD3D11Texture(tex.first, tex.second, stage);
+			setD3D11Texture(tex.first, tex.second.id, stage);
 		}
 
 		// サンプラ更新
 		for (const auto& sam : d3dMat.m_samplerData[stageIndex])
 		{
-			setD3D11Sampler(sam.first, sam.second, stage);
+			setD3D11Sampler(sam.first, sam.second.state, stage);
 		}
 	}
 

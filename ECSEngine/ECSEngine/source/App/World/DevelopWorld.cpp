@@ -190,6 +190,7 @@ void DevelopWorld::Start()
 	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
 	//auto texID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(D3D::SHADER_TEX_SLOT_MAIN, texID, EShaderStage::PS);
+	mat->setTexture("_MainTexture", texID);
 
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, EShaderStage::PS);
