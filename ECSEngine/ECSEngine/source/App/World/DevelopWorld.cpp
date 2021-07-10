@@ -176,6 +176,9 @@ void DevelopWorld::Start()
 	shaderDesc.m_name = "Unlit";
 	ShaderID shaderUnlitID = renderer->createShader(shaderDesc);
 
+	shaderDesc.m_name = "SkyDome";
+	ShaderID shaderSkyID = renderer->createShader(shaderDesc);
+
 	// マテリアルの作成
 	auto matLitID = renderer->createMaterial("Lit", shaderLitID);
 	Material* mat = renderer->getMaterial(matLitID);
@@ -184,6 +187,9 @@ void DevelopWorld::Start()
 	auto matUnlitID = renderer->createMaterial("Unlit", shaderUnlitID);
 	Material* unlit = renderer->getMaterial(matUnlitID);
 	//unlit->m_rasterizeState = ERasterizeState::CULL_FRONT;
+
+	auto matSkyID = renderer->createMaterial("SkyDome", shaderSkyID);
+	Material* skyMat = renderer->getMaterial(matSkyID);
 
 
 	// テクスチャの読み込み
@@ -194,6 +200,7 @@ void DevelopWorld::Start()
 
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, EShaderStage::PS);
+	skyMat->setTexture("_SkyTexture", skytexID);
 
 	// メッシュの生成
 	MeshID meshID = renderer->createMesh("TestMesh");
@@ -207,7 +214,7 @@ void DevelopWorld::Start()
 
 	// レンダーバッファの生成
 	auto rdID = renderer->createRenderBuffer(shaderLitID, meshID);
-	auto rdskyID = renderer->createRenderBuffer(shaderUnlitID, meshSky);
+	auto rdskyID = renderer->createRenderBuffer(shaderSkyID, meshSky);
 
 	// バッチデータの作成
 	auto objBitchID = renderer->creatBatchGroup(matLitID, meshID);
@@ -224,7 +231,7 @@ void DevelopWorld::Start()
 	rd.materialID = matLitID;
 	rd.meshID = meshID;
 	RenderData rdSky;
-	rdSky.materialID = matUnlitID;
+	rdSky.materialID = shaderSkyID;
 	rdSky.meshID = meshSky;
 
 	// スカイドーム

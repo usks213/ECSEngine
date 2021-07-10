@@ -331,8 +331,7 @@ void D3D11RendererManager::imguiDebug()
 					static bool texWind;
 					static std::string texName;
 
-					TextureID id = tex.second.id;
-					auto* pTex = static_cast<D3D11Texture*>(getTexture(id));
+					auto* pTex = static_cast<D3D11Texture*>(getTexture(tex.second.id));
 					ID3D11ShaderResourceView* pSRV = nullptr;
 					if (pTex) pSRV = pTex->m_srv.Get();
 
@@ -349,6 +348,12 @@ void D3D11RendererManager::imguiDebug()
 						ImGui::SetNextWindowBgAlpha(0.8f);
 						ImGui::Begin(texName.c_str());
 
+						if (ImGui::Button("NONE", ImVec2(100, 100)))
+						{
+							texWind ^= 1;
+							tex.second.id = NONE_TEXTURE_ID;
+						}
+
 						for (const auto& tex2 : m_texturePool)
 						{
 							ImGui::Text(tex2.second->m_name.c_str());
@@ -356,7 +361,7 @@ void D3D11RendererManager::imguiDebug()
 							if (ImGui::ImageButton(pTex->m_srv.Get(), ImVec2(100, 100)))
 							{
 								texWind ^= 1;
-								tex.second.id = id = tex2.first;
+								tex.second.id = tex2.first;
 							}
 						}
 						ImGui::End();
