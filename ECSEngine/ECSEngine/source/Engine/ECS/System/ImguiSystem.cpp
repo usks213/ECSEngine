@@ -60,7 +60,7 @@ void ImguiSystem::onUpdate()
 				Position* pos = nullptr;
 				Rotation* rot = nullptr;
 				Scale* scale = nullptr;
-				WorldMatrix* world = nullptr;
+				LocalToWorld* world = nullptr;
 				const auto& archetype = chunk->getArchetype();
 
 				// トランスフォームデータを持っているか
@@ -72,7 +72,7 @@ void ImguiSystem::onUpdate()
 					if (CheckType(Position))			pos = (Position*)data;
 					else if (CheckType(Rotation))		rot = (Rotation*)data;
 					else if (CheckType(Scale))			scale = (Scale*)data;
-					else  if (CheckType(WorldMatrix))	world = (WorldMatrix*)data;
+					else  if (CheckType(LocalToWorld))	world = (LocalToWorld*)data;
 				}
 
 				// トランスフォームデータ情報
@@ -155,9 +155,9 @@ void ImguiSystem::DispGui(std::string_view typeName, void* data)
 	{
 		ImGui::DragFloat3(typeName.data(), (float*)data);
 	}
-	//else *///if (CheckType(WorldMatrix))
+	//else *///if (CheckType(LocalToWorld))
 	//{
-	//	EditTransform(*m_MainCamera, ((WorldMatrix*)data)->value);
+	//	EditTransform(*m_MainCamera, ((LocalToWorld*)data)->value);
 	//}
 
 }
@@ -230,7 +230,7 @@ void EditTransform(Camera& camera, Matrix& worldmatrix)
 	float* matrix = (float*)&worldmatrix;
 	bool editTransformDecomposition = true;
 
-	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
+	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 	static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 	static bool useSnap = false;
 	static float snap[3] = { 1.f, 1.f, 1.f };
@@ -372,7 +372,7 @@ void EditTransform(Camera& camera, Matrix& worldmatrix, Vector3& pos, Quaternion
 	float* matrix = (float*)&worldmatrix;
 	bool editTransformDecomposition = true;
 
-	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
+	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 	static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 	static bool useSnap = false;
 	static float snap[3] = { 1.f, 1.f, 1.f };

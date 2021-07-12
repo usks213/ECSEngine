@@ -18,6 +18,7 @@
 #include <Engine/ECS/ComponentData/ComponentTag.h>
 
 #include <Engine/ECS/System/TransformSystem.h>
+#include <Engine/ECS/System/ParentSystem.h>
 #include <Engine/ECS/System/RenderingSystem.h>
 #include <Engine/ECS/System/ImguiSystem.h>
 
@@ -69,8 +70,8 @@ public:
 		m_oldMousePos = *mousePos;
 	}
 	void onUpdate() override {
-		foreach<Position, Rotation, WorldMatrix, InputTag>
-			([this](Position& pos, Rotation& rot, WorldMatrix& mtx, InputTag& tag)
+		foreach<Position, Rotation, LocalToWorld, InputTag>
+			([this](Position& pos, Rotation& rot, LocalToWorld& mtx, InputTag& tag)
 				{
 					POINT* mousePos = GetMousePosition();
 					POINT mouseDist = {
@@ -226,7 +227,7 @@ void DevelopWorld::Start()
 
 
 	// アーキタイプ
-	Archetype archetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, RenderData, Name>();
+	Archetype archetype = Archetype::create<Position, Rotation, Scale, LocalToWorld, RenderData, Name>();
 	// 初期化データ
 	Position pos;
 	Scale scale;
@@ -253,7 +254,7 @@ void DevelopWorld::Start()
 
 	// 床
 	scale.value = Vector3(1, 1, 1);
-	rot.value = Quaternion::CreateFromYawPitchRoll(0, 3.1415f, 0);
+	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	std::strcpy(name.value, "Plane");
 	RenderData rdPlane;
 	rdPlane.materialID = matUnlitID;
@@ -271,14 +272,14 @@ void DevelopWorld::Start()
 	scale.value = Vector3(1, 1, 1);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	pos.value.y = 2;
-	archetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, Name>();
+	archetype = Archetype::create<Position, Rotation, Scale, LocalToWorld, Name, LocalToParent>();
 	archetype.addType<ObjectTag>();
 	archetype.addTag(objBitchID);
 
 	std::strcpy(name.value, "Sphere");
 
 	// オブジェクトの生成
-	int num = 1;
+	int num = 2;
 	for (int x = 0; x < num; ++x)
 	{
 		for (int y = 0; y < num; ++y)
@@ -295,12 +296,13 @@ void DevelopWorld::Start()
 				getEntityManager()->setComponentData<Rotation>(entity, rot);
 				//getEntityManager()->setComponentData(entity, rd);
 				getEntityManager()->setComponentData(entity, name);
+				getEntityManager()->setComponentData(entity, LocalToParent(plane));
 			}
 		}
 	}
 
 	// カメラ生成
-	Archetype cameraArchetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, Camera, InputTag, Name>();
+	Archetype cameraArchetype = Archetype::create<Position, Rotation, Scale, LocalToWorld, Camera, InputTag, Name>();
 
 	auto entity = getEntityManager()->createEntity(cameraArchetype);
 	Camera cameraData;
@@ -308,10 +310,10 @@ void DevelopWorld::Start()
 	cameraData.fovY = 45;
 	cameraData.nearZ = 1.0f;
 	cameraData.farZ = 1000.0f;
-	pos.value.x = -5;
-	pos.value.z = -5;
+	pos.value.x = 0;
+	pos.value.z = -10;
 	pos.value.y = 5;
-	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	rot.value = Quaternion::CreateFromYawPitchRoll(3.141592f, 0, 0);
 	std::strcpy(name.value, "Camera");
 
 	getEntityManager()->setComponentData<Position>(entity, pos);
@@ -325,6 +327,7 @@ void DevelopWorld::Start()
 	addSystem<ControllSystem>();
 	addSystem<RotationSystem>();
 	addSystem<TransformSystem>();
+	addSystem<ParentSystem>();
 	addSystem<RenderingSystem>();
 }
 

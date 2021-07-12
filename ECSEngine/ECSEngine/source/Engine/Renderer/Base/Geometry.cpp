@@ -20,7 +20,7 @@ void Geometry::Plane(Mesh& out, int split, float size, float texSize)
 {
 	int nNumBlockX = split;
 	int nNumBlockZ = split;
-	float fSizeBlockX = size;
+	float fSizeBlockX = -size;
 	float fSizeBlockZ = size;
 	float fTexSizeX = texSize;
 	float fTexSizeZ = texSize;
@@ -83,7 +83,7 @@ void Geometry::Plane(Mesh& out, int split, float size, float texSize)
 	}
 
 	// インデックス
-	for (auto i = 0u; i < out.m_indexCount; ++i)
+	for (auto i = 0; i < out.m_indexCount; ++i)
 	{
 		out.m_indexData.push_back(pIndexWk[i]);
 	}

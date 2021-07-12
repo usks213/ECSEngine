@@ -67,6 +67,16 @@ namespace ecs {
 			m_pWorld->m_ChunkList[entity.m_chunkIndex].setComponentData(entity, data);
 		}
 
+		/// @brief コンポーネントデータを設定
+		/// @tparam T コンポーネントデータ型
+		/// @param entity 対象のエンティティ
+		/// @param data 追加するデータ
+		template<typename T, typename = std::enable_if_t<is_component_data<T>>>
+		[[nodiscard]] T* getComponentData(const Entity& entity)
+		{
+			return m_pWorld->m_ChunkList[entity.m_chunkIndex].getComponentData<T>(entity.m_index);
+		}
+
 		/// @brief 指定したアーキタイプが含まれるすべてのチャンクを取得
 		/// @param archetype アーキタイプ
 		/// @return チャンクのリスト

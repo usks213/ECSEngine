@@ -179,6 +179,9 @@
     <ClCompile Include="lib\ImGuizmo\ImSequencer.cpp">
       <Filter>ライブラリ\imgui\ImGuizmo</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\ParentSystem.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -366,6 +369,9 @@
     </ClInclude>
     <ClInclude Include="source\Engine\Renderer\Base\BatchGroup.h">
       <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\ParentSystem.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

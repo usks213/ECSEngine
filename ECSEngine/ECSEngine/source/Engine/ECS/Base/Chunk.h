@@ -117,11 +117,23 @@ namespace ecs {
 			return ComponentArray<T>(reinterpret_cast<TType*>(m_pBegin.get() + offset), m_Size);
 		}
 
+		/// @brief 指定した型のデータを取得
+		/// @tparam コンポーネントデータ型
+		/// @param index インデックス
+		/// @return 型のポインタ
+		template<class T>
+		[[nodiscard]] T* getComponentData(std::uint32_t index)
+		{
+			using TType = std::remove_const_t<std::remove_reference_t<T>>;
+			auto offset = m_Archetype.getOffset<TType>() * m_Capacity;
+			return reinterpret_cast<T*>(m_pBegin.get() + offset + m_Archetype.getSize(m_Archetype.getIndex<TType>()) * index);
+		}
+
 		/// @brief 指定した型名のデータを取得
 		/// @param typeName 型名
 		/// @param index インデックス
 		/// @return 汎用ポインタ
-		void* getComponentData(std::string_view typeName, std::uint32_t index)
+		[[nodiscard]] void* getComponentData(std::string_view typeName, std::uint32_t index)
 		{
 			auto offset = m_Archetype.getOffset(typeName) * m_Capacity;
 			return m_pBegin.get() + offset + m_Archetype.getSize(typeName) * index;
@@ -131,7 +143,7 @@ namespace ecs {
 		/// @param typeHash ハッシュ値
 		/// @param index インデックス
 		/// @return 汎用ポインタ
-		void* getComponentData(std::size_t typeHash, std::uint32_t index)
+		[[nodiscard]] void* getComponentData(std::size_t typeHash, std::uint32_t index)
 		{
 			auto offset = m_Archetype.getOffset(typeHash) * m_Capacity;
 			return m_pBegin.get() + offset + m_Archetype.getSizeByHash(typeHash) * index;

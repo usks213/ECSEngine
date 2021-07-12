@@ -11,8 +11,8 @@ using namespace ecs;
 
 
 /// @brief エンティティの生成
-	/// @param archetype アーキタイプ
-	/// @return 生成したエンティティ
+/// @param archetype アーキタイプ
+/// @return 生成したエンティティ
 Entity EntityManager::createEntity(const Archetype& archetype) const
 {
 	const auto chunkIndex = getAndCreateChunkIndex(archetype);

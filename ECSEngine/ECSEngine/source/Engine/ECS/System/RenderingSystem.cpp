@@ -42,8 +42,8 @@ void RenderingSystem::onUpdate()
 	// カメラ設定
 	Camera* mainCamera = nullptr;
 	Vector3 cameraPos;
-	foreach<Camera, WorldMatrix>(
-		[&mainCamera, &cameraPos, &engine](Camera& camera, WorldMatrix& mtxWorld)
+	foreach<Camera, LocalToWorld>(
+		[&mainCamera, &cameraPos, &engine](Camera& camera, LocalToWorld& mtxWorld)
 		{
 			// ビューマトリックス更新
 			Vector3 pos = mtxWorld.value.Translation();
@@ -116,8 +116,8 @@ void RenderingSystem::onUpdate()
 		
 		for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
 		{
-			auto mtxArray = chunk->getComponentArray<WorldMatrix>();
-			for (int i = 0; i < mtxArray.Count(); ++i)
+			auto mtxArray = chunk->getComponentArray<LocalToWorld>();
+			for (auto i = 0u; i < mtxArray.Count(); ++i)
 			{
 				renderer->setD3DTransformBuffer(mtxArray[i].value);
 				renderer->d3dRender(rdID);
@@ -127,8 +127,8 @@ void RenderingSystem::onUpdate()
 
 
 	// オブジェクト描画
-	foreach<RenderData, WorldMatrix>(
-		[&renderer](RenderData& rd, WorldMatrix& mtxWorld)
+	foreach<RenderData, LocalToWorld>(
+		[&renderer](RenderData& rd, LocalToWorld& mtxWorld)
 		{
 			const auto* mat = renderer->getMaterial(rd.materialID);
 			const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, rd.meshID);

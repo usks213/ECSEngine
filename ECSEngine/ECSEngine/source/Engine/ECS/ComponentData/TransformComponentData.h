@@ -31,10 +31,19 @@ namespace ecs {
 		Vector3 value;
 	};
 
-	struct WorldMatrix : IComponentData
+	struct LocalToWorld : IComponentData
 	{
-		ECS_DECLARE_COMPONENT_DATA(WorldMatrix);
+		ECS_DECLARE_COMPONENT_DATA(LocalToWorld);
 		Matrix value;
 	};
 
+	struct LocalToParent : IComponentData
+	{
+		ECS_DECLARE_COMPONENT_DATA(LocalToParent);
+		//Matrix value;
+		Entity parent;
+		LocalToParent(Entity& entity) : 
+			parent(entity)
+		{}
+	};
 }

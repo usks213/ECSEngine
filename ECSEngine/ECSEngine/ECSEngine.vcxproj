@@ -185,6 +185,7 @@
     <ClCompile Include="source\Engine\ECS\Base\World.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\WorldManager.cpp" />
     <ClCompile Include="source\Engine\ECS\System\ImguiSystem.cpp" />
+    <ClCompile Include="source\Engine\ECS\System\ParentSystem.cpp" />
     <ClCompile Include="source\Engine\ECS\System\RenderingSystem.cpp" />
     <ClCompile Include="source\Engine\ECS\System\TransformSystem.cpp" />
     <ClCompile Include="source\Engine\Engine.cpp" />
@@ -237,6 +238,7 @@
     <ClInclude Include="source\Engine\ECS\ComponentData\RenderingComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\TransformComponentData.h" />
     <ClInclude Include="source\Engine\ECS\System\ImguiSystem.h" />
+    <ClInclude Include="source\Engine\ECS\System\ParentSystem.h" />
     <ClInclude Include="source\Engine\ECS\System\RenderingSystem.h" />
     <ClInclude Include="source\Engine\ECS\System\TransformSystem.h" />
     <ClInclude Include="source\Engine\Engine.h" />

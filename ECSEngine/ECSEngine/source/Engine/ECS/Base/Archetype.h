@@ -245,7 +245,7 @@ namespace ecs {
 		/// @brief 型情報からインデックスを取得
 		/// @param info 型情報
 		/// @return 一致したインデックス
-		constexpr std::size_t getIndexByTypeInfo(const TypeInfo info) const
+		[[nodiscard]] constexpr std::size_t getIndexByTypeInfo(const TypeInfo info) const
 		{
 			for (size_t i = 0; i < m_ArchetypeSize; ++i)
 			{

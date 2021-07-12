@@ -27,8 +27,8 @@ void TransformSystem::onDestroy()
 /// @brief çXêV
 void TransformSystem::onUpdate()
 {
-	foreach<Position, Rotation, Scale, WorldMatrix>(
-		[](Position& pos, Rotation& rot, Scale& sca, WorldMatrix& mtxWorld)
+	foreach<Position, Rotation, Scale, LocalToWorld>(
+		[](Position& pos, Rotation& rot, Scale& sca, LocalToWorld& mtxWorld)
 		{
 			// ägèk
 			mtxWorld.value = Matrix::CreateScale(sca.value);
