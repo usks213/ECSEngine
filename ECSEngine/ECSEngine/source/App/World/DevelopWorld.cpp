@@ -197,6 +197,7 @@ void DevelopWorld::Start()
 	//auto texID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(D3D::SHADER_TEX_SLOT_MAIN, texID, EShaderStage::PS);
 	mat->setTexture("_MainTexture", texID);
+	unlit->setTexture("_MainTexture", texID);
 
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, EShaderStage::PS);
@@ -211,6 +212,10 @@ void DevelopWorld::Start()
 	MeshID meshSky = renderer->createMesh("SkyDome");
 	auto* pSky = renderer->getMesh(meshSky);
 	Geometry::SkyDome(*pSky, 36, 1.0f);
+
+	MeshID meshPlane = renderer->createMesh("Plane");
+	auto* pPlaneMesh = renderer->getMesh(meshPlane);
+	Geometry::Plane(*pPlaneMesh);
 
 	// レンダーバッファの生成
 	auto rdID = renderer->createRenderBuffer(shaderLitID, meshID);
@@ -239,16 +244,33 @@ void DevelopWorld::Start()
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	std::strcpy(name.value, "SkyDome");
 
+	auto sky = getEntityManager()->createEntity(archetype);
+	getEntityManager()->setComponentData<Position>(sky, pos);
+	getEntityManager()->setComponentData<Scale>(sky, scale);
+	getEntityManager()->setComponentData<Rotation>(sky, rot);
+	getEntityManager()->setComponentData(sky, rdSky);
+	getEntityManager()->setComponentData(sky, name);
+
+	// 床
+	scale.value = Vector3(1, 1, 1);
+	rot.value = Quaternion::CreateFromYawPitchRoll(0, 3.1415f, 0);
+	std::strcpy(name.value, "Plane");
+	RenderData rdPlane;
+	rdPlane.materialID = matUnlitID;
+	rdPlane.meshID = meshPlane;
+
 	auto plane = getEntityManager()->createEntity(archetype);
 	getEntityManager()->setComponentData<Position>(plane, pos);
 	getEntityManager()->setComponentData<Scale>(plane, scale);
 	getEntityManager()->setComponentData<Rotation>(plane, rot);
-	getEntityManager()->setComponentData(plane, rdSky);
+	getEntityManager()->setComponentData(plane, rdPlane);
 	getEntityManager()->setComponentData(plane, name);
 
+
+	// オブジェクト
 	scale.value = Vector3(1, 1, 1);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
-	pos.value.y = 0;
+	pos.value.y = 2;
 	archetype = Archetype::create<Position, Rotation, Scale, WorldMatrix, Name>();
 	archetype.addType<ObjectTag>();
 	archetype.addTag(objBitchID);
@@ -256,7 +278,7 @@ void DevelopWorld::Start()
 	std::strcpy(name.value, "Sphere");
 
 	// オブジェクトの生成
-	int num = 10;
+	int num = 1;
 	for (int x = 0; x < num; ++x)
 	{
 		for (int y = 0; y < num; ++y)
@@ -266,7 +288,7 @@ void DevelopWorld::Start()
 				auto entity = getEntityManager()->createEntity(archetype);
 
 				pos.value.x = x * 2;
-				pos.value.y = y * 2;
+				pos.value.y = y * 2 + 2;
 				pos.value.z = z * 2;
 				getEntityManager()->setComponentData<Position>(entity, pos);
 				getEntityManager()->setComponentData<Scale>(entity, scale);

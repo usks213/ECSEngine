@@ -97,8 +97,8 @@ D3D11RendererManager::D3D11RendererManager() :
 	m_bUseMSAA(false),
 	m_curD3DShader(nullptr),
 	m_curBlendState(EBlendState::NONE),
-	m_curRasterizeState(ERasterizeState::CULL_BACK),
-	m_curDepthStencilState(EDepthStencilState::ENABLE_TEST_AND_ENABLE_WRITE)
+	m_curRasterizeState(ERasterizeState::CULL_NONE),
+	m_curDepthStencilState(EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE)
 {
 }
 

@@ -16,6 +16,82 @@ struct VERTEX_3D
 	XMFLOAT2 tex;		// テクスチャ座標
 };
 
+void Geometry::Plane(Mesh& out, int split, float size, float texSize)
+{
+	int nNumBlockX = split;
+	int nNumBlockZ = split;
+	float fSizeBlockX = size;
+	float fSizeBlockZ = size;
+	float fTexSizeX = texSize;
+	float fTexSizeZ = texSize;
+
+	// プリミティブ種別設定
+	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
+	// 頂点数の設定
+	out.m_vertexCount = (nNumBlockX + 1) * (nNumBlockZ + 1);
+	// インデックス数の設定(縮退ポリゴン用を考慮する)
+	out.m_indexCount = (nNumBlockX + 1) * 2 * nNumBlockZ + (nNumBlockZ - 1) * 2;
+	// 頂点配列の作成
+	VERTEX_3D* pVertexWk = new VERTEX_3D[out.m_vertexCount];
+	// インデックス配列の作成
+	int* pIndexWk = new int[out.m_indexCount];
+	// 頂点配列の中身を埋める
+	VERTEX_3D* pVtx = pVertexWk;
+
+
+	for (int z = 0; z < nNumBlockZ + 1; ++z) {
+		for (int x = 0; x < nNumBlockX + 1; ++x) {
+
+			// 頂点座標の設定
+			pVtx->vtx.x = x * fSizeBlockX - (nNumBlockX * 0.5f) * fSizeBlockX;
+			pVtx->vtx.y = 0.0f;
+			pVtx->vtx.z = -z * fSizeBlockZ + (nNumBlockZ * 0.5f) * fSizeBlockZ;
+			// 法線の設定
+			pVtx->nor = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			// 反射光の設定
+			pVtx->diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx->tex.x = fTexSizeX * x;
+			pVtx->tex.y = fTexSizeZ * z;
+			++pVtx;
+		}
+	}
+	//インデックス配列の中身を埋める
+	int* pIdx = pIndexWk;
+	for (int z = 0; z < nNumBlockZ; ++z) {
+		if (z > 0) {
+			// 縮退ポリゴンのためのダブりの設定
+			*pIdx++ = (z + 1) * (nNumBlockX + 1);
+		}
+		for (int x = 0; x < nNumBlockX + 1; ++x) {
+			*pIdx++ = (z + 1) * (nNumBlockX + 1) + x;
+			*pIdx++ = z * (nNumBlockX + 1) + x;
+		}
+		if (z < nNumBlockZ - 1) {
+			// 縮退ポリゴンのためのダブりの設定
+			*pIdx++ = z * (nNumBlockX + 1) + nNumBlockX;
+		}
+	}
+
+	// 頂点生成
+	for (auto i = 0u; i < out.m_vertexCount; ++i)
+	{
+		out.m_vertexData.positions.push_back(pVertexWk[i].vtx);
+		out.m_vertexData.normals.push_back(pVertexWk[i].nor);
+		out.m_vertexData.texcoord0s.push_back(pVertexWk[i].tex);
+		out.m_vertexData.colors.push_back(pVertexWk[i].diffuse);
+	}
+
+	// インデックス
+	for (auto i = 0u; i < out.m_indexCount; ++i)
+	{
+		out.m_indexData.push_back(pIndexWk[i]);
+	}
+
+	// 一時配列の解放
+	delete[] pVertexWk;
+	delete[] pIndexWk;
+}
 
 void Geometry::Cube(Mesh& out)
 {
