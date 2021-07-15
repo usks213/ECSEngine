@@ -46,7 +46,7 @@ void RenderingSystem::onUpdate()
 		[&mainCamera, &cameraPos, &engine](Camera& camera, Transform& transform)
 		{
 			// ビューマトリックス更新
-			Matrix mtxWorld = transform.LocalToWorld * transform.LocalToParent;
+			Matrix mtxWorld = transform.globalMatrix;
 			Vector3 pos = mtxWorld.Translation();
 			Vector3 target = pos + mtxWorld.Forward();
 			Vector3 up = mtxWorld.Up();
@@ -120,7 +120,8 @@ void RenderingSystem::onUpdate()
 			auto mtxArray = chunk->getComponentArray<Transform>();
 			for (auto i = 0u; i < mtxArray.Count(); ++i)
 			{
-				renderer->setD3DTransformBuffer(mtxArray[i].LocalToWorld * mtxArray[i].LocalToParent);
+				Matrix scale = Matrix::CreateScale(mtxArray[i].globalScale);
+				renderer->setD3DTransformBuffer(scale * mtxArray[i].globalMatrix);
 				renderer->d3dRender(rdID);
 			}
 		}
@@ -136,7 +137,8 @@ void RenderingSystem::onUpdate()
 
 			renderer->setD3D11Material(rd.materialID);
 
-			renderer->setD3DTransformBuffer(transform.LocalToWorld * transform.LocalToParent);
+			Matrix scale = Matrix::CreateScale(transform.globalScale);
+			renderer->setD3DTransformBuffer(scale * transform.globalMatrix);
 
 			renderer->setD3D11RenderBuffer(rdID);
 

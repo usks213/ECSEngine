@@ -83,13 +83,13 @@ public:
 					float SCREEN_HEIGHT = m_pWorld->getWorldManager()->getEngine()->getWindowHeight();
 
 					// 向き
-					Vector3 vPos = transform.LocalToWorld.Translation();
-					Vector3 right = transform.LocalToWorld.Right();
+					Vector3 vPos = transform.localMatrix.Translation();
+					Vector3 right = transform.localMatrix.Right();
 					Vector3 up = Vector3(0, 1, 0);
-					Vector3 forward = transform.LocalToWorld.Forward();
+					Vector3 forward = transform.localMatrix.Forward();
 					Vector3 vLook = vPos + forward;
 					float focus = 0.0f;
-					transform.LocalToWorld.Up(up);
+					transform.localMatrix.Up(up);
 
 					// 速度
 					float moveSpeed = 1.0f / 60.0f * 5;
@@ -322,7 +322,7 @@ void DevelopWorld::Start()
 	// 腿左
 	auto ThighLeft = getGameObjectManager()->createGameObject("Thigh Left", archetypeHuman);
 	getGameObjectManager()->SetParent(ThighLeft, Waist);
-	pos.value = Vector3(-0.25f, -1.25f, 0);
+	pos.value = Vector3(-1.5f, -2.5f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.3f, 1.2f, 0.8f);
 	getGameObjectManager()->setComponentData<Transform>(ThighLeft, Transform(ThighLeft));
@@ -333,7 +333,7 @@ void DevelopWorld::Start()
 	// 足左
 	auto LegLeft = getGameObjectManager()->createGameObject("Leg Left", archetypeHuman);
 	getGameObjectManager()->SetParent(LegLeft, ThighLeft);
-	pos.value = Vector3(-0.0f, -1.25f, 0);
+	pos.value = Vector3(-0.0f, -3.0f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.6f, 1.2f, 0.8f);
 	getGameObjectManager()->setComponentData<Transform>(LegLeft, Transform(LegLeft));
@@ -344,7 +344,7 @@ void DevelopWorld::Start()
 	// 腿右
 	auto ThighRight = getGameObjectManager()->createGameObject("Thigh Right", archetypeHuman);
 	getGameObjectManager()->SetParent(ThighRight, Waist);
-	pos.value = Vector3(0.25f, -1.25f, 0);
+	pos.value = Vector3(1.5f, -2.5f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.3f, 1.2f, 0.8f);
 	getGameObjectManager()->setComponentData<Transform>(ThighRight, Transform(ThighRight));
@@ -355,7 +355,7 @@ void DevelopWorld::Start()
 	// 足右
 	auto LegRight = getGameObjectManager()->createGameObject("Leg Right", archetypeHuman);
 	getGameObjectManager()->SetParent(LegRight, ThighRight);
-	pos.value = Vector3(0.0f, -1.25f, 0);
+	pos.value = Vector3(0.0f, -3.0f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.6f, 1.2f, 0.8f);
 	getGameObjectManager()->setComponentData<Transform>(LegRight, Transform(LegRight));
@@ -366,7 +366,7 @@ void DevelopWorld::Start()
 	// 体
 	auto Body = getGameObjectManager()->createGameObject("Body", archetypeHuman);
 	getGameObjectManager()->SetParent(Body, Waist);
-	pos.value = Vector3(0.0f, 2.15f, 0);
+	pos.value = Vector3(0.0f, 4.25f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.8f, 3.0f, 0.8f);
 	getGameObjectManager()->setComponentData<Transform>(Body, Transform(Body));
@@ -377,7 +377,7 @@ void DevelopWorld::Start()
 	// 頭
 	auto Head = getGameObjectManager()->createGameObject("Head", archetypeHuman);
 	getGameObjectManager()->SetParent(Head, Body);
-	pos.value = Vector3(0.0f, 0.65f, 0);
+	pos.value = Vector3(0.0f, 3.85f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.4f, 0.25f, 0.8f);
 	getGameObjectManager()->setComponentData<Transform>(Head, Transform(Head));
@@ -388,15 +388,46 @@ void DevelopWorld::Start()
 	// 肩左
 	auto ShoulderLeft = getGameObjectManager()->createGameObject("Shoulder Left", archetypeHuman);
 	getGameObjectManager()->SetParent(ShoulderLeft, Body);
-	pos.value = Vector3(0.65f, 0.4f, 0);
+	pos.value = Vector3(-2.55f, 2.0f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
-	scale.value = Vector3(0.2f, 0.2f, 0.7f);
+	scale.value = Vector3(0.25f, 0.25f, 0.8f);
 	getGameObjectManager()->setComponentData<Transform>(ShoulderLeft, Transform(ShoulderLeft));
 	getGameObjectManager()->setComponentData<Position>(ShoulderLeft, pos);
 	getGameObjectManager()->setComponentData<Scale>(ShoulderLeft, scale);
 	getGameObjectManager()->setComponentData<Rotation>(ShoulderLeft, rot);
 
+	// 肩右
+	auto ShoulderRight = getGameObjectManager()->createGameObject("Shoulder Right", archetypeHuman);
+	getGameObjectManager()->SetParent(ShoulderRight, Body);
+	pos.value = Vector3(2.55f, 2.0f, 0);
+	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	scale.value = Vector3(0.25f, 0.25f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(ShoulderRight, Transform(ShoulderRight));
+	getGameObjectManager()->setComponentData<Position>(ShoulderRight, pos);
+	getGameObjectManager()->setComponentData<Scale>(ShoulderRight, scale);
+	getGameObjectManager()->setComponentData<Rotation>(ShoulderRight, rot);
 
+	// 腕左
+	auto ArmLeft = getGameObjectManager()->createGameObject("Arm Left", archetypeHuman);
+	getGameObjectManager()->SetParent(ArmLeft, ShoulderLeft);
+	pos.value = Vector3(-3.1f, 0, 0);
+	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	scale.value = Vector3(5.0f, 0.75f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(ArmLeft, Transform(ArmLeft));
+	getGameObjectManager()->setComponentData<Position>(ArmLeft, pos);
+	getGameObjectManager()->setComponentData<Scale>(ArmLeft, scale);
+	getGameObjectManager()->setComponentData<Rotation>(ArmLeft, rot);
+
+	// 腕左
+	auto ArmRight = getGameObjectManager()->createGameObject("Arm Right", archetypeHuman);
+	getGameObjectManager()->SetParent(ArmRight, ShoulderRight);
+	pos.value = Vector3(3.1f, 0, 0);
+	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	scale.value = Vector3(5.0f, 0.75f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(ArmRight, Transform(ArmRight));
+	getGameObjectManager()->setComponentData<Position>(ArmRight, pos);
+	getGameObjectManager()->setComponentData<Scale>(ArmRight, scale);
+	getGameObjectManager()->setComponentData<Rotation>(ArmRight, rot);
 
 	// システムの追加
 	addSystem<ImguiSystem>();

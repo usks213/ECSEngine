@@ -31,11 +31,14 @@ void TransformSystem::onUpdate()
 		[](Position& pos, Rotation& rot, Scale& sca, Transform& transform)
 		{
 			// 拡縮
-			transform.LocalToWorld = Matrix::CreateScale(sca.value);
+			//transform.localMatrix = Matrix::CreateScale(sca.value);
+			transform.localScale = transform.globalScale = sca.value;
 			// 回転
-			transform.LocalToWorld *= Matrix::CreateFromQuaternion(rot.value);
+			transform.localMatrix = Matrix::CreateFromQuaternion(rot.value);
 			// 移動
-			transform.LocalToWorld *= Matrix::CreateTranslation(pos.value);
+			transform.localMatrix *= Matrix::CreateTranslation(pos.value);
+			// グローバルマトリックス更新
+			transform.globalMatrix = transform.localMatrix;
 		});
 }
 

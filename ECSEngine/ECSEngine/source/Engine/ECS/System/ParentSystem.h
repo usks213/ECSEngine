@@ -8,7 +8,8 @@
 #pragma once
 
 #include <Engine/ECS/Base/SystemBase.h>
-#include <Engine/Utility/Mathf.h>
+#include <Engine/ECS/ComponentData/TransformComponentData.h>
+
 
 namespace ecs {
 
@@ -31,6 +32,6 @@ namespace ecs {
 		void onUpdate() override;
 
 	private:
-		void updateChild(const GameObjectID& parent, const Matrix& mtxParent);
+		void updateChild(const GameObjectID& parent, const Transform& parentTransform);
 	};
 }

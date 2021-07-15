@@ -18,10 +18,12 @@ namespace ecs {
 	{
 		ECS_DECLARE_COMPONENT_DATA(Transform);
 		GameObjectID	id;
-		Matrix			LocalToWorld;
-		Matrix			LocalToParent;
+		Matrix			localMatrix;
+		Matrix			globalMatrix;
+		Vector3			localScale;
+		Vector3			globalScale;
 		Transform(const GameObjectID& id) :
-			id(id)
+			id(id), localScale(1,1,1), globalScale(1,1,1)
 		{
 		}
 	};

@@ -24,8 +24,8 @@ using namespace ecs;
 
 /// @brief 型チェック
 #define CheckType(Type) typeName == TypeToString(Type)
-void EditTransform(Camera& camera, Matrix& matrix);
-void EditTransform(Camera& camera, Matrix& worldmatrix, Vector3& pos, Quaternion& rot, Vector3& scale);
+void EditTransform(Camera& camera, Transform& transform);
+void EditTransform(Camera& camera, Transform& transform, Vector3& pos, Quaternion& rot, Vector3& scale);
 
  /// @brief 生成時
 void ImguiSystem::onCreate()
@@ -153,11 +153,11 @@ void ImguiSystem::onUpdate()
 		// トランスフォームデータ情報
 		if (pos && rot && scale && transform)
 		{
-			EditTransform(*m_MainCamera, transform->LocalToWorld, pos->value, rot->value, scale->value);
+			EditTransform(*m_MainCamera, *transform, pos->value, rot->value, scale->value);
 		}
 		else if (transform)
 		{
-			EditTransform(*m_MainCamera, transform->LocalToWorld);
+			EditTransform(*m_MainCamera, *transform);
 		}
 
 		// コンポーネントデータ情報
@@ -343,11 +343,8 @@ void ImguiSystem::DispGui(std::string_view typeName, void* data)
 //
 //}
 
-void EditTransform(Camera& camera, Matrix& worldmatrix)
+void EditTransform(Camera& camera, Transform& transform)
 {
-	float* cameraView = (float*)&camera.view;
-	float* cameraProjection = (float*)&camera.projection;
-	float* matrix = (float*)&worldmatrix;
 	bool editTransformDecomposition = true;
 
 	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
@@ -360,45 +357,17 @@ void EditTransform(Camera& camera, Matrix& worldmatrix)
 	static bool boundSizingSnap = false;
 
 	static bool useWindow = false;
-
 	int gizmoCount = 1;
-	const float identityMatrix[16] =
-	{ 1.f, 0.f, 0.f, 0.f,
-		0.f, 1.f, 0.f, 0.f,
-		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.f, 0.f, 1.f };
 	float camDistance = 8.0f;
-
-	float objectMatrix[4][16] = {
-  { 1.f, 0.f, 0.f, 0.f,
-	0.f, 1.f, 0.f, 0.f,
-	0.f, 0.f, 1.f, 0.f,
-	0.f, 0.f, 0.f, 1.f },
-
-  { 1.f, 0.f, 0.f, 0.f,
-  0.f, 1.f, 0.f, 0.f,
-  0.f, 0.f, 1.f, 0.f,
-  2.f, 0.f, 0.f, 1.f },
-
-  { 1.f, 0.f, 0.f, 0.f,
-  0.f, 1.f, 0.f, 0.f,
-  0.f, 0.f, 1.f, 0.f,
-  2.f, 0.f, 2.f, 1.f },
-
-  { 1.f, 0.f, 0.f, 0.f,
-  0.f, 1.f, 0.f, 0.f,
-  0.f, 0.f, 1.f, 0.f,
-  0.f, 0.f, 2.f, 1.f }
-	};
 
 
 	if (editTransformDecomposition)
 	{
-		if (ImGui::IsKeyPressed(90))
+		if (ImGui::IsKeyPressed('1'))
 			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		if (ImGui::IsKeyPressed(69))
+		if (ImGui::IsKeyPressed('2'))
 			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		if (ImGui::IsKeyPressed(82)) // r Key
+		if (ImGui::IsKeyPressed('3')) // r Key
 			mCurrentGizmoOperation = ImGuizmo::SCALE;
 		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
 			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -409,37 +378,38 @@ void EditTransform(Camera& camera, Matrix& worldmatrix)
 		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
 			mCurrentGizmoOperation = ImGuizmo::SCALE;
 		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-		ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
+		ImGuizmo::DecomposeMatrixToComponents(&transform.globalMatrix.m[0][0], matrixTranslation, matrixRotation, matrixScale);
 		ImGui::InputFloat3("Tr", matrixTranslation);
 		ImGui::InputFloat3("Rt", matrixRotation);
-		ImGui::InputFloat3("Sc", matrixScale);
-		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix);
+		ImGui::InputFloat3("Sc", (float*)&transform.globalScale);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform.globalMatrix.m[0][0]);
 
-		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-		{
-			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-				mCurrentGizmoMode = ImGuizmo::LOCAL;
-			ImGui::SameLine();
-			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-				mCurrentGizmoMode = ImGuizmo::WORLD;
-		}
-		if (ImGui::IsKeyPressed(83))
-			useSnap = !useSnap;
-		ImGui::Checkbox("", &useSnap);
-		ImGui::SameLine();
+		//if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+		//{
+		//	if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+		//		mCurrentGizmoMode = ImGuizmo::LOCAL;
+		//	ImGui::SameLine();
+		//	if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+		//		mCurrentGizmoMode = ImGuizmo::WORLD;
+		//}
+		//if (ImGui::IsKeyPressed('4'))
+		//	useSnap = !useSnap;
+		//ImGui::Checkbox("", &useSnap);
+		//ImGui::SameLine();
 
-		switch (mCurrentGizmoOperation)
-		{
-		case ImGuizmo::TRANSLATE:
-			ImGui::InputFloat3("Snap", &snap[0]);
-			break;
-		case ImGuizmo::ROTATE:
-			ImGui::InputFloat("Angle Snap", &snap[0]);
-			break;
-		case ImGuizmo::SCALE:
-			ImGui::InputFloat("Scale Snap", &snap[0]);
-			break;
-		}
+		//switch (mCurrentGizmoOperation)
+		//{
+		//case ImGuizmo::TRANSLATE:
+		//	ImGui::InputFloat3("Snap", &snap[0]);
+		//	break;
+		//case ImGuizmo::ROTATE:
+		//	ImGui::InputFloat("Angle Snap", &snap[0]);
+		//	break;
+		//case ImGuizmo::SCALE:
+		//	ImGui::InputFloat("Scale Snap", &snap[0]);
+		//	break;
+		//}
+
 		ImGui::Checkbox("Bound Sizing", &boundSizing);
 		if (boundSizing)
 		{
@@ -474,9 +444,25 @@ void EditTransform(Camera& camera, Matrix& worldmatrix)
 
 	//ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
 	//ImGuizmo::DrawCubes(cameraView, cameraProjection, &objectMatrix[0][0], gizmoCount);
-	ImGuizmo::Manipulate(cameraView, cameraProjection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 
-	ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+	// スケールの時は分ける
+	if (mCurrentGizmoOperation == ImGuizmo::SCALE)
+	{
+		Matrix mtxScale = Matrix::CreateScale(transform.globalScale);
+		mtxScale *= Matrix::CreateTranslation(transform.globalMatrix.Translation());
+		ImGuizmo::Manipulate(&camera.view.m[0][0], &camera.projection.m[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
+			&mtxScale.m[0][0], NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+		transform.globalScale.x = mtxScale.m[0][0];
+		transform.globalScale.y = mtxScale.m[1][1];
+		transform.globalScale.z = mtxScale.m[2][2];
+	}
+	else
+	{
+		ImGuizmo::Manipulate(&camera.view.m[0][0], &camera.projection.m[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
+			&transform.globalMatrix.m[0][0], NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+	}
+
+	ImGuizmo::ViewManipulate(&camera.view.m[0][0], camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 
 	if (useWindow)
 	{
@@ -485,13 +471,12 @@ void EditTransform(Camera& camera, Matrix& worldmatrix)
 	}
 }
 
-void EditTransform(Camera& camera, Matrix& worldmatrix, Vector3& pos, Quaternion& rot, Vector3& scale)
+void EditTransform(Camera& camera, Transform& transform, Vector3& pos, Quaternion& rot, Vector3& scale)
 {
-	float* cameraView = (float*)&camera.view;
-	float* cameraProjection = (float*)&camera.projection;
-	float* matrix = (float*)&worldmatrix;
-	bool editTransformDecomposition = true;
+	Matrix oldGlobalMatrix = transform.globalMatrix;
+	Vector3 oldGlobalScale = transform.globalScale;
 
+	bool editTransformDecomposition = true;
 	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 	static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 	static bool useSnap = false;
@@ -502,69 +487,58 @@ void EditTransform(Camera& camera, Matrix& worldmatrix, Vector3& pos, Quaternion
 	static bool boundSizingSnap = false;
 
 	static bool useWindow = false;
-
 	int gizmoCount = 1;
-	const float identityMatrix[16] =
-	{ 1.f, 0.f, 0.f, 0.f,
-		0.f, 1.f, 0.f, 0.f,
-		0.f, 0.f, 1.f, 0.f,
-		0.f, 0.f, 0.f, 1.f };
 	float camDistance = 8.0f;
+
 
 	if (editTransformDecomposition)
 	{
-		if (ImGui::IsKeyPressed(90))
-			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		if (ImGui::IsKeyPressed(69))
-			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		if (ImGui::IsKeyPressed(82)) // r Key
-			mCurrentGizmoOperation = ImGuizmo::SCALE;
+		//if (ImGui::IsKeyPressed('1'))
+		//	mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+		//if (ImGui::IsKeyPressed('2'))
+		//	mCurrentGizmoOperation = ImGuizmo::ROTATE;
+		//if (ImGui::IsKeyPressed('3')) // r Key
+		//	mCurrentGizmoOperation = ImGuizmo::SCALE;
 		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
 			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		ImGui::SameLine();
 		if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
 			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		//ImGui::SameLine();
-		/*if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-			mCurrentGizmoOperation = ImGuizmo::SCALE;*/
-
-		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-		ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
-
-		ImGui::InputFloat3("Position", (float*)&pos);
-		ImGui::InputFloat3("Rotation", matrixRotation, "%.3f", ImGuiInputTextFlags_::ImGuiInputTextFlags_ReadOnly);
-		ImGui::DragFloat3("Scale", (float*)&scale);
-		
-		worldmatrix = Matrix::CreateScale(1,1,1);
-		worldmatrix *= Matrix::CreateFromQuaternion(rot);
-		worldmatrix *= Matrix::CreateTranslation(pos);
-		matrix = (float*)&worldmatrix;
-
-		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-		{
-			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-				mCurrentGizmoMode = ImGuizmo::LOCAL;
-			ImGui::SameLine();
-			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-				mCurrentGizmoMode = ImGuizmo::WORLD;
-		}
-		if (ImGui::IsKeyPressed(83))
-			useSnap = !useSnap;
-		ImGui::Checkbox("", &useSnap);
 		ImGui::SameLine();
+		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+			mCurrentGizmoOperation = ImGuizmo::SCALE;
+		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+		ImGuizmo::DecomposeMatrixToComponents(&transform.globalMatrix.m[0][0], matrixTranslation, matrixRotation, matrixScale);
+		ImGui::InputFloat3("Tr", matrixTranslation);
+		ImGui::InputFloat3("Rt", matrixRotation);
+		ImGui::InputFloat3("Sc", (float*)&transform.globalScale);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform.globalMatrix.m[0][0]);
 
-		switch (mCurrentGizmoOperation)
-		{
-		case ImGuizmo::TRANSLATE:
-			ImGui::InputFloat3("Snap", &snap[0]);
-			break;
-		case ImGuizmo::ROTATE:
-			ImGui::InputFloat("Angle Snap", &snap[0]);
-			break;
-		case ImGuizmo::SCALE:
-			ImGui::InputFloat("Scale Snap", &snap[0]);
-			break;
-		}
+		//if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+		//{
+		//	if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+		//		mCurrentGizmoMode = ImGuizmo::LOCAL;
+		//	ImGui::SameLine();
+		//	if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+		//		mCurrentGizmoMode = ImGuizmo::WORLD;
+		//}
+		//if (ImGui::IsKeyPressed('B'))
+		//	useSnap = !useSnap;
+		//ImGui::Checkbox("", &useSnap);
+		//ImGui::SameLine();
+
+		//switch (mCurrentGizmoOperation)
+		//{
+		//case ImGuizmo::TRANSLATE:
+		//	ImGui::InputFloat3("Snap", &snap[0]);
+		//	break;
+		//case ImGuizmo::ROTATE:
+		//	ImGui::InputFloat("Angle Snap", &snap[0]);
+		//	break;
+		//case ImGuizmo::SCALE:
+		//	ImGui::InputFloat("Scale Snap", &snap[0]);
+		//	break;
+		//}
 		ImGui::Checkbox("Bound Sizing", &boundSizing);
 		if (boundSizing)
 		{
@@ -599,15 +573,32 @@ void EditTransform(Camera& camera, Matrix& worldmatrix, Vector3& pos, Quaternion
 
 	//ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
 	//ImGuizmo::DrawCubes(cameraView, cameraProjection, &objectMatrix[0][0], gizmoCount);
-	ImGuizmo::Manipulate(cameraView, cameraProjection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
-	//worldmatrix = Matrix::CreateScale(scale);
-	//worldmatrix *= Matrix::CreateFromYawPitchRoll(angle.y, angle.x, angle.z);
-	//worldmatrix *= Matrix::CreateTranslation(pos);
-	//matrix = (float*)&worldmatrix;
-	pos = worldmatrix.Translation();
-	rot = Quaternion::CreateFromRotationMatrix(worldmatrix);
 
-	ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+	// スケールの時は分ける
+	if (mCurrentGizmoOperation == ImGuizmo::SCALE)
+	{
+		Matrix mtxScale = Matrix::CreateScale(transform.globalScale);
+		mtxScale *= Matrix::CreateTranslation(transform.globalMatrix.Translation());
+		ImGuizmo::Manipulate(&camera.view.m[0][0], &camera.projection.m[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
+			&mtxScale.m[0][0], NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+		// 変更差分を反映
+		scale.x += mtxScale.m[0][0] - oldGlobalScale.x;
+		scale.y += mtxScale.m[1][1] - oldGlobalScale.y;
+		scale.z += mtxScale.m[2][2] - oldGlobalScale.z;
+	}
+	else
+	{
+		ImGuizmo::Manipulate(&camera.view.m[0][0], &camera.projection.m[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
+			&transform.globalMatrix.m[0][0], NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+		// 変更差分を反映
+		pos += transform.globalMatrix.Translation() - oldGlobalMatrix.Translation();
+		Quaternion newQ = Quaternion::CreateFromRotationMatrix(transform.globalMatrix);
+		Quaternion oldQ = Quaternion::CreateFromRotationMatrix(oldGlobalMatrix);
+		oldQ.Inverse(oldQ);
+		rot *= newQ * oldQ;
+	}
+
+	ImGuizmo::ViewManipulate(&camera.view.m[0][0], camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 
 	if (useWindow)
 	{
