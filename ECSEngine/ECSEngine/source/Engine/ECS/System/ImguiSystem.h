@@ -18,6 +18,8 @@ namespace ecs {
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド
 		explicit ImguiSystem(World* pWorld):
+			m_MainCamera(nullptr), 
+			m_selectObjectID(NONE_GAME_OBJECT_ID),
 			SystemBase(pWorld)
 		{}
 		/// デストラクタ
@@ -38,6 +40,7 @@ namespace ecs {
 
 		void DispChilds(const GameObjectID parentID);
 
-		Camera* m_MainCamera;
+		Camera*			m_MainCamera;
+		GameObjectID	m_selectObjectID;
 	};
 }

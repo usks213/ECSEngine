@@ -82,8 +82,11 @@ GameObjectID GameObjectManager::GetParent(const GameObjectID& gameObjectID)
 /// @param gameObjectID 自身
 void GameObjectManager::ResetParent(const GameObjectID& gameObjectID)
 {
-	// 親の子から自身を削除
+	// 親の取得
 	auto parent = m_game0bjectMap[gameObjectID]->GetParentID();
+	if (parent == NONE_GAME_OBJECT_ID) return;
+
+	// 親の子から自身を削除
 	m_game0bjectMap[parent]->RemoveChildID(gameObjectID);
 	// 親を初期化
 	m_game0bjectMap[gameObjectID]->ResetParentID();

@@ -57,6 +57,10 @@ namespace ecs {
 		/// @return –¼‘O
 		std::string_view getName() { return m_name; }
 
+		/// @brief q‚Ì”‚ğæ“¾
+		/// @return q‚Ì”
+		std::size_t getChildCount() { return m_childsID.size(); }
+
 	protected:
 
 
