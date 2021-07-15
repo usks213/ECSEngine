@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Engine/ECS/Base/SystemBase.h>
+#include <Engine/Utility/Mathf.h>
 
 namespace ecs {
 
@@ -30,6 +31,6 @@ namespace ecs {
 		void onUpdate() override;
 
 	private:
-
+		void updateChild(const GameObjectID& parent, const Matrix& mtxParent);
 	};
 }

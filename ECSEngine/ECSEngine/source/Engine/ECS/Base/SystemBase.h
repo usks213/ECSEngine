@@ -8,6 +8,7 @@
 #pragma once
 
 #include "EntityManager.h"
+#include "GameObjectManager.h"
 
 
 namespace ecs {
@@ -42,6 +43,10 @@ namespace ecs {
 		/// @brief エンティティマネージャー取得
 		/// @return エンティティマネージャー
 		[[nodiscard]] EntityManager* getEntityManager() const;
+
+		/// @brief ゲームオブジェクトマネージャー取得
+		/// @return ゲームオブジェクトマネージャー
+		[[nodiscard]] GameObjectManager* getGameObjectManager() const;
 
 		/// @brief 更新順設定
 		/// @param 更新番号

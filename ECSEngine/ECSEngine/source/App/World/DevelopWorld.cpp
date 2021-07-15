@@ -11,6 +11,7 @@
 
 #include <Engine/ECS/Base/WorldManager.h>
 #include <Engine/ECS/Base/EntityManager.h>
+#include <Engine/ECS/Base/GameObjectManager.h>
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/RenderingComponentData.h>
@@ -134,7 +135,7 @@ public:
 					}
 
 					// 移動
-					if (GetMouseButton(MOUSEBUTTON_R))
+					if (GetMouseButton(MOUSEBUTTON_R) || GetKeyPress(VK_SHIFT))
 					{
 						if (GetKeyPress(VK_SHIFT))
 						{
@@ -192,6 +193,17 @@ void DevelopWorld::Start()
 	auto matSkyID = renderer->createMaterial("SkyDome", shaderSkyID);
 	Material* skyMat = renderer->getMaterial(matSkyID);
 
+	renderer->createTextureFromFile("data/texture/wall000.jpg");
+	renderer->createTextureFromFile("data/texture/wall001.jpg");
+	renderer->createTextureFromFile("data/texture/wall002.jpg");
+	renderer->createTextureFromFile("data/texture/wall003.jpg");
+	renderer->createTextureFromFile("data/texture/wall004.jpg");
+
+	renderer->createTextureFromFile("data/texture/field000.jpg");
+	renderer->createTextureFromFile("data/texture/field001.jpg");
+	renderer->createTextureFromFile("data/texture/field002.jpg");
+	renderer->createTextureFromFile("data/texture/field003.jpg");
+	renderer->createTextureFromFile("data/texture/field004.jpg");
 
 	// テクスチャの読み込み
 	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
@@ -245,12 +257,12 @@ void DevelopWorld::Start()
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	std::strcpy(name.value, "SkyDome");
 
-	auto sky = getEntityManager()->createEntity(archetype);
-	getEntityManager()->setComponentData<Position>(sky, pos);
-	getEntityManager()->setComponentData<Scale>(sky, scale);
-	getEntityManager()->setComponentData<Rotation>(sky, rot);
-	getEntityManager()->setComponentData(sky, rdSky);
-	getEntityManager()->setComponentData(sky, name);
+	auto sky = getGameObjectManager()->createGameObject("SkyDome", archetype);
+	getGameObjectManager()->setComponentData<Position>(sky, pos);
+	getGameObjectManager()->setComponentData<Scale>(sky, scale);
+	getGameObjectManager()->setComponentData<Rotation>(sky, rot);
+	getGameObjectManager()->setComponentData(sky, rdSky);
+	getGameObjectManager()->setComponentData(sky, name);
 
 	// 床
 	scale.value = Vector3(1, 1, 1);
@@ -260,43 +272,46 @@ void DevelopWorld::Start()
 	rdPlane.materialID = matUnlitID;
 	rdPlane.meshID = meshPlane;
 
-	auto plane = getEntityManager()->createEntity(archetype);
-	getEntityManager()->setComponentData<Position>(plane, pos);
-	getEntityManager()->setComponentData<Scale>(plane, scale);
-	getEntityManager()->setComponentData<Rotation>(plane, rot);
-	getEntityManager()->setComponentData(plane, rdPlane);
-	getEntityManager()->setComponentData(plane, name);
+	auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
+	getGameObjectManager()->setComponentData<Position>(plane, pos);
+	getGameObjectManager()->setComponentData<Scale>(plane, scale);
+	getGameObjectManager()->setComponentData<Rotation>(plane, rot);
+	getGameObjectManager()->setComponentData(plane, rdPlane);
+	getGameObjectManager()->setComponentData(plane, name);
 
 
 	// オブジェクト
 	scale.value = Vector3(1, 1, 1);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	pos.value.y = 2;
-	archetype = Archetype::create<Position, Rotation, Scale, LocalToWorld, Name, LocalToParent>();
+	archetype = Archetype::create<Position, Rotation, Scale, LocalToWorld, Name>();
 	archetype.addType<ObjectTag>();
 	archetype.addTag(objBitchID);
 
 	std::strcpy(name.value, "Sphere");
 
 	// オブジェクトの生成
-	int num = 2;
+	int num = 3;
+	GameObjectID parent = plane;
 	for (int x = 0; x < num; ++x)
 	{
 		for (int y = 0; y < num; ++y)
 		{
 			for (int z = 0; z < num; ++z)
 			{
-				auto entity = getEntityManager()->createEntity(archetype);
+				auto entity = getGameObjectManager()->createGameObject("Sphere", archetype);
+				getGameObjectManager()->SetParent(entity, parent);
+				parent = entity;
 
 				pos.value.x = x * 2;
-				pos.value.y = y * 2 + 2;
+				pos.value.y = y * 2;
 				pos.value.z = z * 2;
-				getEntityManager()->setComponentData<Position>(entity, pos);
-				getEntityManager()->setComponentData<Scale>(entity, scale);
-				getEntityManager()->setComponentData<Rotation>(entity, rot);
-				//getEntityManager()->setComponentData(entity, rd);
-				getEntityManager()->setComponentData(entity, name);
-				getEntityManager()->setComponentData(entity, LocalToParent(plane));
+				getGameObjectManager()->setComponentData<Position>(entity, pos);
+				getGameObjectManager()->setComponentData<Scale>(entity, scale);
+				getGameObjectManager()->setComponentData<Rotation>(entity, rot);
+				//getGameObjectManager()->setComponentData(entity, rd);
+				getGameObjectManager()->setComponentData(entity, name);
+				//getGameObjectManager()->setComponentData<LocalToParent>(entity, LocalToParent(plane));
 			}
 		}
 	}
@@ -304,7 +319,7 @@ void DevelopWorld::Start()
 	// カメラ生成
 	Archetype cameraArchetype = Archetype::create<Position, Rotation, Scale, LocalToWorld, Camera, InputTag, Name>();
 
-	auto entity = getEntityManager()->createEntity(cameraArchetype);
+	auto entity = getGameObjectManager()->createGameObject("Camera" ,cameraArchetype);
 	Camera cameraData;
 	cameraData.isOrthographic = false;
 	cameraData.fovY = 45;
@@ -316,11 +331,23 @@ void DevelopWorld::Start()
 	rot.value = Quaternion::CreateFromYawPitchRoll(3.141592f, 0, 0);
 	std::strcpy(name.value, "Camera");
 
-	getEntityManager()->setComponentData<Position>(entity, pos);
-	getEntityManager()->setComponentData<Scale>(entity, scale);
-	getEntityManager()->setComponentData<Rotation>(entity, rot);
-	getEntityManager()->setComponentData(entity, cameraData);
-	getEntityManager()->setComponentData(entity, name);
+	getGameObjectManager()->setComponentData<Position>(entity, pos);
+	getGameObjectManager()->setComponentData<Scale>(entity, scale);
+	getGameObjectManager()->setComponentData<Rotation>(entity, rot);
+	getGameObjectManager()->setComponentData(entity, cameraData);
+	getGameObjectManager()->setComponentData(entity, name);
+
+
+	//--- ゲームオブジェクト
+	GameObjectID goID = getGameObjectManager()->createGameObject("GameObject", archetype);
+
+	getGameObjectManager()->setComponentData<GameObjectData>(goID, goID);
+	getGameObjectManager()->setComponentData<Position>(goID, pos);
+	getGameObjectManager()->setComponentData<Scale>(goID, scale);
+	getGameObjectManager()->setComponentData<Rotation>(goID, rot);
+	getGameObjectManager()->setComponentData(goID, name);
+	//getGameObjectManager()->setComponentData(goID, LocalToParent(plane));
+
 
 	// システムの追加
 	addSystem<ImguiSystem>();

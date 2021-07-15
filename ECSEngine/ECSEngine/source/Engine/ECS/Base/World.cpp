@@ -8,6 +8,7 @@
 
 #include "World.h"
 #include "EntityManager.h"
+#include "GameObjectManager.h"
 #include "SystemBase.h"
 #include <algorithm>
 
@@ -19,6 +20,7 @@ World::World(WorldManager* pWorldManager):
 	m_pWorldManager(pWorldManager)
 {
 	m_pEntityManager.reset(new EntityManager(this));
+	m_pGameObjectManager.reset(new GameObjectManager(this));
 }
 
 /// @brief デストラクタ
@@ -35,6 +37,13 @@ World::~World()
 EntityManager* World::getEntityManager() const
 {
 	return m_pEntityManager.get();
+}
+
+/// @brief ゲームオブジェクトマネージャーの取得
+/// @return ゲームオブジェクトマネージャー
+GameObjectManager* World::getGameObjectManager() const
+{
+	return m_pGameObjectManager.get();
 }
 
 /// @brief システムの更新

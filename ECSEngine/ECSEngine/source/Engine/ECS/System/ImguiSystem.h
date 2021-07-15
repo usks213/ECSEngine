@@ -36,6 +36,8 @@ namespace ecs {
 		/// @param data ÉfÅ[É^
 		void DispGui(std::string_view typeName, void* data);
 
+		void DispChilds(const GameObjectID parentID);
+
 		Camera* m_MainCamera;
 	};
 }

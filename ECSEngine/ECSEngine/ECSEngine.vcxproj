@@ -181,6 +181,8 @@
     <ClCompile Include="source\App\World\DevelopWorld.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\Chunk.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\EntityManager.cpp" />
+    <ClCompile Include="source\Engine\ECS\Base\GameObject.cpp" />
+    <ClCompile Include="source\Engine\ECS\Base\GameObjectManager.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\SystemBase.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\World.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\WorldManager.cpp" />
@@ -227,6 +229,8 @@
     <ClInclude Include="source\Engine\ECS\Base\Chunk.h" />
     <ClInclude Include="source\Engine\ECS\Base\ComponentArray.h" />
     <ClInclude Include="source\Engine\ECS\Base\EntityManager.h" />
+    <ClInclude Include="source\Engine\ECS\Base\GameObject.h" />
+    <ClInclude Include="source\Engine\ECS\Base\GameObjectManager.h" />
     <ClInclude Include="source\Engine\ECS\Base\IComponentData.h" />
     <ClInclude Include="source\Engine\ECS\Base\SystemBase.h" />
     <ClInclude Include="source\Engine\ECS\Base\TypeInfo.h" />

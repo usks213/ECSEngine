@@ -33,6 +33,25 @@ void ParentSystem::onUpdate()
 			auto* mtxParent = getEntityManager()->getComponentData<LocalToWorld>(parent.parent);
 			mtxWorld.value *= mtxParent->value;
 		});
+
+	for (const auto& id : m_pWorld->getGameObjectManager()->getRootList())
+	{
+		auto* mtxWorld = getGameObjectManager()->getComponentData<LocalToWorld>(id);
+		if (mtxWorld == nullptr) continue;
+		for (auto child : getGameObjectManager()->GetChilds(id))
+		{
+			updateChild(child, mtxWorld->value);
+		}
+	}
 }
 
+void ParentSystem::updateChild(const GameObjectID& parent, const Matrix& mtxParent)
+{
+	auto* mtxWorld = getGameObjectManager()->getComponentData<LocalToWorld>(parent);
+	mtxWorld->value *= mtxParent;
 
+	for (auto child : getGameObjectManager()->GetChilds(parent))
+	{
+		updateChild(child, mtxWorld->value);
+	}
+}

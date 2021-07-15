@@ -38,6 +38,13 @@ EntityManager* SystemBase::getEntityManager() const
 	return m_pWorld->getEntityManager();
 }
 
+/// @brief ゲームオブジェクトマネージャー取得
+/// @return ゲームオブジェクトマネージャー
+GameObjectManager* SystemBase::getGameObjectManager() const
+{
+	return m_pWorld->getGameObjectManager();
+}
+
 /// @brief 更新順設定
 /// @param 更新番号
 void SystemBase::setExecutionOrder(const int executionOrder)

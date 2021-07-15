@@ -12,6 +12,7 @@
 
 #include <string>
 #include <Engine/Engine.h>
+#include <Engine/ECS/Base/GameObjectManager.h>
 
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
@@ -41,13 +42,142 @@ void ImguiSystem::onDestroy()
 /// @brief 更新
 void ImguiSystem::onUpdate()
 {
-	ImGui::SetNextWindowBgAlpha(0.4f);
-	ImGui::Begin("Entity");
-
 	foreach<Camera>([this](Camera& camera)
 		{
 			m_MainCamera = &camera;
 		});
+
+	ImGui::SetNextWindowBgAlpha(0.4f);
+	ImGui::Begin("GameObject");
+	int nIndex = 0;
+	for (auto& root : m_pWorld->getGameObjectManager()->getRootList())
+	{
+		GameObject* gameObject = m_pWorld->getGameObjectManager()->getGameObjectMap()[root].get();
+		Entity entity(gameObject->m_chunkIndex, gameObject->m_index);
+		auto& chunkList = m_pWorld->getChunkList();
+		auto& chunk = chunkList[entity.m_chunkIndex];
+
+		std::string name(gameObject->getName());
+		ImGui::PushID(root);
+		//ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_NoTreePushOnOpen
+		//ImGui::TreeNodeEx();
+		if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
+		{
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+			{
+				GameObjectID index = root;
+				ImGui::SetDragDropPayload("DND_DEMO_CELL", &index, sizeof(GameObjectID));
+				ImGui::Text("Move Parent");
+
+				ImGui::EndDragDropSource();
+			}
+
+			Position* pos = nullptr;
+			Rotation* rot = nullptr;
+			Scale* scale = nullptr;
+			LocalToWorld* world = nullptr;
+			const auto& archetype = chunk.getArchetype();
+
+			// トランスフォームデータを持っているか
+			for (int i = 0; i < archetype.getArchetypeSize(); ++i)
+			{
+				const auto& type = archetype.getTypeInfo(i);
+				std::string_view typeName = type.getName();
+				void* data = chunk.getComponentData(type.getName(), entity.m_index);
+				if (CheckType(Position))			pos = (Position*)data;
+				else if (CheckType(Rotation))		rot = (Rotation*)data;
+				else if (CheckType(Scale))			scale = (Scale*)data;
+				else  if (CheckType(LocalToWorld))	world = (LocalToWorld*)data;
+			}
+
+			// トランスフォームデータ情報
+			if (pos && rot && scale && world)
+			{
+				EditTransform(*m_MainCamera, world->value, pos->value, rot->value, scale->value);
+				Matrix& m = world->value;
+			}
+			else if (world)
+			{
+				EditTransform(*m_MainCamera, world->value);
+			}
+
+			// コンポーネントデータ情報
+			for (int i = 0; i < archetype.getArchetypeSize(); ++i)
+			{
+				const auto& type = archetype.getTypeInfo(i);
+				ImGui::Text(type.getName().data());
+				DispGui(type.getName(), chunk.getComponentData(type.getName(), entity.m_index));
+			}
+
+			// 子のオブジェクト
+			DispChilds(root);
+			ImGui::TreePop();
+		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(GameObjectID));
+				GameObjectID payload_n = *(const GameObjectID*)payload->Data;
+				// 親子関係再構築
+				getGameObjectManager()->AddChild(root, payload_n);
+			}
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::PopID();
+
+		//if (ImGui::TreeNode((name + std::to_string(nIndex++)).c_str()))
+		//{
+		//	Position* pos = nullptr;
+		//	Rotation* rot = nullptr;
+		//	Scale* scale = nullptr;
+		//	LocalToWorld* world = nullptr;
+		//	const auto& archetype = chunk.getArchetype();
+
+		//	// トランスフォームデータを持っているか
+		//	for (int i = 0; i < archetype.getArchetypeSize(); ++i)
+		//	{
+		//		const auto& type = archetype.getTypeInfo(i);
+		//		std::string_view typeName = type.getName();
+		//		void* data = chunk.getComponentData(type.getName(), entity.m_index);
+		//		if (CheckType(Position))			pos = (Position*)data;
+		//		else if (CheckType(Rotation))		rot = (Rotation*)data;
+		//		else if (CheckType(Scale))			scale = (Scale*)data;
+		//		else  if (CheckType(LocalToWorld))	world = (LocalToWorld*)data;
+		//	}
+
+		//	// トランスフォームデータ情報
+		//	if (pos && rot && scale && world)
+		//	{
+		//		EditTransform(*m_MainCamera, world->value, pos->value, rot->value, scale->value);
+		//		Matrix& m = world->value;
+		//	}
+		//	else if (world)
+		//	{
+		//		EditTransform(*m_MainCamera, world->value);
+		//	}
+
+		//	// コンポーネントデータ情報
+		//	for (int i = 0; i < archetype.getArchetypeSize(); ++i)
+		//	{
+		//		const auto& type = archetype.getTypeInfo(i);
+		//		ImGui::Text(type.getName().data());
+		//		DispGui(type.getName(), chunk.getComponentData(type.getName(), entity.m_index));
+		//	}
+
+		//	
+		//	// 子のオブジェクト
+		//	DispChilds(root);
+
+
+		//	ImGui::TreePop();
+		//}
+	}
+	ImGui::End();
+
+
+	ImGui::SetNextWindowBgAlpha(0.4f);
+	ImGui::Begin("Entity");
 
 	for (auto* chunk : getEntityManager()->getChunkList<Name>())
 	{
@@ -55,7 +185,7 @@ void ImguiSystem::onUpdate()
 		for (std::uint32_t index = 0; index < names.Count(); ++index)
 		{
 			std::string name(names[index].value);
-			if (ImGui::TreeNode((name + std::to_string(index)).c_str()))
+			if (ImGui::TreeNodeEx((name + std::to_string(index)).c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
 			{
 				Position* pos = nullptr;
 				Rotation* rot = nullptr;
@@ -104,8 +234,92 @@ void ImguiSystem::onUpdate()
 			}
 		}
 	}
+	ImGui::End();
+
+
+	ImGui::Begin("Testtt");
+
+	GameObjectID currentID = false;	//
+	int childNum = 0;				// 子がいるか
+
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
+	bool open = ImGui::TreeNodeEx("Test",
+		ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen | 
+		(currentID ? ImGuiTreeNodeFlags_Selected : 0) | (childNum ? ImGuiTreeNodeFlags_Leaf : 0));
+	ImGui::PopStyleVar();
+
+	ImGui::PushID(999);
+	if (ImGui::BeginPopupContextItem()) {
+		// Some processing...
+		ImGui::EndPopup();
+	}
+	ImGui::PopID();
+
+	if (ImGui::IsItemClicked()) {
+		// Some processing...
+		currentID ^= 1;
+	}
+
+	if (ImGui::BeginDragDropTarget()) {
+		// Some processing...
+		ImGui::EndDragDropTarget();
+	}
+
+	if (ImGui::BeginDragDropSource()) {
+		// Some processing...
+		ImGui::EndDragDropSource();
+	}
+
+	if (open) {
+		// Recursive call...
+		ImGui::TreePop();
+	}
+
 
 	ImGui::End();
+}
+
+
+void ImguiSystem::DispChilds(const GameObjectID parentID)
+{
+	int nIndex = 0;
+	for (auto& child : m_pWorld->getGameObjectManager()->GetChilds(parentID))
+	{
+		GameObject* gameObject = m_pWorld->getGameObjectManager()->getGameObjectMap()[child].get();
+		Entity entity(gameObject->m_chunkIndex, gameObject->m_index);
+		auto& chunkList = m_pWorld->getChunkList();
+		auto& chunk = chunkList[entity.m_chunkIndex];
+		std::string name(gameObject->getName());
+
+		ImGui::PushID(child);
+		if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick))
+		{
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+			{
+				GameObjectID index = child;
+				ImGui::SetDragDropPayload("DND_DEMO_CELL", &index, sizeof(GameObjectID));
+				ImGui::Text("Move Parent");
+
+				ImGui::EndDragDropSource();
+			}
+
+			// 子のオブジェクト
+			DispChilds(child);
+			ImGui::TreePop();
+		}
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
+			{
+				IM_ASSERT(payload->DataSize == sizeof(GameObjectID));
+				GameObjectID payload_n = *(const GameObjectID*)payload->Data;
+				// 親子関係再構築
+				getGameObjectManager()->AddChild(child, payload_n);
+			}
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::PopID();
+	}
 }
 
 

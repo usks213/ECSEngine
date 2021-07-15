@@ -25,6 +25,10 @@ namespace ecs {
 	/// @brief コンポーネントの最大保持数
 	constexpr auto c_maxComponentSize = 16;
 
+	/// @brief コンポーネントで扱う最大文字数
+	constexpr int MAX_COMPONENT_STRING = 32;
+
+
 	/// @brief Tがコンポーネントデータか判定
 	/// @tparam T getTypeHash()を保持している型
 	template<class T>

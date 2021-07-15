@@ -13,9 +13,6 @@
 
 namespace ecs {
 
-	/// @brief コンポーネントで扱う最大文字数
-	constexpr int MAX_COMPONENT_STRING = 32;
-
 	/// @brief 名前コンポーネント
 	struct Name : IComponentData
 	{

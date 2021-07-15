@@ -14,6 +14,7 @@ class WorldManager;
 
 namespace ecs {
 	class EntityManager;
+	class GameObjectManager;
 	class SystemBase;
 
 	/// @class World
@@ -22,6 +23,7 @@ namespace ecs {
 	{
 		friend class WorldManager;
 		friend class EntityManager;
+		friend class GameObjectManager;
 		friend class SystemBase;
 	public:
 		/// @brief コンストラクタ
@@ -64,6 +66,10 @@ namespace ecs {
 		/// @return エンティティマネージャー
 		[[nodiscard]] EntityManager* getEntityManager() const;
 
+		/// @brief ゲームオブジェクトマネージャーの取得
+		/// @return ゲームオブジェクトマネージャー
+		[[nodiscard]] GameObjectManager* getGameObjectManager() const;
+
 		/// @brief ワールドマネージャー取得
 		/// @return ワールドマネージャー
 		[[nodiscard]] WorldManager* getWorldManager() const { return m_pWorldManager; }
@@ -90,6 +96,8 @@ namespace ecs {
 		std::vector<std::unique_ptr<SystemBase>> m_SystemList;
 		/// @brief エンティティマネージャー
 		std::unique_ptr<EntityManager> m_pEntityManager;
+		/// @brief ゲームオブジェクトマネージャー
+		std::unique_ptr<GameObjectManager> m_pGameObjectManager;
 		/// @brief ワールドマネージャー
 		WorldManager* m_pWorldManager;
 	};
