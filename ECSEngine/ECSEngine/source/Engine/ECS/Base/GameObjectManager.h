@@ -127,6 +127,16 @@ namespace ecs {
 			return std::lower_bound(m_rootList.begin(), m_rootList.end(), id);
 		}
 
+		/// @brief e‚ğ’H‚Á‚Äˆê’v‚µ‚½ID‚ğ•Ô‚·(ˆê’v‚µ‚È‚¢ê‡‚ÍNONE_ID)
+		GameObjectID searchParent(GameObjectID parentID, GameObjectID searchID) {
+			if (searchID == m_game0bjectMap[parentID]->GetParentID()
+				|| m_game0bjectMap[parentID]->GetParentID() == NONE_GAME_OBJECT_ID)
+			{
+				return m_game0bjectMap[parentID]->GetParentID();
+			}
+			searchParent(m_game0bjectMap[parentID]->GetParentID(), searchID);
+		}
+
 	private:
 		/// @brief ƒ[ƒ‹ƒh
 		World* m_pWorld;

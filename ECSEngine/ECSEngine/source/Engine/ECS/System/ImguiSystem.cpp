@@ -69,6 +69,7 @@ void ImguiSystem::onUpdate()
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
 		bool open = ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_FramePadding |
+			ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick |
 			(m_selectObjectID == root ? ImGuiTreeNodeFlags_Selected : 0) | (childNum ? 0 : ImGuiTreeNodeFlags_Leaf));
 		ImGui::PopStyleVar();
 
@@ -115,15 +116,17 @@ void ImguiSystem::onUpdate()
 	}
 	ImGui::End();
 
-
+	m_MainCamera = nullptr;
+	m_MaimCameraTransform = nullptr;
 	// メインカメラの取得
-	foreach<Camera>([this](Camera& camera)
+	foreach<Camera, Transform>([this](Camera& camera, Transform& transform)
 		{
 			m_MainCamera = &camera;
+			m_MaimCameraTransform = &transform;
 		});
 
-	//----- インスペクター -----
 
+	//----- インスペクター -----
 	ImGui::SetNextWindowBgAlpha(0.8f);
 	ImGui::Begin("Inspector");
 	if (m_selectObjectID != NONE_GAME_OBJECT_ID)
@@ -151,13 +154,17 @@ void ImguiSystem::onUpdate()
 		}
 
 		// トランスフォームデータ情報
-		if (pos && rot && scale && transform)
+		if (m_MainCamera && m_MaimCameraTransform &&
+			m_MaimCameraTransform->id != m_selectObjectID)
 		{
-			EditTransform(*m_MainCamera, *transform, pos->value, rot->value, scale->value);
-		}
-		else if (transform)
-		{
-			EditTransform(*m_MainCamera, *transform);
+			if (pos && rot && scale && transform)
+			{
+				EditTransform(*m_MainCamera, *transform, pos->value, rot->value, scale->value);
+			}
+			else if (transform)
+			{
+				EditTransform(*m_MainCamera, *transform);
+			}
 		}
 
 		// コンポーネントデータ情報
@@ -182,7 +189,8 @@ void ImguiSystem::DispChilds(const GameObjectID parentID)
 		std::size_t childNum = gameObject->getChildCount(); // 子がいるか
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
-		bool open = ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_FramePadding |
+		bool open = ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_FramePadding | 
+			ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick |
 			(m_selectObjectID == child ? ImGuiTreeNodeFlags_Selected : 0) | (childNum ? 0 : ImGuiTreeNodeFlags_Leaf));
 		ImGui::PopStyleVar();
 

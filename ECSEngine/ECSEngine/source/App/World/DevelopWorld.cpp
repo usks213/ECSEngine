@@ -89,7 +89,6 @@ public:
 					Vector3 forward = transform.localMatrix.Forward();
 					Vector3 vLook = vPos + forward;
 					float focus = 0.0f;
-					transform.localMatrix.Up(up);
 
 					// 速度
 					float moveSpeed = 1.0f / 60.0f * 5;
@@ -158,6 +157,16 @@ public:
 							pos.value += forward * -moveSpeed;
 						}
 					}
+
+					// Matrix更新
+					// 回転
+					transform.localMatrix = Matrix::CreateFromQuaternion(rot.value);
+					// 移動
+					transform.localMatrix *= Matrix::CreateTranslation(pos.value);
+					// グローバルマトリックス更新
+					transform.localMatrix.Up(up);
+					transform.globalMatrix = transform.localMatrix;
+
 					m_oldMousePos = *mousePos;
 				});
 	}
@@ -431,9 +440,9 @@ void DevelopWorld::Start()
 
 	// システムの追加
 	addSystem<ImguiSystem>();
-	addSystem<ControllSystem>();
 	addSystem<RotationSystem>();
 	addSystem<TransformSystem>();
+	addSystem<ControllSystem>();
 	addSystem<ParentSystem>();
 	addSystem<RenderingSystem>();
 }

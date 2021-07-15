@@ -47,16 +47,33 @@ void GameObjectManager::destroyGameObject(const GameObjectID& gameObjectID)
 /// @param parentID 親
 void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameObjectID& parentID)
 {
+	// 自身の親
+	auto parent = m_game0bjectMap[gameObjectID]->GetParentID();
+
+	// 自身の子の親をたどると、自身がある場合はスワップ関数を使う
+	// 相手の親をたどると自身がある
+	if (searchParent(parentID, gameObjectID) == gameObjectID)
+	{
+		return;
+		//// 相手の親を自身の親に
+		//m_game0bjectMap[parentID]->SetParentID(parent);
+		//// 自身の親の子に自身の子を追加
+		//m_game0bjectMap[parent]->AddChildID(parentID);
+		//// 自身の子から親になるのを消す
+		//m_game0bjectMap[gameObjectID]->RemoveChildID(parentID);
+		//// 自身の子と相手の子をスワップする
+		////m_game0bjectMap[gameObjectID]->AddChildID();
+	}
+
 	auto itr = findRootList(gameObjectID);
 	if (itr != m_rootList.end() && *itr == gameObjectID)
 	{
-		// 自身がルートだった場合は削除
+		//--- 自身がルートだった場合は削除
 		m_rootList.erase(itr);
 	}
 	else
 	{
-		// 違う場合は親の子から自身を削除
-		auto parent = m_game0bjectMap[gameObjectID]->GetParentID();
+		//--- 違う場合は親の子から自身を削除
 		// 親の子から自身を削除
 		m_game0bjectMap[parent]->RemoveChildID(gameObjectID);
 		// 親を初期化

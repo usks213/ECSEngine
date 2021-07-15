@@ -9,6 +9,7 @@
 
 #include <Engine/ECS/Base/SystemBase.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
+#include <Engine/ECS/ComponentData/TransformComponentData.h>
 
 namespace ecs {
 
@@ -19,6 +20,7 @@ namespace ecs {
 		/// @param pWorld ÉèÅ[ÉãÉh
 		explicit ImguiSystem(World* pWorld):
 			m_MainCamera(nullptr), 
+			m_MaimCameraTransform(nullptr), 
 			m_selectObjectID(NONE_GAME_OBJECT_ID),
 			SystemBase(pWorld)
 		{}
@@ -41,6 +43,7 @@ namespace ecs {
 		void DispChilds(const GameObjectID parentID);
 
 		Camera*			m_MainCamera;
+		Transform*		m_MaimCameraTransform;
 		GameObjectID	m_selectObjectID;
 	};
 }
