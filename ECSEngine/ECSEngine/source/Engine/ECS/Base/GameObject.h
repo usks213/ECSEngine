@@ -19,16 +19,6 @@ namespace ecs {
 	/// @brief 存在しないゲームオブジェクトID
 	constexpr GameObjectID NONE_GAME_OBJECT_ID = std::numeric_limits<GameObjectID>::max();
 
-	/// @brief ECSゲームオブジェクトデータ
-	struct GameObjectData : IComponentData
-	{
-		ECS_DECLARE_COMPONENT_DATA(GameObjectData);
-		GameObjectID id;
-		GameObjectData(const GameObjectID& id):
-			id(id)
-		{
-		}
-	};
 
 	class GameObjectManager;
 

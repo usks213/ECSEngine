@@ -71,8 +71,8 @@ public:
 		m_oldMousePos = *mousePos;
 	}
 	void onUpdate() override {
-		foreach<Position, Rotation, LocalToWorld, InputTag>
-			([this](Position& pos, Rotation& rot, LocalToWorld& mtx, InputTag& tag)
+		foreach<Position, Rotation, Transform, InputTag>
+			([this](Position& pos, Rotation& rot, Transform& transform, InputTag& tag)
 				{
 					POINT* mousePos = GetMousePosition();
 					POINT mouseDist = {
@@ -83,13 +83,13 @@ public:
 					float SCREEN_HEIGHT = m_pWorld->getWorldManager()->getEngine()->getWindowHeight();
 
 					// 向き
-					Vector3 vPos = mtx.value.Translation();
-					Vector3 right = mtx.value.Right();
+					Vector3 vPos = transform.LocalToWorld.Translation();
+					Vector3 right = transform.LocalToWorld.Right();
 					Vector3 up = Vector3(0, 1, 0);
-					Vector3 forward = mtx.value.Forward();
+					Vector3 forward = transform.LocalToWorld.Forward();
 					Vector3 vLook = vPos + forward;
 					float focus = 0.0f;
-					mtx.value.Up(up);
+					transform.LocalToWorld.Up(up);
 
 					// 速度
 					float moveSpeed = 1.0f / 60.0f * 5;
@@ -239,7 +239,7 @@ void DevelopWorld::Start()
 
 
 	// アーキタイプ
-	Archetype archetype = Archetype::create<Position, Rotation, Scale, LocalToWorld, RenderData, Name>();
+	Archetype archetype = Archetype::create<Position, Rotation, Scale, Transform, RenderData, Name>();
 	// 初期化データ
 	Position pos;
 	Scale scale;
@@ -258,6 +258,7 @@ void DevelopWorld::Start()
 	std::strcpy(name.value, "SkyDome");
 
 	auto sky = getGameObjectManager()->createGameObject("SkyDome", archetype);
+	getGameObjectManager()->setComponentData<Transform>(sky, Transform(sky));
 	getGameObjectManager()->setComponentData<Position>(sky, pos);
 	getGameObjectManager()->setComponentData<Scale>(sky, scale);
 	getGameObjectManager()->setComponentData<Rotation>(sky, rot);
@@ -273,6 +274,7 @@ void DevelopWorld::Start()
 	rdPlane.meshID = meshPlane;
 
 	auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
+	getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane));
 	getGameObjectManager()->setComponentData<Position>(plane, pos);
 	getGameObjectManager()->setComponentData<Scale>(plane, scale);
 	getGameObjectManager()->setComponentData<Rotation>(plane, rot);
@@ -280,7 +282,7 @@ void DevelopWorld::Start()
 	getGameObjectManager()->setComponentData(plane, name);
 
 	// カメラ生成
-	Archetype cameraArchetype = Archetype::create<Position, Rotation, Scale, LocalToWorld, Camera, InputTag, Name>();
+	Archetype cameraArchetype = Archetype::create<Position, Rotation, Scale, Transform, Camera, InputTag, Name>();
 
 	auto entity = getGameObjectManager()->createGameObject("Camera", cameraArchetype);
 	Camera cameraData;
@@ -294,6 +296,7 @@ void DevelopWorld::Start()
 	rot.value = Quaternion::CreateFromYawPitchRoll(3.141592f, 3.141592f / -7, 0);
 	std::strcpy(name.value, "Camera");
 
+	getGameObjectManager()->setComponentData<Transform>(entity, Transform(entity));
 	getGameObjectManager()->setComponentData<Position>(entity, pos);
 	getGameObjectManager()->setComponentData<Scale>(entity, scale);
 	getGameObjectManager()->setComponentData<Rotation>(entity, rot);
@@ -303,7 +306,7 @@ void DevelopWorld::Start()
 
 
 	// 人
-	Archetype archetypeHuman = Archetype::create<Position, Rotation, Scale, LocalToWorld>();
+	Archetype archetypeHuman = Archetype::create<Position, Rotation, Scale, Transform>();
 	archetypeHuman.addTag(objBitchID);
 
 	// 腰
@@ -311,6 +314,7 @@ void DevelopWorld::Start()
 	pos.value = Vector3(0, 8, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(5, 2, 2);
+	getGameObjectManager()->setComponentData<Transform>(Waist, Transform(Waist));
 	getGameObjectManager()->setComponentData<Position>(Waist, pos);
 	getGameObjectManager()->setComponentData<Scale>(Waist, scale);
 	getGameObjectManager()->setComponentData<Rotation>(Waist, rot);
@@ -321,6 +325,7 @@ void DevelopWorld::Start()
 	pos.value = Vector3(-0.25f, -1.25f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.3f, 1.2f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(ThighLeft, Transform(ThighLeft));
 	getGameObjectManager()->setComponentData<Position>(ThighLeft, pos);
 	getGameObjectManager()->setComponentData<Scale>(ThighLeft, scale);
 	getGameObjectManager()->setComponentData<Rotation>(ThighLeft, rot);
@@ -331,6 +336,7 @@ void DevelopWorld::Start()
 	pos.value = Vector3(-0.0f, -1.25f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.6f, 1.2f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(LegLeft, Transform(LegLeft));
 	getGameObjectManager()->setComponentData<Position>(LegLeft, pos);
 	getGameObjectManager()->setComponentData<Scale>(LegLeft, scale);
 	getGameObjectManager()->setComponentData<Rotation>(LegLeft, rot);
@@ -341,6 +347,7 @@ void DevelopWorld::Start()
 	pos.value = Vector3(0.25f, -1.25f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.3f, 1.2f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(ThighRight, Transform(ThighRight));
 	getGameObjectManager()->setComponentData<Position>(ThighRight, pos);
 	getGameObjectManager()->setComponentData<Scale>(ThighRight, scale);
 	getGameObjectManager()->setComponentData<Rotation>(ThighRight, rot);
@@ -351,6 +358,7 @@ void DevelopWorld::Start()
 	pos.value = Vector3(0.0f, -1.25f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.6f, 1.2f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(LegRight, Transform(LegRight));
 	getGameObjectManager()->setComponentData<Position>(LegRight, pos);
 	getGameObjectManager()->setComponentData<Scale>(LegRight, scale);
 	getGameObjectManager()->setComponentData<Rotation>(LegRight, rot);
@@ -361,6 +369,7 @@ void DevelopWorld::Start()
 	pos.value = Vector3(0.0f, 2.15f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.8f, 3.0f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(Body, Transform(Body));
 	getGameObjectManager()->setComponentData<Position>(Body, pos);
 	getGameObjectManager()->setComponentData<Scale>(Body, scale);
 	getGameObjectManager()->setComponentData<Rotation>(Body, rot);
@@ -371,6 +380,7 @@ void DevelopWorld::Start()
 	pos.value = Vector3(0.0f, 0.65f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.4f, 0.25f, 0.8f);
+	getGameObjectManager()->setComponentData<Transform>(Head, Transform(Head));
 	getGameObjectManager()->setComponentData<Position>(Head, pos);
 	getGameObjectManager()->setComponentData<Scale>(Head, scale);
 	getGameObjectManager()->setComponentData<Rotation>(Head, rot);
@@ -381,6 +391,7 @@ void DevelopWorld::Start()
 	pos.value = Vector3(0.65f, 0.4f, 0);
 	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale.value = Vector3(0.2f, 0.2f, 0.7f);
+	getGameObjectManager()->setComponentData<Transform>(ShoulderLeft, Transform(ShoulderLeft));
 	getGameObjectManager()->setComponentData<Position>(ShoulderLeft, pos);
 	getGameObjectManager()->setComponentData<Scale>(ShoulderLeft, scale);
 	getGameObjectManager()->setComponentData<Rotation>(ShoulderLeft, rot);

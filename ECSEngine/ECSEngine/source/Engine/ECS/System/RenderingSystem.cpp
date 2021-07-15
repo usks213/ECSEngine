@@ -42,13 +42,14 @@ void RenderingSystem::onUpdate()
 	// カメラ設定
 	Camera* mainCamera = nullptr;
 	Vector3 cameraPos;
-	foreach<Camera, LocalToWorld>(
-		[&mainCamera, &cameraPos, &engine](Camera& camera, LocalToWorld& mtxWorld)
+	foreach<Camera, Transform>(
+		[&mainCamera, &cameraPos, &engine](Camera& camera, Transform& transform)
 		{
 			// ビューマトリックス更新
-			Vector3 pos = mtxWorld.value.Translation();
-			Vector3 target = pos + mtxWorld.value.Forward();
-			Vector3 up = mtxWorld.value.Up();
+			Matrix mtxWorld = transform.LocalToWorld * transform.LocalToParent;
+			Vector3 pos = mtxWorld.Translation();
+			Vector3 target = pos + mtxWorld.Forward();
+			Vector3 up = mtxWorld.Up();
 			camera.view = Matrix::CreateLookAt(pos, target, up);
 
 			// ウィンドウサイズ
@@ -116,10 +117,10 @@ void RenderingSystem::onUpdate()
 		
 		for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
 		{
-			auto mtxArray = chunk->getComponentArray<LocalToWorld>();
+			auto mtxArray = chunk->getComponentArray<Transform>();
 			for (auto i = 0u; i < mtxArray.Count(); ++i)
 			{
-				renderer->setD3DTransformBuffer(mtxArray[i].value);
+				renderer->setD3DTransformBuffer(mtxArray[i].LocalToWorld * mtxArray[i].LocalToParent);
 				renderer->d3dRender(rdID);
 			}
 		}
@@ -127,15 +128,15 @@ void RenderingSystem::onUpdate()
 
 
 	// オブジェクト描画
-	foreach<RenderData, LocalToWorld>(
-		[&renderer](RenderData& rd, LocalToWorld& mtxWorld)
+	foreach<RenderData, Transform>(
+		[&renderer](RenderData& rd, Transform& transform)
 		{
 			const auto* mat = renderer->getMaterial(rd.materialID);
 			const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, rd.meshID);
 
 			renderer->setD3D11Material(rd.materialID);
 
-			renderer->setD3DTransformBuffer(mtxWorld.value);
+			renderer->setD3DTransformBuffer(transform.LocalToWorld * transform.LocalToParent);
 
 			renderer->setD3D11RenderBuffer(rdID);
 

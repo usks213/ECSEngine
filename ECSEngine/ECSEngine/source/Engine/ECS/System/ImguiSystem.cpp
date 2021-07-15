@@ -135,7 +135,7 @@ void ImguiSystem::onUpdate()
 		Position* pos = nullptr;
 		Rotation* rot = nullptr;
 		Scale* scale = nullptr;
-		LocalToWorld* world = nullptr;
+		Transform* transform = nullptr;
 		const auto& archetype = chunk.getArchetype();
 
 		// トランスフォームデータを持っているか
@@ -147,18 +147,17 @@ void ImguiSystem::onUpdate()
 			if (CheckType(Position))			pos = (Position*)data;
 			else if (CheckType(Rotation))		rot = (Rotation*)data;
 			else if (CheckType(Scale))			scale = (Scale*)data;
-			else  if (CheckType(LocalToWorld))	world = (LocalToWorld*)data;
+			else  if (CheckType(Transform))		transform = (Transform*)data;
 		}
 
 		// トランスフォームデータ情報
-		if (pos && rot && scale && world)
+		if (pos && rot && scale && transform)
 		{
-			EditTransform(*m_MainCamera, world->value, pos->value, rot->value, scale->value);
-			Matrix& m = world->value;
+			EditTransform(*m_MainCamera, transform->LocalToWorld, pos->value, rot->value, scale->value);
 		}
-		else if (world)
+		else if (transform)
 		{
-			EditTransform(*m_MainCamera, world->value);
+			EditTransform(*m_MainCamera, transform->LocalToWorld);
 		}
 
 		// コンポーネントデータ情報

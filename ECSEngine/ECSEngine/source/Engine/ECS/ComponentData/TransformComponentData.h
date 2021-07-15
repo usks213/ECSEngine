@@ -7,11 +7,24 @@
  *********************************************************************/
 #pragma once
 
-#include <Engine/ECS/Base/IComponentData.h>
+#include <Engine/ECS/Base/GameObject.h>
 #include <Engine/Utility/Mathf.h>
 
 
 namespace ecs {
+
+	/// @brief トランスフォームデータ(必須)
+	struct Transform : IComponentData
+	{
+		ECS_DECLARE_COMPONENT_DATA(Transform);
+		GameObjectID	id;
+		Matrix			LocalToWorld;
+		Matrix			LocalToParent;
+		Transform(const GameObjectID& id) :
+			id(id)
+		{
+		}
+	};
 
 	struct Position : IComponentData
 	{
@@ -29,21 +42,5 @@ namespace ecs {
 	{
 		ECS_DECLARE_COMPONENT_DATA(Scale);
 		Vector3 value;
-	};
-
-	struct LocalToWorld : IComponentData
-	{
-		ECS_DECLARE_COMPONENT_DATA(LocalToWorld);
-		Matrix value;
-	};
-
-	struct LocalToParent : IComponentData
-	{
-		ECS_DECLARE_COMPONENT_DATA(LocalToParent);
-		//Matrix value;
-		Entity parent;
-		LocalToParent(Entity& entity) : 
-			parent(entity)
-		{}
 	};
 }

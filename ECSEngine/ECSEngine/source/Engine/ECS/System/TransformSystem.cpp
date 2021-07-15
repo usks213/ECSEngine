@@ -27,15 +27,15 @@ void TransformSystem::onDestroy()
 /// @brief çXêV
 void TransformSystem::onUpdate()
 {
-	foreach<Position, Rotation, Scale, LocalToWorld>(
-		[](Position& pos, Rotation& rot, Scale& sca, LocalToWorld& mtxWorld)
+	foreach<Position, Rotation, Scale, Transform>(
+		[](Position& pos, Rotation& rot, Scale& sca, Transform& transform)
 		{
 			// ägèk
-			mtxWorld.value = Matrix::CreateScale(sca.value);
+			transform.LocalToWorld = Matrix::CreateScale(sca.value);
 			// âÒì]
-			mtxWorld.value *= Matrix::CreateFromQuaternion(rot.value);
+			transform.LocalToWorld *= Matrix::CreateFromQuaternion(rot.value);
 			// à⁄ìÆ
-			mtxWorld.value *= Matrix::CreateTranslation(pos.value);
+			transform.LocalToWorld *= Matrix::CreateTranslation(pos.value);
 		});
 }
 

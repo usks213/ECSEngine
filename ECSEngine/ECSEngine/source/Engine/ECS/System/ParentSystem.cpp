@@ -27,31 +27,24 @@ void ParentSystem::onDestroy()
 /// @brief çXêV
 void ParentSystem::onUpdate()
 {
-	foreach<LocalToWorld, LocalToParent>(
-		[this](LocalToWorld& mtxWorld, LocalToParent& parent)
-		{
-			auto* mtxParent = getEntityManager()->getComponentData<LocalToWorld>(parent.parent);
-			mtxWorld.value *= mtxParent->value;
-		});
-
 	for (const auto& id : m_pWorld->getGameObjectManager()->getRootList())
 	{
-		auto* mtxWorld = getGameObjectManager()->getComponentData<LocalToWorld>(id);
-		if (mtxWorld == nullptr) continue;
+		auto* transform = getGameObjectManager()->getComponentData<Transform>(id);
+		if (transform == nullptr) continue;
 		for (auto child : getGameObjectManager()->GetChilds(id))
 		{
-			updateChild(child, mtxWorld->value);
+			updateChild(child, transform->LocalToWorld);
 		}
 	}
 }
 
 void ParentSystem::updateChild(const GameObjectID& parent, const Matrix& mtxParent)
 {
-	auto* mtxWorld = getGameObjectManager()->getComponentData<LocalToWorld>(parent);
-	mtxWorld->value *= mtxParent;
+	auto* transform = getGameObjectManager()->getComponentData<Transform>(parent);
+	transform->LocalToParent = mtxParent;
 
 	for (auto child : getGameObjectManager()->GetChilds(parent))
 	{
-		updateChild(child, mtxWorld->value);
+		updateChild(child, transform->LocalToWorld * transform->LocalToParent);
 	}
 }
