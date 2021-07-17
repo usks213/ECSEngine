@@ -392,14 +392,14 @@ void EditTransform(Camera& camera, Transform& transform)
 		ImGui::InputFloat3("Sc", (float*)&transform.globalScale);
 		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform.globalMatrix.m[0][0]);
 
-		//if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-		//{
-		//	if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-		//		mCurrentGizmoMode = ImGuizmo::LOCAL;
-		//	ImGui::SameLine();
-		//	if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-		//		mCurrentGizmoMode = ImGuizmo::WORLD;
-		//}
+		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+		{
+			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+				mCurrentGizmoMode = ImGuizmo::LOCAL;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+				mCurrentGizmoMode = ImGuizmo::WORLD;
+		}
 		//if (ImGui::IsKeyPressed('4'))
 		//	useSnap = !useSnap;
 		//ImGui::Checkbox("", &useSnap);
@@ -486,7 +486,7 @@ void EditTransform(Camera& camera, Transform& transform, Vector3& pos, Quaternio
 
 	bool editTransformDecomposition = true;
 	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
-	static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+	static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
 	static bool useSnap = false;
 	static float snap[3] = { 1.f, 1.f, 1.f };
 	static float bounds[] = { -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f };
@@ -522,14 +522,14 @@ void EditTransform(Camera& camera, Transform& transform, Vector3& pos, Quaternio
 		ImGui::InputFloat3("Sc", (float*)&transform.globalScale);
 		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform.globalMatrix.m[0][0]);
 
-		//if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-		//{
-		//	if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-		//		mCurrentGizmoMode = ImGuizmo::LOCAL;
-		//	ImGui::SameLine();
-		//	if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-		//		mCurrentGizmoMode = ImGuizmo::WORLD;
-		//}
+		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+		{
+			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+				mCurrentGizmoMode = ImGuizmo::LOCAL;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+				mCurrentGizmoMode = ImGuizmo::WORLD;
+		}
 		//if (ImGui::IsKeyPressed('B'))
 		//	useSnap = !useSnap;
 		//ImGui::Checkbox("", &useSnap);
@@ -603,7 +603,7 @@ void EditTransform(Camera& camera, Transform& transform, Vector3& pos, Quaternio
 		Quaternion newQ = Quaternion::CreateFromRotationMatrix(transform.globalMatrix);
 		Quaternion oldQ = Quaternion::CreateFromRotationMatrix(oldGlobalMatrix);
 		oldQ.Inverse(oldQ);
-		rot *= newQ * oldQ;
+		rot = newQ * oldQ * rot;
 	}
 
 	ImGuizmo::ViewManipulate(&camera.view.m[0][0], camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);

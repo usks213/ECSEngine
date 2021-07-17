@@ -50,19 +50,10 @@ void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameOb
 	// 自身の親
 	auto parent = m_game0bjectMap[gameObjectID]->GetParentID();
 
-	// 自身の子の親をたどると、自身がある場合はスワップ関数を使う
-	// 相手の親をたどると自身がある
+	// 自身の子に親を設定する場合はできない
 	if (searchParent(parentID, gameObjectID) == gameObjectID)
 	{
 		return;
-		//// 相手の親を自身の親に
-		//m_game0bjectMap[parentID]->SetParentID(parent);
-		//// 自身の親の子に自身の子を追加
-		//m_game0bjectMap[parent]->AddChildID(parentID);
-		//// 自身の子から親になるのを消す
-		//m_game0bjectMap[gameObjectID]->RemoveChildID(parentID);
-		//// 自身の子と相手の子をスワップする
-		////m_game0bjectMap[gameObjectID]->AddChildID();
 	}
 
 	auto itr = findRootList(gameObjectID);

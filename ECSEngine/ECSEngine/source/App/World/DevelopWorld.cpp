@@ -438,6 +438,17 @@ void DevelopWorld::Start()
 	getGameObjectManager()->setComponentData<Scale>(ArmRight, scale);
 	getGameObjectManager()->setComponentData<Rotation>(ArmRight, rot);
 
+	// 回転ボックス
+	archetypeHuman.addType<ObjectTag>();
+	auto RotateBox = getGameObjectManager()->createGameObject("Rotate Box", archetypeHuman);
+	pos.value = Vector3(0, 2, 0);
+	rot.value = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	scale.value = Vector3(1, 1, 1);
+	getGameObjectManager()->setComponentData<Transform>(RotateBox, Transform(RotateBox));
+	getGameObjectManager()->setComponentData<Position>(RotateBox, pos);
+	getGameObjectManager()->setComponentData<Scale>(RotateBox, scale);
+	getGameObjectManager()->setComponentData<Rotation>(RotateBox, rot);
+
 	// システムの追加
 	addSystem<ImguiSystem>();
 	addSystem<RotationSystem>();
