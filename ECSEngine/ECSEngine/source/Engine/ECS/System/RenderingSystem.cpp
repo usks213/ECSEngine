@@ -46,7 +46,7 @@ void RenderingSystem::onUpdate()
 		[&mainCamera, &cameraPos, &engine](Camera& camera, Transform& transform)
 		{
 			// ビューマトリックス更新
-			Matrix mtxWorld = transform.globalMatrix;
+			Matrix mtxWorld = transform.localToWorld * transform.localToParent;
 			Vector3 pos = mtxWorld.Translation();
 			Vector3 target = pos + mtxWorld.Forward();
 			Vector3 up = mtxWorld.Up();
@@ -117,11 +117,11 @@ void RenderingSystem::onUpdate()
 		
 		for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
 		{
-			auto mtxArray = chunk->getComponentArray<Transform>();
-			for (auto i = 0u; i < mtxArray.Count(); ++i)
+			auto transform = chunk->getComponentArray<Transform>();
+			for (auto i = 0u; i < transform.Count(); ++i)
 			{
-				Matrix scale = Matrix::CreateScale(mtxArray[i].globalScale);
-				renderer->setD3DTransformBuffer(scale * mtxArray[i].globalMatrix);
+				Matrix scale = Matrix::CreateScale(transform[i].localScale * transform[i].parentScale);
+				renderer->setD3DTransformBuffer(scale * transform[i].localToWorld * transform[i].localToParent);
 				renderer->d3dRender(rdID);
 			}
 		}
@@ -137,8 +137,8 @@ void RenderingSystem::onUpdate()
 
 			renderer->setD3D11Material(rd.materialID);
 
-			Matrix scale = Matrix::CreateScale(transform.globalScale);
-			renderer->setD3DTransformBuffer(scale * transform.globalMatrix);
+			Matrix scale = Matrix::CreateScale(transform.localScale * transform.parentScale);
+			renderer->setD3DTransformBuffer(scale * transform.localToWorld * transform.localToParent);
 
 			renderer->setD3D11RenderBuffer(rdID);
 

@@ -32,6 +32,6 @@ namespace ecs {
 		void onUpdate() override;
 
 	private:
-		void updateChild(const GameObjectID& parent, const Transform& parentTransform);
+		void updateChild(const GameObjectID& parent, const Matrix& localToParent, const Vector3& parentScale);
 	};
 }

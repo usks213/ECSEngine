@@ -18,31 +18,26 @@ namespace ecs {
 	{
 		ECS_DECLARE_COMPONENT_DATA(Transform);
 		GameObjectID	id;
-		Matrix			localMatrix;
-		Matrix			globalMatrix;
+
+		Vector3			translation;
+		Quaternion		rotation;
+		Vector3			scale;
+
+		Matrix			localToWorld;
+		Matrix			localToParent;
 		Vector3			localScale;
-		Vector3			globalScale;
+		Vector3			parentScale;
+
 		Transform(const GameObjectID& id) :
-			id(id), localScale(1,1,1), globalScale(1,1,1)
+			id(id), translation(), rotation(), scale(1,1,1),
+			localScale(1,1,1), parentScale(1,1,1)
 		{
 		}
-	};
-
-	struct Position : IComponentData
-	{
-		ECS_DECLARE_COMPONENT_DATA(Position);
-		Vector3 value;
-	};
-
-	struct Rotation : IComponentData
-	{
-		ECS_DECLARE_COMPONENT_DATA(Rotation);
-		Quaternion value;
-	};
-
-	struct Scale : IComponentData
-	{
-		ECS_DECLARE_COMPONENT_DATA(Scale);
-		Vector3 value;
+		Transform(const GameObjectID& id, Vector3 translation, 
+			Quaternion rotation = Quaternion(), Vector3 scale = Vector3(1,1,1)) :
+			id(id), translation(translation), rotation(rotation), scale(scale),
+			localScale(1, 1, 1), parentScale(1, 1, 1)
+		{
+		}
 	};
 }

@@ -27,18 +27,16 @@ void TransformSystem::onDestroy()
 /// @brief 更新
 void TransformSystem::onUpdate()
 {
-	foreach<Position, Rotation, Scale, Transform>(
-		[](Position& pos, Rotation& rot, Scale& sca, Transform& transform)
+	foreach<Transform>(
+		[](Transform& transform)
 		{
 			// 拡縮
-			//transform.localMatrix = Matrix::CreateScale(sca.value);
-			transform.localScale = transform.globalScale = sca.value;
+			//transform.localToWorld = Matrix::CreateScale(transform.scale);
+			transform.localScale = transform.scale;
 			// 回転
-			transform.localMatrix = Matrix::CreateFromQuaternion(rot.value);
+			transform.localToWorld = Matrix::CreateFromQuaternion(transform.rotation);
 			// 移動
-			transform.localMatrix *= Matrix::CreateTranslation(pos.value);
-			// グローバルマトリックス更新
-			transform.globalMatrix = transform.localMatrix;
+			transform.localToWorld *= Matrix::CreateTranslation(transform.translation);
 		});
 }
 
