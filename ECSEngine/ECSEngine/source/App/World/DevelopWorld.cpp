@@ -21,6 +21,9 @@
 #include <Engine/ECS/System/TransformSystem.h>
 #include <Engine/ECS/System/ParentSystem.h>
 #include <Engine/ECS/System/RenderingSystem.h>
+#include <Engine/ECS/System/QuadTreeSystem.h>
+#include <Engine/ECS/System/PhysicsSystem.h>
+#include <Engine/ECS/System/CollisionSystem.h>
 #include <Engine/ECS/System/ImguiSystem.h>
 
 #include <Engine/Utility/Input.h>
@@ -48,6 +51,7 @@ struct Test :public IComponentData
 };
 
 class RotationSystem : public ecs::SystemBase {
+	ECS_DECLARE_SYSTEM(RotationSystem);
 public:
 	explicit RotationSystem(World* pWorld) :
 		SystemBase(pWorld)
@@ -61,6 +65,7 @@ public:
 };
 
 class ControllSystem : public ecs::SystemBase {
+	ECS_DECLARE_SYSTEM(ControllSystem);
 private:
 	POINT m_oldMousePos;
 public:
@@ -249,7 +254,7 @@ void DevelopWorld::Start()
 
 
 	// アーキタイプ
-	Archetype archetype = Archetype::create<Transform, RenderData>();
+	Archetype archetype = Archetype::create<Transform, RenderData, StaticType>();
 	// 初期化データ
 	Vector3 pos;
 	Vector3 scale;
@@ -281,12 +286,12 @@ void DevelopWorld::Start()
 	getGameObjectManager()->setComponentData(plane, rdPlane);
 
 	// カメラ生成
-	Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag>();
+	Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag, DynamicType>();
 
 	auto entity = getGameObjectManager()->createGameObject("Camera", cameraArchetype);
 	Camera cameraData;
 	cameraData.isOrthographic = false;
-	cameraData.fovY = 45;
+	cameraData.fovY = 60;
 	cameraData.nearZ = 1.0f;
 	cameraData.farZ = 1000.0f;
 	pos.x = 0;
@@ -300,7 +305,7 @@ void DevelopWorld::Start()
 
 
 	// 人
-	Archetype archetypeHuman = Archetype::create<Transform>();
+	Archetype archetypeHuman = Archetype::create<Transform, DynamicType>();
 	archetypeHuman.addTag(objBitchID);
 
 	// 腰
@@ -403,9 +408,12 @@ void DevelopWorld::Start()
 	// システムの追加
 	addSystem<ImguiSystem>();
 	addSystem<RotationSystem>();
+	addSystem<PhysicsSystem>();
 	addSystem<TransformSystem>();
 	addSystem<ControllSystem>();
 	addSystem<ParentSystem>();
+	addSystem<QuadTreeSystem>();
+	addSystem<CollisionSystem>();
 	addSystem<RenderingSystem>();
 }
 

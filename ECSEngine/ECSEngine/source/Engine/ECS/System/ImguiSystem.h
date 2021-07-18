@@ -15,6 +15,7 @@ namespace ecs {
 
 	class ImguiSystem final : public SystemBase
 	{
+		ECS_DECLARE_SYSTEM(ImguiSystem);
 	public:
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド

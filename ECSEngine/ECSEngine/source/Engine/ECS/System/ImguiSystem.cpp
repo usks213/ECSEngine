@@ -360,7 +360,6 @@ void ImguiSystem::EditTransform(Camera& camera, Transform& transform)
 	int gizmoCount = 1;
 	float camDistance = 8.0f;
 
-
 	if (editTransformDecomposition)
 	{
 		//if (ImGui::IsKeyPressed('1'))
@@ -380,12 +379,16 @@ void ImguiSystem::EditTransform(Camera& camera, Transform& transform)
 			mCurrentGizmoOperation = ImGuizmo::SCALE;
 			mCurrentGizmoMode = ImGuizmo::LOCAL;
 		}
-		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-		ImGuizmo::DecomposeMatrixToComponents(&transform.localMatrix.m[0][0], matrixTranslation, matrixRotation, matrixScale);
-		ImGui::InputFloat3("Tr", matrixTranslation);
-		ImGui::InputFloat3("Rt", matrixRotation);
-		ImGui::InputFloat3("Sc", matrixScale);
-		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform.localMatrix.m[0][0]);
+
+		Matrix oldLocal = transform.localMatrix;
+		Vector3 matrixTranslation, matrixRotation, matrixScale;
+		ImGuizmo::DecomposeMatrixToComponents(&transform.localMatrix.m[0][0], 
+			(float*)&matrixTranslation, (float*)&matrixRotation, (float*)&matrixScale);
+		ImGui::InputFloat3("Tr", (float*)&matrixTranslation);
+		ImGui::InputFloat3("Rt", (float*)&matrixRotation);
+		ImGui::InputFloat3("Sc", (float*)&matrixScale);
+		ImGuizmo::RecomposeMatrixFromComponents((float*)&matrixTranslation, (float*)&matrixRotation, 
+			(float*)&matrixScale, &transform.localMatrix.m[0][0]);
 
 		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
 		{

@@ -15,6 +15,7 @@ namespace ecs {
 
 	class ParentSystem final : public SystemBase
 	{
+		ECS_DECLARE_SYSTEM(ParentSystem);
 	public:
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド

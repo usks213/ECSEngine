@@ -52,10 +52,15 @@ void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameOb
 	{
 		return;
 	}
+	// 同じ親だったら更新しない
+	if (GetParent(gameObjectID) == parentID)
+	{
+		return;
+	}
 
 	// 自身の親
 	auto parent = m_game0bjectMap[gameObjectID]->GetParentID();
-	auto transfrom = getComponentData<Transform>(gameObjectID);
+	auto transform = getComponentData<Transform>(gameObjectID);
 	auto parentTrans = getComponentData<Transform>(parentID);
 
 	auto itr = findRootList(gameObjectID);
@@ -72,15 +77,22 @@ void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameOb
 		// 親を初期化
 		m_game0bjectMap[gameObjectID]->ResetParentID();
 		// 行列再計算
-		auto global = transfrom->globalMatrix;
+		auto global = transform->globalMatrix;
 		// 位置
-		transfrom->translation = global.Translation();
+		transform->translation = global.Translation();
 		// 回転
-		Matrix invSca = Matrix::CreateScale(transfrom->globalScale);
+		Matrix invSca = Matrix::CreateScale(transform->globalScale);
 		invSca = invSca.Invert();
-		transfrom->rotation = Quaternion::CreateFromRotationMatrix(invSca * global);
+		transform->rotation = Quaternion::CreateFromRotationMatrix(invSca * global);
 		// 拡縮
-		transfrom->scale = transfrom->globalScale;
+		transform->scale = transform->globalScale;
+		// マトリックス更新
+		// 拡縮
+		transform->localMatrix = Matrix::CreateScale(transform->scale);
+		// 回転
+		transform->localMatrix *= Matrix::CreateFromQuaternion(transform->rotation);
+		// 移動
+		transform->localMatrix *= Matrix::CreateTranslation(transform->translation);
 	}
 
 	// 自身に親を設定
@@ -93,16 +105,22 @@ void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameOb
 	// 親の逆行列を反映
 	auto invParent = (parentTrans->globalMatrix).Invert();
 	auto invParentScale = Vector3(1,1,1) / parentTrans->globalScale;
-	auto localMatrix = transfrom->localMatrix * invParent;
+	auto localMatrix = transform->localMatrix * invParent;
 	// 位置
-	transfrom->translation = localMatrix.Translation();
+	transform->translation = localMatrix.Translation();
 	// 回転
-	Matrix invSca = Matrix::CreateScale(transfrom->scale * invParentScale);
+	Matrix invSca = Matrix::CreateScale(transform->scale * invParentScale);
 	invSca = invSca.Invert();
-	transfrom->rotation = Quaternion::CreateFromRotationMatrix(invSca * localMatrix);
+	transform->rotation = Quaternion::CreateFromRotationMatrix(invSca * localMatrix);
 	// 拡縮
-	transfrom->scale = transfrom->scale * invParentScale;
-
+	transform->scale = transform->scale * invParentScale;
+	// マトリックス更新
+	// 拡縮
+	transform->localMatrix = Matrix::CreateScale(transform->scale);
+	// 回転
+	transform->localMatrix *= Matrix::CreateFromQuaternion(transform->rotation);
+	// 移動
+	transform->localMatrix *= Matrix::CreateTranslation(transform->translation);
 }
 /// @brief 親の取得
 /// @param gameObjectID 自身
@@ -120,16 +138,23 @@ void GameObjectManager::ResetParent(const GameObjectID& gameObjectID)
 	if (parent == NONE_GAME_OBJECT_ID) return;
 
 	// 行列再計算
-	auto transfrom = getComponentData<Transform>(gameObjectID);
-	auto global = transfrom->globalMatrix;
+	auto transform = getComponentData<Transform>(gameObjectID);
+	auto global = transform->globalMatrix;
 	// 位置
-	transfrom->translation = global.Translation();
+	transform->translation = global.Translation();
 	// 回転
-	Matrix invSca = Matrix::CreateScale(transfrom->globalScale);
+	Matrix invSca = Matrix::CreateScale(transform->globalScale);
 	invSca = invSca.Invert();
-	transfrom->rotation = Quaternion::CreateFromRotationMatrix(invSca * global);
+	transform->rotation = Quaternion::CreateFromRotationMatrix(invSca * global);
 	// 拡縮
-	transfrom->scale = transfrom->globalScale;
+	transform->scale = transform->globalScale;
+	// マトリックス更新
+	// 拡縮
+	transform->localMatrix = Matrix::CreateScale(transform->scale);
+	// 回転
+	transform->localMatrix *= Matrix::CreateFromQuaternion(transform->rotation);
+	// 移動
+	transform->localMatrix *= Matrix::CreateTranslation(transform->translation);
 
 	// 親の子から自身を削除
 	m_game0bjectMap[parent]->RemoveChildID(gameObjectID);

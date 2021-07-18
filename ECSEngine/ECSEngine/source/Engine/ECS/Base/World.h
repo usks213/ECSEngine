@@ -48,6 +48,20 @@ namespace ecs {
 			sortSystem();
 		}
 
+		/// @brief  システムの取得
+		/// @tparam システムのポイント
+		template<class T, typename = std::enable_if_t<std::is_base_of_v<SystemBase, T>>>
+		T* getSystem()
+		{
+			for (const auto& sys : m_SystemList) {
+				// システムIDを判定
+				if (sys->getTypeID() == T::getTypeHash()) {
+					return static_cast<T*>(sys.get());
+				}
+			}
+			return nullptr;
+		}
+
 		/// @brief 他のワールドのデータを結合する
 		/// SystemListは結合されない
 		/// @param other 結合するワールド

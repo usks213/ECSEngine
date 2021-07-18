@@ -13,6 +13,7 @@ namespace ecs {
 
 	class RenderingSystem final : public SystemBase
 	{
+		ECS_DECLARE_SYSTEM(RenderingSystem);
 	public:
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド

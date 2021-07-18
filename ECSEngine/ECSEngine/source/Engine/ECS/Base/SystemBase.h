@@ -11,6 +11,16 @@
 #include "GameObjectManager.h"
 
 
+ /// @brief システムの型情報付加
+#define ECS_DECLARE_SYSTEM(T)						\
+DECLARE_TYPE_INFO( T );								\
+[[nodiscard]] std::size_t getTypeID() override {	\
+	return getTypeHash();							\
+}													\
+void _dumyFunction2() = delete
+
+
+
 namespace ecs {
 
 	/// @class SystemBase
@@ -37,6 +47,10 @@ namespace ecs {
 
 		/// @brief 更新順番号取得
 		[[nodiscard]] int getExecutionOrder() const;
+
+		/// @brief システムの型IDを取得
+		/// @return ID
+		[[nodiscard]] virtual std::size_t getTypeID() = 0;
 
 	protected:
 

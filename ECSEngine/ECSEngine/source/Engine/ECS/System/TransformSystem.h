@@ -13,6 +13,7 @@ namespace ecs {
 
 	class TransformSystem final : public SystemBase
 	{
+		ECS_DECLARE_SYSTEM(TransformSystem);
 	public:
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド

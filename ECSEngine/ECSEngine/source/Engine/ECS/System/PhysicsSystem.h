@@ -15,6 +15,7 @@ namespace ecs {
 
 	class PhysicsSystem final : public SystemBase
 	{
+		ECS_DECLARE_SYSTEM(PhysicsSystem);
 	public:
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド

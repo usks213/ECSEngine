@@ -191,6 +191,12 @@
     <ClCompile Include="source\Engine\ECS\System\PhysicsSystem.cpp">
       <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\QuadTreeSystem.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\CollisionSystem.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -392,6 +398,12 @@
       <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
     </ClInclude>
     <ClInclude Include="source\Engine\ECS\System\PhysicsSystem.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\QuadTreeSystem.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\CollisionSystem.h">
       <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClInclude>
   </ItemGroup>

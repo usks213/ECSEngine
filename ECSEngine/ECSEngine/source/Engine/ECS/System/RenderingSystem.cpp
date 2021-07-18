@@ -68,7 +68,7 @@ void RenderingSystem::onUpdate()
 			{
 				// “§‹“Š‰e
 				camera.projection = Matrix::CreatePerspectiveFieldOfView(
-					camera.fovY, camera.aspect, camera.nearZ, camera.farZ);
+					XMConvertToRadians(camera.fovY), camera.aspect, camera.nearZ, camera.farZ);
 			}
 
 			// ƒƒCƒ“ƒJƒƒ‰
