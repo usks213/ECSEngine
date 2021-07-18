@@ -54,7 +54,7 @@ public:
 	{}
 	void onUpdate() override {
 		foreach<Transform, ObjectTag>([](Transform& transform, ObjectTag& tag) {
-			transform.rotation *= Quaternion::CreateFromYawPitchRoll(0.01f, 0, 0);
+			transform.rotation *= Quaternion::CreateFromYawPitchRoll(0.1f, 0, 0);
 			//rot.x += 0.1f;
 			});
 	}
@@ -327,7 +327,9 @@ void DevelopWorld::Start()
 	getGameObjectManager()->setComponentData<Transform>(LegLeft, Transform(LegLeft, pos, rot, scale));
 
 	// ‘Ú‰E
-	auto ThighRight = getGameObjectManager()->createGameObject("Thigh Right", archetypeHuman);
+	Archetype a = archetypeHuman;
+	a.addType<ObjectTag>();
+	auto ThighRight = getGameObjectManager()->createGameObject("Thigh Right", a);
 	getGameObjectManager()->SetParent(ThighRight, Waist);
 	pos = Vector3(1.5f, -2.5f, 0);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);

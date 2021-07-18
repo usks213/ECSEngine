@@ -13,17 +13,15 @@
 
 namespace ecs {
 
-	/// @brief 名前コンポーネント
-	struct Name : IComponentData
+	/// @brief 静的オブジェクト
+	struct StaticType : IComponentData
 	{
-		ECS_DECLARE_COMPONENT_DATA(Name);
-		char value[MAX_COMPONENT_STRING];
+		ECS_DECLARE_COMPONENT_DATA(StaticTag);
 	};
 
-	/// @brief タグコンポーネント
-	struct Tag : IComponentData
+	/// @brief 動的オブジェクト
+	struct DynamicType : IComponentData
 	{
-		ECS_DECLARE_COMPONENT_DATA(Tag);
-		char value[MAX_COMPONENT_STRING];
+		ECS_DECLARE_COMPONENT_DATA(DynamicTag);
 	};
 }

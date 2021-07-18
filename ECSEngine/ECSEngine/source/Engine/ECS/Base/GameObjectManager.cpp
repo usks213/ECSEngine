@@ -7,7 +7,7 @@
  *********************************************************************/
 
 #include "GameObjectManager.h"
-#include <Engine/ECS/ComponentData/BasicComponentData.h>
+#include <Engine/ECS/ComponentData/TransformComponentData.h>
 
 using namespace ecs;
 
@@ -47,14 +47,16 @@ void GameObjectManager::destroyGameObject(const GameObjectID& gameObjectID)
 /// @param parentID 親
 void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameObjectID& parentID)
 {
-	// 自身の親
-	auto parent = m_game0bjectMap[gameObjectID]->GetParentID();
-
 	// 自身の子に親を設定する場合はできない
 	if (searchParent(parentID, gameObjectID) == gameObjectID)
 	{
 		return;
 	}
+
+	// 自身の親
+	auto parent = m_game0bjectMap[gameObjectID]->GetParentID();
+	auto transfrom = getComponentData<Transform>(gameObjectID);
+	auto parentTrans = getComponentData<Transform>(parentID);
 
 	auto itr = findRootList(gameObjectID);
 	if (itr != m_rootList.end() && *itr == gameObjectID)
@@ -69,7 +71,16 @@ void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameOb
 		m_game0bjectMap[parent]->RemoveChildID(gameObjectID);
 		// 親を初期化
 		m_game0bjectMap[gameObjectID]->ResetParentID();
-
+		// 行列再計算
+		auto global = transfrom->localToWorld * transfrom->localToParent;
+		// 位置
+		transfrom->translation = global.Translation();
+		// 回転
+		Matrix invSca = Matrix::CreateScale(transfrom->scale * transfrom->parentScale);
+		invSca = invSca.Invert();
+		transfrom->rotation = Quaternion::CreateFromRotationMatrix(invSca * global);
+		// 拡縮
+		transfrom->scale = transfrom->scale * transfrom->parentScale;
 	}
 
 	// 自身に親を設定
@@ -77,6 +88,20 @@ void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameOb
 
 	// 親の子に自身を設定
 	m_game0bjectMap[parentID]->AddChildID(gameObjectID);
+
+
+	// 親の逆行列を反映
+	auto invParent = (parentTrans->localToWorld * parentTrans->localToParent).Invert();
+	auto invParentScale = Vector3(1,1,1) / parentTrans->scale * parentTrans->parentScale;
+	auto localMatrix = transfrom->localToWorld * invParent;
+	// 位置
+	transfrom->translation = localMatrix.Translation();
+	// 回転
+	Matrix invSca = Matrix::CreateScale(transfrom->scale * invParentScale);
+	invSca = invSca.Invert();
+	transfrom->rotation = Quaternion::CreateFromRotationMatrix(invSca * localMatrix);
+	// 拡縮
+	transfrom->scale = transfrom->scale * invParentScale;
 
 }
 /// @brief 親の取得
@@ -93,6 +118,18 @@ void GameObjectManager::ResetParent(const GameObjectID& gameObjectID)
 	// 親の取得
 	auto parent = m_game0bjectMap[gameObjectID]->GetParentID();
 	if (parent == NONE_GAME_OBJECT_ID) return;
+
+	// 行列再計算
+	auto transfrom = getComponentData<Transform>(gameObjectID);
+	auto global = transfrom->localToWorld * transfrom->localToParent;
+	// 位置
+	transfrom->translation = global.Translation();
+	// 回転
+	Matrix invSca = Matrix::CreateScale(transfrom->scale * transfrom->parentScale);
+	invSca = invSca.Invert();
+	transfrom->rotation = Quaternion::CreateFromRotationMatrix(invSca * global);
+	// 拡縮
+	transfrom->scale = transfrom->scale * transfrom->parentScale;
 
 	// 親の子から自身を削除
 	m_game0bjectMap[parent]->RemoveChildID(gameObjectID);
