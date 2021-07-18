@@ -188,6 +188,9 @@
     <ClCompile Include="source\Engine\ECS\Base\GameObjectManager.cpp">
       <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\PhysicsSystem.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -384,6 +387,12 @@
     </ClInclude>
     <ClInclude Include="source\Engine\ECS\Base\GameObjectManager.h">
       <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\PhysicsComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\PhysicsSystem.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -83,10 +83,10 @@ public:
 					float SCREEN_HEIGHT = m_pWorld->getWorldManager()->getEngine()->getWindowHeight();
 
 					// 向き
-					Vector3 vPos = transform.localToWorld.Translation();
-					Vector3 right = transform.localToWorld.Right();
+					Vector3 vPos = transform.localMatrix.Translation();
+					Vector3 right = transform.localMatrix.Right();
 					Vector3 up = Vector3(0, 1, 0);
-					Vector3 forward = transform.localToWorld.Forward();
+					Vector3 forward = transform.localMatrix.Forward();
 					Vector3 vLook = vPos + forward;
 					float focus = 0.0f;
 
@@ -160,13 +160,13 @@ public:
 
 					// Matrix更新
 					// 拡縮
-					transform.localToWorld = Matrix::CreateScale(transform.scale);
+					transform.localMatrix = Matrix::CreateScale(transform.scale);
 					// 回転
-					transform.localToWorld *= Matrix::CreateFromQuaternion(transform.rotation);
+					transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
 					// 移動
-					transform.localToWorld *= Matrix::CreateTranslation(transform.translation);
+					transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
 					// グローバルマトリックス更新
-					transform.localToWorld.Up(up);
+					transform.localMatrix.Up(up);
 
 					m_oldMousePos = *mousePos;
 				});

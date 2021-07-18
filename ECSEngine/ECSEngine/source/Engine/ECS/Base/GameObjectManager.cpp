@@ -72,15 +72,15 @@ void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameOb
 		// e‚ğ‰Šú‰»
 		m_game0bjectMap[gameObjectID]->ResetParentID();
 		// s—ñÄŒvZ
-		auto global = transfrom->localToWorld * transfrom->localToParent;
+		auto global = transfrom->globalMatrix;
 		// ˆÊ’u
 		transfrom->translation = global.Translation();
 		// ‰ñ“]
-		Matrix invSca = Matrix::CreateScale(transfrom->scale * transfrom->parentScale);
+		Matrix invSca = Matrix::CreateScale(transfrom->globalScale);
 		invSca = invSca.Invert();
 		transfrom->rotation = Quaternion::CreateFromRotationMatrix(invSca * global);
 		// Šgk
-		transfrom->scale = transfrom->scale * transfrom->parentScale;
+		transfrom->scale = transfrom->globalScale;
 	}
 
 	// ©g‚Ée‚ğİ’è
@@ -91,9 +91,9 @@ void GameObjectManager::SetParent(const GameObjectID& gameObjectID, const GameOb
 
 
 	// e‚Ì‹ts—ñ‚ğ”½‰f
-	auto invParent = (parentTrans->localToWorld * parentTrans->localToParent).Invert();
-	auto invParentScale = Vector3(1,1,1) / parentTrans->scale * parentTrans->parentScale;
-	auto localMatrix = transfrom->localToWorld * invParent;
+	auto invParent = (parentTrans->globalMatrix).Invert();
+	auto invParentScale = Vector3(1,1,1) / parentTrans->globalScale;
+	auto localMatrix = transfrom->localMatrix * invParent;
 	// ˆÊ’u
 	transfrom->translation = localMatrix.Translation();
 	// ‰ñ“]
@@ -121,15 +121,15 @@ void GameObjectManager::ResetParent(const GameObjectID& gameObjectID)
 
 	// s—ñÄŒvZ
 	auto transfrom = getComponentData<Transform>(gameObjectID);
-	auto global = transfrom->localToWorld * transfrom->localToParent;
+	auto global = transfrom->globalMatrix;
 	// ˆÊ’u
 	transfrom->translation = global.Translation();
 	// ‰ñ“]
-	Matrix invSca = Matrix::CreateScale(transfrom->scale * transfrom->parentScale);
+	Matrix invSca = Matrix::CreateScale(transfrom->globalScale);
 	invSca = invSca.Invert();
 	transfrom->rotation = Quaternion::CreateFromRotationMatrix(invSca * global);
 	// Šgk
-	transfrom->scale = transfrom->scale * transfrom->parentScale;
+	transfrom->scale = transfrom->globalScale;
 
 	// e‚Ìq‚©‚ç©g‚ğíœ
 	m_game0bjectMap[parent]->RemoveChildID(gameObjectID);

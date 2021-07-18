@@ -42,6 +42,9 @@ namespace ecs {
 
 		void DispChilds(const GameObjectID parentID);
 
+		void EditTransform(Camera& camera, Transform& transform);
+
+
 		Camera*			m_MainCamera;
 		Transform*		m_MaimCameraTransform;
 		GameObjectID	m_selectObjectID;

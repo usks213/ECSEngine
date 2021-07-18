@@ -23,19 +23,21 @@ namespace ecs {
 		Quaternion		rotation;
 		Vector3			scale;
 
-		Matrix			localToWorld;
-		Matrix			localToParent;
+		Matrix			localMatrix;
+		Matrix			globalMatrix;
 		//Vector3			localScale;
-		Vector3			parentScale;
+		Vector3			globalScale;
 
 		Transform(const GameObjectID& id) :
-			id(id), translation(), rotation(), scale(1,1,1)
+			id(id), translation(), rotation(), scale(1,1,1),
+			globalScale(1,1,1)
 			//localScale(1,1,1), parentScale(1,1,1)
 		{
 		}
 		Transform(const GameObjectID& id, Vector3 translation, 
 			Quaternion rotation = Quaternion(), Vector3 scale = Vector3(1,1,1)) :
-			id(id), translation(translation), rotation(rotation), scale(scale)
+			id(id), translation(translation), rotation(rotation), scale(scale),
+			globalScale(1, 1, 1)
 			//localScale(1, 1, 1), parentScale(1, 1, 1)
 		{
 		}

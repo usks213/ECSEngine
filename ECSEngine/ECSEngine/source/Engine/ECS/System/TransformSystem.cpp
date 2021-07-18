@@ -31,12 +31,11 @@ void TransformSystem::onUpdate()
 		[](Transform& transform)
 		{
 			// ägèk
-			transform.localToWorld = Matrix::CreateScale(transform.scale);
-			//transform.localScale = transform.scale;
+			transform.localMatrix = Matrix::CreateScale(transform.scale);
 			// âÒì]
-			transform.localToWorld *= Matrix::CreateFromQuaternion(transform.rotation);
+			transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
 			// à⁄ìÆ
-			transform.localToWorld *= Matrix::CreateTranslation(transform.translation);
+			transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
 		});
 }
 

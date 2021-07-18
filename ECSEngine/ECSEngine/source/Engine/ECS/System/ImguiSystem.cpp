@@ -342,10 +342,10 @@ void ImguiSystem::DispGui(std::string_view typeName, void* data)
 //
 //}
 
-void EditTransform(Camera& camera, Transform& transform)
+void ImguiSystem::EditTransform(Camera& camera, Transform& transform)
 {
 	bool editTransformDecomposition = true;
-	Matrix oldGlobalMatrix = transform.localToWorld * transform.localToParent;;
+	Matrix oldGlobalMatrix = transform.globalMatrix;
 
 	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 	static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
@@ -381,11 +381,11 @@ void EditTransform(Camera& camera, Transform& transform)
 			mCurrentGizmoMode = ImGuizmo::LOCAL;
 		}
 		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-		ImGuizmo::DecomposeMatrixToComponents(&transform.localToWorld.m[0][0], matrixTranslation, matrixRotation, matrixScale);
+		ImGuizmo::DecomposeMatrixToComponents(&transform.localMatrix.m[0][0], matrixTranslation, matrixRotation, matrixScale);
 		ImGui::InputFloat3("Tr", matrixTranslation);
 		ImGui::InputFloat3("Rt", matrixRotation);
 		ImGui::InputFloat3("Sc", matrixScale);
-		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform.localToWorld.m[0][0]);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, &transform.localMatrix.m[0][0]);
 
 		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
 		{
@@ -446,7 +446,7 @@ void EditTransform(Camera& camera, Transform& transform)
 	}
 
 	// ギズモ
-	Matrix globalMatrix = transform.localToWorld * transform.localToParent;
+	Matrix globalMatrix = transform.globalMatrix;
 	ImGuizmo::Manipulate(&camera.view.m[0][0], &camera.projection.m[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
 		&globalMatrix.m[0][0], NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 
@@ -455,17 +455,26 @@ void EditTransform(Camera& camera, Transform& transform)
 	ImGuizmo::DecomposeMatrixToComponents(&globalMatrix.m[0][0], (float*)&newTra, (float*)&newRot, (float*)&newSca);
 	ImGuizmo::DecomposeMatrixToComponents(&oldGlobalMatrix.m[0][0], (float*)&oldTra, (float*)&oldRot, (float*)&oldSca);
 	// ローカルマトリックス
-	Matrix local;
-	transform.localToParent.Invert(local);
-	local = globalMatrix * local;
-	transform.localToWorld = local;
+	Matrix local = globalMatrix;
+
+	// 親のがいる場合
+	auto parent = getGameObjectManager()->GetParent(transform.id);
+	if (parent != NONE_GAME_OBJECT_ID)
+	{
+		auto parentTrans = getGameObjectManager()->getComponentData<Transform>(parent);
+		parentTrans->globalMatrix.Invert(local);
+		local = globalMatrix * local;
+	}
 	Vector3 locTra, locRot, locSca;
 	ImGuizmo::DecomposeMatrixToComponents(&local.m[0][0], (float*)&locTra, (float*)&locRot, (float*)&locSca);
+
+	// ローカルマトリックス更新
+	transform.localMatrix = local;
 
 	if (oldTra != newTra)
 	{
 		// 移動
-		transform.translation = local.Translation();
+		transform.translation = locTra;
 	}
 	if (oldRot != newRot)
 	{

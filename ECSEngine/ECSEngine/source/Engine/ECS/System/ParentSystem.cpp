@@ -31,24 +31,24 @@ void ParentSystem::onUpdate()
 	{
 		auto* transform = getGameObjectManager()->getComponentData<Transform>(id);
 		if (transform == nullptr) continue;			
-		transform->localToParent = Matrix();
-		transform->parentScale = Vector3(1, 1, 1);
+		transform->globalMatrix = transform->localMatrix;
+		transform->globalScale = transform->scale;
 
 		for (auto child : getGameObjectManager()->GetChilds(id))
 		{
-			updateChild(child, transform->localToWorld, transform->scale);
+			updateChild(child, transform->globalMatrix, transform->globalScale);
 		}
 	}
 }
 
-void ParentSystem::updateChild(const GameObjectID& parent, const Matrix& localToParent, const Vector3& parentScale)
+void ParentSystem::updateChild(const GameObjectID& parent, const Matrix& globalMatrix, const Vector3& globalScale)
 {
 	auto* transform = getGameObjectManager()->getComponentData<Transform>(parent);
-	transform->localToParent = localToParent;
-	transform->parentScale = parentScale;
+	transform->globalMatrix = transform->localMatrix * globalMatrix;
+	transform->globalScale = transform->scale * globalScale;
 
 	for (auto child : getGameObjectManager()->GetChilds(parent))
 	{
-		updateChild(child, transform->localToWorld * localToParent, transform->scale * transform->parentScale);
+		updateChild(child, transform->globalMatrix, transform->globalScale);
 	}
 }

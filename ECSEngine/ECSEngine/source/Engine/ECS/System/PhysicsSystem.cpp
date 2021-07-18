@@ -28,7 +28,7 @@ void PhysicsSystem::onDestroy()
 /// @brief çXêV
 void PhysicsSystem::onUpdate()
 {
-	foreach<Transform>(
+	foreach<Transform, Physics>(
 		[this](Transform& transform, Physics& phisics)
 		{
 			//===== âÒì] =====
