@@ -19,12 +19,12 @@
 #include <Engine/ECS/ComponentData/ComponentTag.h>
 #include <Engine/ECS/ComponentData/RenderingComponentData.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
+#include <Engine/ECS/ComponentData/PhysicsComponentData.h>
 
 using namespace ecs;
 
 /// @brief 型チェック
 #define CheckType(Type) typeName == TypeToString(Type)
-void EditTransform(Camera& camera, Transform& transform);
 
 
  /// @brief 生成時
@@ -476,6 +476,9 @@ void ImguiSystem::EditTransform(Camera& camera, Transform& transform)
 
 	if (oldTra != newTra)
 	{
+		// 速度
+		auto physics = getGameObjectManager()->getComponentData<Physics>(transform.id);
+		if (physics) physics->velocity = locTra - transform.translation;
 		// 移動
 		transform.translation = locTra;
 	}

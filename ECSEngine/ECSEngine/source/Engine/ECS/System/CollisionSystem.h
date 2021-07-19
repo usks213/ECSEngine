@@ -8,6 +8,8 @@
 #pragma once
 
 #include <Engine/ECS/Base/SystemBase.h>
+#include <Engine/ECS/ComponentData/TransformComponentData.h>
+#include <Engine/ECS/ComponentData/PhysicsComponentData.h>
 
 namespace ecs {
 
@@ -31,6 +33,23 @@ namespace ecs {
 		void onUpdate() override;
 
 	private:
-		void Collision(const Entity& main, const std::vector<Entity>& m_subList);
+		void Collision(const Entity& main, const std::vector<Entity>& m_subList,
+			bool mainStatic, bool subStatic);
+
+		
+		bool AABBvsAABB(Transform& transform1, Physics& physics1,
+			Transform& transform2, Physics& physics2, bool static2);
+		bool AABBvsSphere(Transform& transform1, Physics& physics1,
+			Transform& transform2, Physics& physics2, bool static2);
+		bool SphereVsAABB(Transform& transform1, Physics& physics1,
+			Transform& transform2, Physics& physics2, bool static2);
+		bool SphereVsSphere(Transform& transform1, Physics& physics1,
+			Transform& transform2, Physics& physics2, bool static2);
+		bool OBBvsOBB(Transform& transform1, Physics& physics1,
+			Transform& transform2, Physics& physics2, bool static2);
+		bool OBBvsSphere(Transform& transform1, Physics& physics1,
+			Transform& transform2, Physics& physics2, bool static2);
+		bool SphereVsOBB(Transform& transform1, Physics& physics1,
+			Transform& transform2, Physics& physics2, bool static2);
 	};
 }

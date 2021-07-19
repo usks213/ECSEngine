@@ -8,6 +8,7 @@
 
 #include "TransformSystem.h"
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
+#include <Engine/ECS/ComponentData/BasicComponentData.h>
 
 using namespace ecs;
 
@@ -15,7 +16,16 @@ using namespace ecs;
  /// @brief ¶¬
 void TransformSystem::onCreate()
 {
-
+	foreach<Transform>(
+		[](Transform& transform)
+		{
+			// Šgk
+			transform.localMatrix = Matrix::CreateScale(transform.scale);
+			// ‰ñ“]
+			transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
+			// ˆÚ“®
+			transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
+		});
 }
 
 /// @brief íœ
@@ -27,8 +37,8 @@ void TransformSystem::onDestroy()
 /// @brief XV
 void TransformSystem::onUpdate()
 {
-	foreach<Transform>(
-		[](Transform& transform)
+	foreach<Transform, DynamicType>(
+		[](Transform& transform, DynamicType& type)
 		{
 			// Šgk
 			transform.localMatrix = Matrix::CreateScale(transform.scale);

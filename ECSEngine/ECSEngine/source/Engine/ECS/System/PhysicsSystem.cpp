@@ -9,6 +9,7 @@
 #include "PhysicsSystem.h"
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/PhysicsComponentData.h>
+#include <Engine/ECS/ComponentData/BasicComponentData.h>
 
 using namespace ecs;
 
@@ -16,7 +17,7 @@ using namespace ecs;
  /// @brief 生成時
 void PhysicsSystem::onCreate()
 {
-	m_graviyForce = Vector3(0, -9.8f / 60.0f, 0);
+	m_graviyAcceleration = Vector3(0, -0.8f, 0);
 }
 
 /// @brief 削除時
@@ -28,36 +29,39 @@ void PhysicsSystem::onDestroy()
 /// @brief 更新
 void PhysicsSystem::onUpdate()
 {
-	foreach<Transform, Physics>(
-		[this](Transform& transform, Physics& phisics)
+	// デルタタイム
+	float delta = (1.0f / 60.0f);
+
+	foreach<Transform, Physics, DynamicType>(
+		[this, delta](Transform& transform, Physics& physics, DynamicType& type)
 		{
 			//===== 回転 =====
 
 			// 角速度
-			phisics.angularVelocity = Quaternion();
+			physics.angularVelocity = Quaternion();
 			// トルク加算
-			phisics.angularVelocity *= phisics.torque;
+			physics.angularVelocity *= physics.torque;
 			// 回転の更新
-			transform.rotation *= phisics.angularVelocity;
+			transform.rotation *= physics.angularVelocity;
 			// 抵抗
 
 
 			//===== 移動 =====
-
 			// 重力
-			if (phisics.gravity)
+			if (physics.gravity)
 			{
-				phisics.force += m_graviyForce;
+				physics.force += m_graviyAcceleration * physics.mass;
 			}
 			// 抵抗
-			phisics.force *= (Vector3(1, 1, 1) - phisics.drag);
-			if (phisics.force.Length() < 0.01f)
-				phisics.force = Vector3();
-
+			physics.force *= (Vector3(1, 1, 1) - physics.drag);
+			if (physics.force.Length() < 0.01f)
+				physics.force = Vector3();
+			// 加速度
+			physics.acceleration = physics.force / physics.mass;
 			// 速度更新
-			phisics.velocity += phisics.force;
+			physics.velocity += physics.acceleration * delta;
 			// 位置の更新
-			transform.translation += phisics.velocity;
+			transform.translation += physics.velocity * delta;
 
 		});
 }

@@ -21,8 +21,9 @@ namespace ecs {
 		/// @brief コライダーの種類
 		enum class ColliderType : std::uint32_t
 		{
-			Box,
+			AABB,
 			Sphere,
+			OBB,
 			Max,
 		};
 
@@ -32,8 +33,8 @@ namespace ecs {
 		/// @param gravity 重力使用
 		explicit Physics(ColliderType collider, bool trigger = false, bool gravity = true) :
 			colliderType(collider), trigger(trigger), 
-			gravity(gravity), mass(1.0f), drag(),
-			e(0.5f), staticFriction(0.1f), dynamicFriction(0.05f)
+			gravity(gravity), mass(2.0f), drag(),
+			e(1.0f), staticFriction(1.0f), dynamicFriction(1.0f)
 		{
 		}
 
@@ -63,6 +64,8 @@ namespace ecs {
 		//--- 内部処理パラメータ
 		/// @brief 速度
 		Vector3 velocity;
+		/// @brief 加速度
+		Vector3 acceleration;
 		/// @brief 力
 		Vector3 force;
 		/// @brief 角速度

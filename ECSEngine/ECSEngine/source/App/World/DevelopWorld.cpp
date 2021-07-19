@@ -96,7 +96,7 @@ public:
 					float focus = 0.0f;
 
 					// 速度
-					float moveSpeed = 1.0f / 60.0f * 5;
+					float moveSpeed = 1.0f / 60.0f;
 					float rotSpeed = 3.141592f / 60.0f;
 
 					// 左ボタン(カメラ回り込み
@@ -237,13 +237,18 @@ void DevelopWorld::Start()
 	//Geometry::Sphere(*pMesh, 36, 1.0f, 1.0f / 18);
 	Geometry::Cube(*pMesh);
 
+	MeshID sphereID = renderer->createMesh("Sphere");
+	auto* pSphere = renderer->getMesh(sphereID);
+	Geometry::Sphere(*pSphere, 36, 0.5f, 1.0f / 18);
+
+
 	MeshID meshSky = renderer->createMesh("SkyDome");
 	auto* pSky = renderer->getMesh(meshSky);
 	Geometry::SkyDome(*pSky, 36, 1.0f);
 
 	MeshID meshPlane = renderer->createMesh("Plane");
 	auto* pPlaneMesh = renderer->getMesh(meshPlane);
-	Geometry::Plane(*pPlaneMesh, 20);
+	Geometry::Plane(*pPlaneMesh, 20, 1.0f / 20);
 
 	// レンダーバッファの生成
 	auto rdID = renderer->createRenderBuffer(shaderLitID, meshID);
@@ -251,6 +256,7 @@ void DevelopWorld::Start()
 
 	// バッチデータの作成
 	auto objBitchID = renderer->creatBatchGroup(matLitID, meshID);
+	auto sphereBitchID = renderer->creatBatchGroup(matLitID, sphereID);
 
 
 	// アーキタイプ
@@ -275,7 +281,8 @@ void DevelopWorld::Start()
 	getGameObjectManager()->setComponentData(sky, rdSky);
 
 	// 床
-	scale = Vector3(1, 1, 1);
+	archetype = Archetype::create<Transform, RenderData, StaticType, Physics>();
+	scale = Vector3(20, 1, 20);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	RenderData rdPlane;
 	rdPlane.materialID = matUnlitID;
@@ -283,6 +290,8 @@ void DevelopWorld::Start()
 
 	auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
 	getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
+	getGameObjectManager()->setComponentData(plane, 
+		Physics(Physics::ColliderType::OBB, false, false));
 	getGameObjectManager()->setComponentData(plane, rdPlane);
 
 	// カメラ生成
@@ -296,8 +305,8 @@ void DevelopWorld::Start()
 	cameraData.farZ = 1000.0f;
 	pos.x = 0;
 	pos.z = -17.5f;
-	pos.y = 17.5f;
-	rot = Quaternion::CreateFromYawPitchRoll(3.141592f, 3.141592f / -7, 0);
+	pos.y = 6;
+	rot = Quaternion::CreateFromYawPitchRoll(3.141592f, 0, 0);
 
 	getGameObjectManager()->setComponentData<Transform>(entity, Transform(entity, pos, rot, scale));
 	getGameObjectManager()->setComponentData(entity, cameraData);
@@ -305,7 +314,7 @@ void DevelopWorld::Start()
 
 
 	// 人
-	Archetype archetypeHuman = Archetype::create<Transform, DynamicType>();
+	Archetype archetypeHuman = Archetype::create<Transform, DynamicType, Physics>();
 	archetypeHuman.addTag(objBitchID);
 
 	// 腰
@@ -314,6 +323,8 @@ void DevelopWorld::Start()
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale = Vector3(5, 2, 2);
 	getGameObjectManager()->setComponentData<Transform>(Waist, Transform(Waist, pos, rot, scale));
+	getGameObjectManager()->setComponentData(Waist,
+		Physics(Physics::ColliderType::OBB, false, true));
 
 	// 腿左
 	auto ThighLeft = getGameObjectManager()->createGameObject("Thigh Left", archetypeHuman);
@@ -356,6 +367,8 @@ void DevelopWorld::Start()
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale = Vector3(0.8f, 3.0f, 0.8f);
 	getGameObjectManager()->setComponentData<Transform>(Body, Transform(Body, pos, rot, scale));
+	getGameObjectManager()->setComponentData(Body,
+		Physics(Physics::ColliderType::OBB, false, false));
 
 	// 頭
 	auto Head = getGameObjectManager()->createGameObject("Head", archetypeHuman);
@@ -398,12 +411,16 @@ void DevelopWorld::Start()
 	getGameObjectManager()->setComponentData<Transform>(ArmRight, Transform(ArmRight, pos, rot, scale));
 
 	// 回転ボックス
-	archetypeHuman.addType<ObjectTag>();
-	auto RotateBox = getGameObjectManager()->createGameObject("Rotate Box", archetypeHuman);
-	pos = Vector3(0, 2, 0);
+	Archetype boxArch = Archetype::create<Transform, StaticType, Physics>();
+	boxArch.addTag(sphereBitchID);
+	//archetypeHuman.addType<ObjectTag>();
+	auto RotateBox = getGameObjectManager()->createGameObject("Rotate Box", boxArch);
+	pos = Vector3(0, 6, 0);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale = Vector3(1, 1, 1);
 	getGameObjectManager()->setComponentData<Transform>(RotateBox, Transform(RotateBox, pos, rot, scale));
+	getGameObjectManager()->setComponentData(RotateBox,
+		Physics(Physics::ColliderType::Sphere, false, false));
 
 	// システムの追加
 	addSystem<ImguiSystem>();

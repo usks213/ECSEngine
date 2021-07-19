@@ -34,6 +34,6 @@ namespace ecs {
 
 	private:
 		/// @brief èdóÕ
-		Vector3 m_graviyForce;
+		Vector3 m_graviyAcceleration;
 	};
 }
