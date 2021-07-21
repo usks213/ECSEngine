@@ -182,6 +182,7 @@
     <ClCompile Include="lib\WICTextureLoader\WICTextureLoader11.cpp" />
     <ClCompile Include="source\App\main.cpp" />
     <ClCompile Include="source\App\World\DevelopWorld.cpp" />
+    <ClCompile Include="source\App\World\PhysicsTestWorld.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\Chunk.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\EntityManager.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\GameObject.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="lib\WICTextureLoader\WICTextureLoader11.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\App\World\DevelopWorld.h" />
+    <ClInclude Include="source\App\World\PhysicsTestWorld.h" />
     <ClInclude Include="source\Engine\ECS\Base\Archetype.h" />
     <ClInclude Include="source\Engine\ECS\Base\BinaryStream.h" />
     <ClInclude Include="source\Engine\ECS\Base\Chunk.h" />

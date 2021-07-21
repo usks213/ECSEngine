@@ -197,6 +197,9 @@
     <ClCompile Include="source\Engine\ECS\System\CollisionSystem.cpp">
       <Filter>ソース ファイル\Engine\ECS\System</Filter>
     </ClCompile>
+    <ClCompile Include="source\App\World\PhysicsTestWorld.cpp">
+      <Filter>ソース ファイル\App\World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -405,6 +408,9 @@
     </ClInclude>
     <ClInclude Include="source\Engine\ECS\System\CollisionSystem.h">
       <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\App\World\PhysicsTestWorld.h">
+      <Filter>ソース ファイル\App\World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

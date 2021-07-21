@@ -31,10 +31,11 @@ namespace ecs {
 		/// @param collider コライダー種別
 		/// @param trigger 押し出しなし
 		/// @param gravity 重力使用
-		explicit Physics(ColliderType collider, bool trigger = false, bool gravity = true) :
+		explicit Physics(ColliderType collider, bool trigger = false, bool gravity = true,
+			float mass = 1.0f, float e = 0.95f, float sf = 0.0f, float df = 0.0f) :
 			colliderType(collider), trigger(trigger), 
-			gravity(gravity), mass(2.0f), drag(),
-			e(1.0f), staticFriction(1.0f), dynamicFriction(1.0f)
+			gravity(gravity), mass(1.0f), drag(),
+			e(0.8f), staticFriction(0.0f), dynamicFriction(0.0f)
 		{
 		}
 

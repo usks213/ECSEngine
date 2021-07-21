@@ -77,16 +77,16 @@ void CollisionSystem::onUpdate()
 				false, true);
 		}
 	}
-	//--- 静的オブジェクトと動的オブジェクト
-		// サブ空間の当たり判定
-	for (int i = 0; i < quadTree->getCellNum(); ++i)
-	{
-		for (auto& entity : quadTree->m_staticMainList[i])
-		{
-			Collision(entity, quadTree->m_dynamicSubList[i],
-				true, false);
-		}
-	}
+	////--- 静的オブジェクトと動的オブジェクト
+	//	// サブ空間の当たり判定
+	//for (int i = 0; i < quadTree->getCellNum(); ++i)
+	//{
+	//	for (auto& entity : quadTree->m_staticMainList[i])
+	//	{
+	//		Collision(entity, quadTree->m_dynamicSubList[i],
+	//			true, false);
+	//	}
+	//}
 }
 
 
@@ -322,8 +322,51 @@ bool CollisionSystem::SphereVsAABB(Transform& transform1, Physics& physics1,
 bool CollisionSystem::SphereVsSphere(Transform& transform1, Physics& physics1,
 	Transform& transform2, Physics& physics2, bool static2)
 {
-
 	return false;
+
+	//--- 詳細判定
+	// 中心座標
+	Vector3 pos1 = transform1.globalMatrix.Translation();
+	Vector3 pos2 = transform2.globalMatrix.Translation();
+	// 半径
+	float radius1 = transform1.globalScale.x * 0.5f;
+	float radius2 = transform2.globalScale.x * 0.5f;
+
+	// 二点間距離
+	Vector3 distance = pos1 - pos2;
+
+	//--- 衝突判定
+	if (distance.LengthSquared() >= (radius1 + radius2) * (radius1 + radius2)) return false;
+
+
+	//--- 物理
+	// トリガー
+	if (physics1.trigger || physics2.trigger) return true;
+
+	// 物理計算
+	Vector3 normal = distance;
+	normal.Normalize();
+	//CollisionPhysics(physics1, physics2, normal, static2);
+
+	//---  押し出し
+	// 二点間と２半径の差
+	float len = (radius1 + radius2) - distance.Length();
+	// 押し出す方向
+	Vector3 vec = normal * len;
+	// 押し出し
+	Vector3 pos = transform1.globalMatrix.Translation() + vec;
+	// 親の逆行列
+	Matrix parentInv;
+	auto parentID = getGameObjectManager()->GetParent(transform1.id);
+	if (parentID != NONE_GAME_OBJECT_ID)
+	{
+		auto* parentTrans = getGameObjectManager()->getComponentData<Transform>(parentID);
+		parentInv = parentTrans->globalMatrix.Invert();
+	}
+
+	transform1.translation = Vector3::Transform(pos, parentInv);
+
+	return true;
 }
 
 bool CollisionSystem::OBBvsOBB(Transform& transform1, Physics& physics1,
@@ -521,17 +564,17 @@ bool CollisionSystem::SphereVsOBB(Transform& transform1, Physics& physics1,
 	// X軸
 	if (len.x <= len.y && len.x <= len.z)
 	{
-		if (d.x >= 0)
+		if (d.x < 0)
 		{
 			normal = obb.globalMatrix.Right() * 0.5f;
-			Vector3 pos = obb.globalMatrix.Translation() + normal * len.x;
+			Vector3 pos = center + normal * len.x;
 			pos = Vector3::Transform(pos, parentInv);
 			transform1.translation = pos;
 		}
 		else
 		{
 			normal = obb.globalMatrix.Left() * 0.5f;
-			Vector3 pos = obb.globalMatrix.Translation() + normal * len.x;
+			Vector3 pos = center + normal * len.x;
 			pos = Vector3::Transform(pos, parentInv);
 			transform1.translation = pos;
 		}
@@ -539,17 +582,17 @@ bool CollisionSystem::SphereVsOBB(Transform& transform1, Physics& physics1,
 	// Y軸
 	else if (len.y <= len.x && len.y <= len.z)
 	{
-		if (d.y >= 0)
+		if (d.y < 0)
 		{
 			normal = obb.globalMatrix.Up() * 0.5f;
-			Vector3 pos = obb.globalMatrix.Translation() + normal * len.y;
+			Vector3 pos = center + normal * len.y;
 			pos = Vector3::Transform(pos, parentInv);
 			transform1.translation = pos;
 		}
 		else
 		{
 			normal = obb.globalMatrix.Down() * 0.5f;
-			Vector3 pos = obb.globalMatrix.Translation() + normal * len.y;
+			Vector3 pos = center + normal * len.y;
 			pos = Vector3::Transform(pos, parentInv);
 			transform1.translation = pos;
 		}
@@ -557,23 +600,24 @@ bool CollisionSystem::SphereVsOBB(Transform& transform1, Physics& physics1,
 	// Z軸
 	else if (len.z <= len.x && len.z <= len.y)
 	{
-		if (d.z >= 0)
+		if (d.z < 0)
 		{
 			normal = obb.globalMatrix.Forward() * 0.5f;
-			Vector3 pos = obb.globalMatrix.Translation() + normal * len.z;
+			Vector3 pos = center + normal * len.z;
 			pos = Vector3::Transform(pos, parentInv);
 			transform1.translation = pos;
 		}
 		else
 		{
 			normal = obb.globalMatrix.Backward() * 0.5f;
-			Vector3 pos = obb.globalMatrix.Translation() + normal * len.z;
+			Vector3 pos = center + normal * len.z;
 			pos = Vector3::Transform(pos, parentInv);
 			transform1.translation = pos;
 		}
 	}
 
 	// 物理
+	normal.Normalize();
 	CollisionPhysics(physics1, physics2, normal, static2);
 
 	return true;
@@ -634,23 +678,21 @@ void CollisionPhysics(Physics& physics1, Physics& physics2, const Vector3& norma
 	}
 
 	//--- ベクトルの合成・力の反映
-	Vector3 newForce1 = horizontalForce1 + verticalForce1;
-	Vector3 newForce2 = horizontalForce2 + verticalForce2;
 	if (static2)
 	{
 		physics1.force = Vector3();
-		physics1.acceleration = (newForce1 - newForce2);
-		physics1.velocity = physics1.acceleration / 2 + physics1.acceleration * delta;
+		physics1.acceleration = (verticalForce1 - verticalForce2) / 2 + horizontalForce1;
+		physics1.velocity = physics1.acceleration + physics1.acceleration * delta;
 	}
 	else
 	{
 		physics1.force = Vector3();
-		physics1.acceleration = newForce1;
-		physics1.velocity = physics1.acceleration / 2 + physics1.acceleration * delta;
+		physics1.acceleration = verticalForce1 / 2 + horizontalForce1;
+		physics1.velocity = physics1.acceleration + physics1.acceleration * delta;
 
 		physics2.force = Vector3();
-		physics2.acceleration = newForce2;
-		physics2.velocity = physics2.acceleration / 2 + physics2.acceleration * delta;
+		physics2.acceleration = verticalForce2 / 2 + horizontalForce2;
+		physics2.velocity = physics2.acceleration + physics2.acceleration * delta;
 	}
 }
 

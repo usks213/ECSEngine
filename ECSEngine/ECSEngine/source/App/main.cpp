@@ -18,6 +18,7 @@
 #include <Engine/Utility/Input.h>
 
 #include <App/World/DevelopWorld.h>
+#include <App/World/PhysicsTestWorld.h>
 
 // imgui
 #include "imgui.h"
@@ -70,7 +71,7 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	engine.initialize();
 
 	// ワールド
-	engine.getWorldManager()->LoadWorld<ecs::DevelopWorld>();
+	engine.getWorldManager()->LoadWorld<ecs::PhysicsTestWorld>();
 
 
 	// メッセージループ

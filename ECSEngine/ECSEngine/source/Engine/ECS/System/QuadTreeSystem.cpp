@@ -43,7 +43,7 @@ void QuadTreeSystem::onCreate()
 	// 空間レベル
 	SetLevel(3); // 3=85, 4=341,
 	// 空間サイズ
-	SetQuadSize(100, 100);
+	SetQuadSize(32, 32);
 	// 空間の端
 	SetLeftTop(-m_fWidth / 2, -m_fHeight / 2);
 
@@ -98,7 +98,7 @@ void QuadTreeSystem::onUpdate()
 		//Vector3 pos = Vector3::Transform(cameraTrans->translation, cameraTrans->globalMatrix);
 		Vector3 pos = cameraTrans->translation;
 		// 空間端
-		SetLeftTop(pos.x - m_fWidth / 2, pos.z - m_fHeight / 2);
+		SetLeftTop(pos.x - m_fWidth / 2, pos.y - m_fHeight / 2);
 	}
 	else
 	{
@@ -128,8 +128,8 @@ void QuadTreeSystem::onUpdate()
 
 				// ここで空間の登録をする
 				// 左上と右下を出す
-				wLeftTop = GetPointElem(min.x, min.z);
-				wRightDown = GetPointElem(max.x, max.z);
+				wLeftTop = GetPointElem(min.x, min.y);
+				wRightDown = GetPointElem(max.x, max.y);
 				// 空間外
 				if (wLeftTop >= m_uiMaxCell - 1 || wRightDown >= m_uiMaxCell - 1)
 				{
@@ -182,8 +182,8 @@ void QuadTreeSystem::onUpdate()
 
 				// ここで空間の登録をする
 				// 左上と右下を出す
-				wLeftTop = GetPointElem(min.x, min.z);
-				wRightDown = GetPointElem(max.x, max.z);
+				wLeftTop = GetPointElem(min.x, min.y);
+				wRightDown = GetPointElem(max.x, max.y);
 				// 空間外
 				if (wLeftTop >= m_uiMaxCell - 1 || wRightDown >= m_uiMaxCell - 1)
 				{
@@ -225,20 +225,20 @@ void QuadTreeSystem::onUpdate()
 		chunkIndex++;
 	}
 
-	ImGui::Begin("QuadTree");
-	int i = 0;
-	for (const auto& list : m_dynamicMainList)
-	{
-		if (ImGui::TreeNodeEx(std::to_string(i).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-		{
-			for (const auto& entity : list)
-			{
-				ImGui::Text(std::to_string(entity.m_index).c_str());
-			}
-			ImGui::TreePop();
-		}
-		i++;
-	}
+	//ImGui::Begin("QuadTree");
+	//int i = 0;
+	//for (const auto& list : m_staticSubList)
+	//{
+	//	if (ImGui::TreeNodeEx(std::to_string(i).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+	//	{
+	//		for (const auto& entity : list)
+	//		{
+	//			ImGui::Text(std::to_string(entity.m_index).c_str());
+	//		}
+	//		ImGui::TreePop();
+	//	}
+	//	i++;
+	//}
 
-	ImGui::End();
+	//ImGui::End();
 }
