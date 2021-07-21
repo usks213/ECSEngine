@@ -246,9 +246,11 @@
     <ClInclude Include="source\Engine\ECS\Base\WorldManager.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\BasicComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\CameraComponentData.h" />
+    <ClInclude Include="source\Engine\ECS\ComponentData\ColliderComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\ComponentTag.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\PhysicsComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\RenderingComponentData.h" />
+    <ClInclude Include="source\Engine\ECS\ComponentData\RigidbodyComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\TransformComponentData.h" />
     <ClInclude Include="source\Engine\ECS\System\CollisionSystem.h" />
     <ClInclude Include="source\Engine\ECS\System\ImguiSystem.h" />

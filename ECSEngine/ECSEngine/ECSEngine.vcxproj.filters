@@ -412,6 +412,12 @@
     <ClInclude Include="source\App\World\PhysicsTestWorld.h">
       <Filter>ソース ファイル\App\World</Filter>
     </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\ColliderComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\RigidbodyComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">

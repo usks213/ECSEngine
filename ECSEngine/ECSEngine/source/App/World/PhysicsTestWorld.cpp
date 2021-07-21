@@ -14,6 +14,8 @@
 #include <Engine/ECS/Base/GameObjectManager.h>
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
+#include <Engine/ECS/ComponentData/ColliderComponentData.h>
+#include <Engine/ECS/ComponentData/RigidbodyComponentData.h>
 #include <Engine/ECS/ComponentData/RenderingComponentData.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
 #include <Engine/ECS/ComponentData/ComponentTag.h>
@@ -46,15 +48,13 @@ public:
 		SystemBase(pWorld)
 	{}
 	void onUpdate() override {
-		foreach<Transform, Physics, ObjectTag>([](Transform& transform, Physics& physics, ObjectTag& tag) {
+		foreach<Transform, ObjectTag>([](Transform& transform, ObjectTag& tag) {
 
 			if (transform.translation.y < -5)
 			{
 				transform.translation.x = 10 - rand() % 20;
 				transform.translation.y = 30;
 				transform.translation.z = 0;
-				physics.force = Vector3();
-				physics.velocity = Vector3();
 			}
 
 			});
@@ -278,7 +278,7 @@ void PhysicsTestWorld::Start()
 	getGameObjectManager()->setComponentData(sky, rdSky);
 
 	// 床
-	archetype = Archetype::create<Transform, RenderData, StaticType, Physics>();
+	archetype = Archetype::create<Transform, RenderData, StaticType, Collider, Rigidbody>();
 	scale = Vector3(20, 1, 20);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	RenderData rdPlane;
@@ -310,7 +310,7 @@ void PhysicsTestWorld::Start()
 
 
 	// ステージ
-	Archetype stageArchetype = Archetype::create<Transform, StaticType, Physics>();
+	Archetype stageArchetype = Archetype::create<Transform, StaticType, Collider, Rigidbody>();
 	stageArchetype.addTag(objBitchID);
 
 	// Stage
@@ -319,8 +319,7 @@ void PhysicsTestWorld::Start()
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale = Vector3(1, 1, 1);
 	getGameObjectManager()->setComponentData<Transform>(Stage, Transform(Stage, pos, rot, scale));
-	getGameObjectManager()->setComponentData(Stage,
-		Physics(Physics::ColliderType::OBB, false, false));
+	getGameObjectManager()->setComponentData(Stage, Rigidbody(0.0f));
 
 
 	// 杭
@@ -332,26 +331,26 @@ void PhysicsTestWorld::Start()
 			getGameObjectManager()->SetParent(Kui, Stage);
 			pos = Vector3(x * 3 - 20 + y, y * 3 - 5, 0);
 			rot = Quaternion::CreateFromYawPitchRoll(0, 0, rand() % 180 / 3.1415f);
-			scale = Vector3(1, 1, 2);
+			scale = Vector3(1, 1, 30);
 			getGameObjectManager()->setComponentData<Transform>(Kui, Transform(Kui, pos, rot, scale));
-			getGameObjectManager()->setComponentData(Kui,
-				Physics(Physics::ColliderType::OBB, false, false));
+			getGameObjectManager()->setComponentData(Kui, Rigidbody(0.0f));
+			getGameObjectManager()->setComponentData(Kui, Collider(Collider::ColliderType::BOX));
 		}
 	}
 
 	// ボール
-	Archetype sphereArch = Archetype::create<Transform, DynamicType, Physics, ObjectTag>();
+	Archetype sphereArch = Archetype::create<Transform, DynamicType, Collider, Rigidbody, ObjectTag>();
 	sphereArch.addTag(sphereBitchID);
 
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < 3000; i++)
 	{
 		auto Ball = getGameObjectManager()->createGameObject("Ball", sphereArch);
 		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);
 		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 		scale = Vector3(1, 1, 1);
 		getGameObjectManager()->setComponentData<Transform>(Ball, Transform(Ball, pos, rot, scale));
-		getGameObjectManager()->setComponentData(Ball,
-			Physics(Physics::ColliderType::Sphere, false, true));
+		getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
+		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
 	}
 
 	// システムの追加
@@ -361,8 +360,8 @@ void PhysicsTestWorld::Start()
 	addSystem<TransformSystem>();
 	addSystem<ControllSystem>();
 	addSystem<ParentSystem>();
-	addSystem<QuadTreeSystem>();
-	addSystem<CollisionSystem>();
+	//addSystem<QuadTreeSystem>();
+	//addSystem<CollisionSystem>();
 	addSystem<RenderingSystem>();
 }
 
