@@ -13,6 +13,34 @@
 
 using namespace ecs;
 
+#include "BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h"
+#include "BulletCollision/CollisionDispatch/btGhostObject.h"
+#include "BulletCollision/CollisionShapes/btShapeHull.h"
+#include "BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h"
+#include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h"
+#include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h"
+#include "BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h"
+#include "BulletDynamics/Dynamics/btSimulationIslandManagerMt.h"
+#include "BulletDynamics/MLCPSolvers/btDantzigSolver.h"
+#include "BulletDynamics/MLCPSolvers/btLemkeSolver.h"
+#include "BulletDynamics/MLCPSolvers/btMLCPSolver.h"
+#include "BulletDynamics/MLCPSolvers/btSolveProjectedGaussSeidel.h"
+#include "LinearMath/btAlignedObjectArray.h"
+#include "LinearMath/btPoolAllocator.h"
+#include "btBulletCollisionCommon.h"
+
+#pragma comment(lib, "Bullet2FileLoader.lib")
+#pragma comment(lib, "Bullet3Collision.lib")
+#pragma comment(lib, "Bullet3Common.lib")
+#pragma comment(lib, "Bullet3Dynamics.lib")
+#pragma comment(lib, "Bullet3Geometry.lib")
+#pragma comment(lib, "Bullet3OpenCL_clew.lib")
+#pragma comment(lib, "BulletCollision.lib")
+#pragma comment(lib, "BulletDynamics.lib")
+#pragma comment(lib, "BulletInverseDynamics.lib")
+#pragma comment(lib, "BulletSoftBody.lib")
+#pragma comment(lib, "LinearMath.lib")
+
 
  /// @brief ê∂ê¨éû
 void PhysicsSystem::onCreate()
