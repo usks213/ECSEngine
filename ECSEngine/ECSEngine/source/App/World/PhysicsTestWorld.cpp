@@ -236,7 +236,7 @@ void PhysicsTestWorld::Start()
 
 	MeshID sphereID = renderer->createMesh("Sphere");
 	auto* pSphere = renderer->getMesh(sphereID);
-	Geometry::Sphere(*pSphere, 36, 0.5f, 1.0f / 18);
+	Geometry::Sphere(*pSphere, 36, 1.0f, 1.0f / 18);
 
 
 	MeshID meshSky = renderer->createMesh("SkyDome");
@@ -342,24 +342,24 @@ void PhysicsTestWorld::Start()
 	Archetype sphereArch = Archetype::create<Transform, DynamicType, Collider, Rigidbody, ObjectTag>();
 	sphereArch.addTag(sphereBitchID);
 
-	for (int i = 0; i < 3000; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		auto Ball = getGameObjectManager()->createGameObject("Ball", sphereArch);
 		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);
 		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
-		scale = Vector3(1, 1, 1);
+		scale = Vector3(0.5f, 0.5f, 0.5f);
 		getGameObjectManager()->setComponentData<Transform>(Ball, Transform(Ball, pos, rot, scale));
 		getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
-		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
+		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE, Vector3()));
 	}
 
 	// ƒVƒXƒeƒ€‚Ì’Ç‰Á
 	addSystem<ImguiSystem>();
 	addSystem<SphereSystem>();
-	addSystem<PhysicsSystem>();
 	addSystem<TransformSystem>();
 	addSystem<ControllSystem>();
 	addSystem<ParentSystem>();
+	addSystem<PhysicsSystem>();
 	//addSystem<QuadTreeSystem>();
 	//addSystem<CollisionSystem>();
 	addSystem<RenderingSystem>();

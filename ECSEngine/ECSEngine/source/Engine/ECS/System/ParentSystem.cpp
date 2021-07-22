@@ -15,7 +15,7 @@ using namespace ecs;
  /// @brief ¶¬Žž
 void ParentSystem::onCreate()
 {
-
+	onUpdate();
 }
 
 /// @brief íœŽž
@@ -33,6 +33,7 @@ void ParentSystem::onUpdate()
 		if (transform == nullptr) continue;			
 		transform->globalMatrix = transform->localMatrix;
 		transform->globalScale = transform->scale;
+		//transform->parentMatrix = Matrix();
 
 		for (auto child : getGameObjectManager()->GetChilds(id))
 		{
@@ -46,6 +47,7 @@ void ParentSystem::updateChild(const GameObjectID& parent, const Matrix& globalM
 	auto* transform = getGameObjectManager()->getComponentData<Transform>(parent);
 	transform->globalMatrix = transform->localMatrix * globalMatrix;
 	transform->globalScale = transform->scale * globalScale;
+	//transform->parentMatrix = Matrix::CreateScale(globalScale).Invert() * globalMatrix;
 
 	for (auto child : getGameObjectManager()->GetChilds(parent))
 	{

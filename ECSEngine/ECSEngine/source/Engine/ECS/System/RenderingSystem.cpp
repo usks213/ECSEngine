@@ -16,6 +16,9 @@
 #include <Engine/Engine.h>
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
 
+#include <Engine/ECS/System/PhysicsSystem.h>
+
+
 using namespace ecs;
 
 
@@ -144,6 +147,14 @@ void RenderingSystem::onUpdate()
 
 			renderer->d3dRender(rdID);
 		});
+
+
+	// BulletDebugDraw
+	auto* physicsSytem = m_pWorld->getSystem<PhysicsSystem>();
+	if (physicsSytem)
+	{
+		physicsSytem->debugDraw();
+	}
 }
 
 

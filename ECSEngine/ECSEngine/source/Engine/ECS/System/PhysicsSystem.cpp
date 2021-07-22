@@ -10,6 +10,7 @@
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/PhysicsComponentData.h>
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
+#include <Engine/Engine.h>
 
 using namespace ecs;
 
@@ -42,13 +43,19 @@ void PhysicsSystem::onCreate()
 
 	}
 
+	// デバッグ表示
+	m_pDebugDraw = std::make_unique<IBulletDebugDrawDX11>();
+	m_pDebugDraw->Setup(static_cast<D3D11RendererManager*>(
+		m_pWorld->getWorldManager()->getEngine()->getRendererManager()));
+	m_pDebugDraw->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+
 	// ワールド作成
-	m_pWorld = std::make_unique<btDiscreteDynamicsWorld>(
+	m_pDynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(
 		m_pDispatcher.get(), m_pBroadphase.get(), m_pSolver.get(), m_pConfig.get());
 
 	// ワールド設定
-	m_pWorld->setGravity(btVector3(0, -10, 0));
-
+	m_pDynamicsWorld->setGravity(btVector3(0, -10, 0));
+	m_pDynamicsWorld->setDebugDrawer(m_pDebugDraw.get());
 }
 
 /// @brief 削除時
@@ -56,11 +63,11 @@ void PhysicsSystem::onDestroy()
 {
 	// bullet関連の削除
 	// 削除順番があるので注意
-	if (m_pWorld) m_pWorld->setDebugDrawer(nullptr);
+	if (m_pDynamicsWorld) m_pDynamicsWorld->setDebugDrawer(nullptr);
 
 	// btBroadphaseInterfaceなどワールド作成時に指定したものは
 	// btDiscreteDynamicsWorldクラスのデストラクタで使用するため後で削除
-	m_pWorld.reset();
+	m_pDynamicsWorld.reset();
 }
 
 /// @brief 更新
@@ -112,23 +119,37 @@ void PhysicsSystem::onUpdate()
 			{
 				// 物理データ取得
 				auto& physics = m_physicsDatas[transform.id];
+				Matrix globalMatrix = Matrix::CreateScale(
+					transform.globalScale).Invert() * transform.globalMatrix;
+				Vector3 globalPos = globalMatrix.Translation();
+				Quaternion globalRot = Quaternion::CreateFromRotationMatrix(globalMatrix);
+				globalPos += Vector3::Transform(collider.center, Matrix::CreateFromQuaternion(globalRot));
+
 				// トランスフォームデータを反映
 				btVector3 pos;
-				pos[0] = transform.translation.x;
-				pos[1] = transform.translation.y;
-				pos[2] = transform.translation.z;
+				pos[0] = globalPos.x;
+				pos[1] = globalPos.y;
+				pos[2] = globalPos.z;
 				pos[3] = 0.0f;
 				btQuaternion rot;
-				rot[0] = transform.rotation.x;
-				rot[1] = transform.rotation.y;
-				rot[2] = transform.rotation.z;
-				rot[3] = transform.rotation.w;
+				rot[0] = globalRot.x;
+				rot[1] = globalRot.y;
+				rot[2] = globalRot.z;
+				rot[3] = globalRot.w;
 				//トランスフォームの作成
 				btTransform bttransform;
 				bttransform.setOrigin(pos);
 				bttransform.setRotation(rot);
 				// 反映
 				physics->body->setWorldTransform(bttransform);
+
+				// コライダー
+				btVector3 scale;
+				scale[0] = transform.globalScale.x * collider.size.x;
+				scale[1] = transform.globalScale.y * collider.size.y;
+				scale[2] = transform.globalScale.z * collider.size.z;
+				scale[3] = 0.0f;
+				physics->shape->setLocalScaling(scale);
 			}
 			else
 			{
@@ -139,30 +160,77 @@ void PhysicsSystem::onUpdate()
 		});
 
 	// シミュレーション開始
-	m_pWorld->stepSimulation(delta);
+	m_pDynamicsWorld->stepSimulation(delta);
+
+	std::vector<GameObjectID> m_updateList;
+	m_updateList.reserve(m_pDynamicsWorld->getNumCollisionObjects());
 
 	// パラメータ反映
-	foreach<Transform, Collider, Rigidbody>(
-		[this, delta](Transform& transform, Collider& collider, Rigidbody& rigidbody)
+	foreach<Transform, Collider, Rigidbody, DynamicType>(
+		[this, delta, &m_updateList](Transform& transform, Collider& collider, Rigidbody& rigidbody, DynamicType& type)
 		{
+			if (rigidbody.mass == 0.0f) return;
+
 			// 物理データ取得
 			auto& physics = m_physicsDatas[transform.id];
 
 			// トランスフォーム取得
 			btTransform matrix;
 			matrix = physics->body->getWorldTransform();
+			Vector3 globalPos;
+			Quaternion globalRot;
 
-			transform.translation.x = matrix.getOrigin()[0];
-			transform.translation.y = matrix.getOrigin()[1];
-			transform.translation.z = matrix.getOrigin()[2];
+			globalPos.x = matrix.getOrigin()[0];
+			globalPos.y = matrix.getOrigin()[1];
+			globalPos.z = matrix.getOrigin()[2];
 
-			transform.rotation.x = matrix.getRotation()[0];
-			transform.rotation.y = matrix.getRotation()[1];
-			transform.rotation.z = matrix.getRotation()[2];
-			transform.rotation.w = matrix.getRotation()[3];
+			globalRot.x = matrix.getRotation()[0];
+			globalRot.y = matrix.getRotation()[1];
+			globalRot.z = matrix.getRotation()[2];
+			globalRot.w = matrix.getRotation()[3];
+
+			globalPos -= Vector3::Transform(collider.center, Matrix::CreateFromQuaternion(globalRot));
+
+			Matrix globalMatrix = Matrix::CreateFromQuaternion(globalRot);
+			globalMatrix *= Matrix::CreateTranslation(globalPos);
+
+			transform.translation = globalMatrix.Translation();
+			transform.rotation = Quaternion::CreateFromRotationMatrix(globalMatrix);
+
+			// マトリックス更新
+			transform.localMatrix = Matrix::CreateScale(transform.scale);
+			transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
+			transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
+
+			// 更新リストに追加
+			m_updateList.push_back(transform.id);
 		});
+
+
+	// 親子関係更新
+	for (const auto& id : m_updateList)
+	{
+		auto* transform = getGameObjectManager()->getComponentData<Transform>(id);
+		if (transform == nullptr) continue;
+		transform->globalMatrix = transform->localMatrix;
+
+		for (auto child : getGameObjectManager()->GetChilds(id))
+		{
+			updateChild(child, transform->globalMatrix);
+		}
+	}
 }
 
+void PhysicsSystem::updateChild(const GameObjectID& parent, const Matrix& globalMatrix)
+{
+	auto* transform = getGameObjectManager()->getComponentData<Transform>(parent);
+	transform->globalMatrix = transform->localMatrix * globalMatrix;
+
+	for (auto child : getGameObjectManager()->GetChilds(parent))
+	{
+		updateChild(child, transform->globalMatrix);
+	}
+}
 
 void PhysicsSystem::CreatePhysicsData(const Transform& transform,
 	const Collider& collider, const Rigidbody& rigidbody)
@@ -171,42 +239,54 @@ void PhysicsSystem::CreatePhysicsData(const Transform& transform,
 	std::unique_ptr<PhysicsData> physics = std::make_unique<PhysicsData>();
 
 	// パラメータ
+	Matrix globalMatrix = Matrix::CreateScale(
+		transform.globalScale).Invert() * transform.globalMatrix;
+	Vector3 globalPos = globalMatrix.Translation();
+	Quaternion globalRot = Quaternion::CreateFromRotationMatrix(globalMatrix);
+	globalPos += Vector3::Transform(collider.center, Matrix::CreateFromQuaternion(globalRot));
+
+	// 反映
 	btVector3 pos;
-	pos[0] = transform.translation.x;
-	pos[1] = transform.translation.y;
-	pos[2] = transform.translation.z;
+	pos[0] = globalPos.x;
+	pos[1] = globalPos.y;
+	pos[2] = globalPos.z;
 	pos[3] = 0.0f;
 	btQuaternion rot;
-	rot[0] = transform.rotation.x;
-	rot[1] = transform.rotation.y;
-	rot[2] = transform.rotation.z;
-	rot[3] = transform.rotation.w;
+	rot[0] = globalRot.x;
+	rot[1] = globalRot.y;
+	rot[2] = globalRot.z;
+	rot[3] = globalRot.w;
 	btVector3 scale;
-	scale[0] = transform.scale.x * 0.5f;
-	scale[1] = transform.scale.y * 0.5f;
-	scale[2] = transform.scale.z * 0.5f;
+	scale[0] = 1.0f;
+	scale[1] = 1.0f;
+	scale[2] = 1.0f;
 	scale[3] = 0.0f;
+	btVector3 normal;
+	Vector3 up = transform.globalMatrix.Up();
+	normal[0] = up.x;
+	normal[1] = up.y;
+	normal[2] = up.z;
 
 	// コライダーの作成(Box)
 	switch (collider.colliderType)
 	{
 	case Collider::ColliderType::BOX:
-		physics->shape = std::make_unique<btBoxShape>(scale);
+		physics->shape = std::make_unique<btBoxShape>(scale * 0.5f);
 		break;
 	case Collider::ColliderType::SPHERE:
 		physics->shape = std::make_unique<btSphereShape>(scale.x());
 		break;
 	case Collider::ColliderType::CYLINDER:
-		physics->shape = std::make_unique<btBoxShape>(scale);
+		physics->shape = std::make_unique<btCylinderShape>(scale);
 		break;
 	case Collider::ColliderType::CAPSULE:
-		physics->shape = std::make_unique<btBoxShape>(scale);
+		physics->shape = std::make_unique<btCapsuleShape>(scale.x(), scale.y());
 		break;
 	case Collider::ColliderType::CONE:
-		physics->shape = std::make_unique<btBoxShape>(scale);
+		physics->shape = std::make_unique<btConeShape>(scale.x(), scale.y());
 		break;
 	case Collider::ColliderType::PLANE:
-		physics->shape = std::make_unique<btBoxShape>(scale);
+		physics->shape = std::make_unique<btStaticPlaneShape>(normal, 0.0f);
 		break;
 	case Collider::ColliderType::POLYGON:
 		physics->shape = std::make_unique<btBoxShape>(scale);
@@ -239,8 +319,107 @@ void PhysicsSystem::CreatePhysicsData(const Transform& transform,
 	physics->body = std::make_unique<btRigidBody>(rbInfo);
 
 	// ワールドに登録
-	m_pWorld->addRigidBody(static_cast<btRigidBody*>(physics->body.get()));
+	m_pDynamicsWorld->addRigidBody(static_cast<btRigidBody*>(physics->body.get()));
 
 	// マップに登録
 	m_physicsDatas.emplace(transform.id, std::move(physics));
 }
+
+
+IBulletDebugDrawDX11::IBulletDebugDrawDX11()
+{
+}
+
+IBulletDebugDrawDX11::~IBulletDebugDrawDX11()
+{
+}
+
+void IBulletDebugDrawDX11::Setup(D3D11RendererManager* renderer)
+{
+	// 描画データの作成
+	m_renderer = renderer;
+	m_pDevice = renderer->m_d3dDevice.Get();
+	m_pContext = renderer->m_d3dContext.Get();
+
+	// シェーダー
+	ShaderDesc shaderDesc;
+	shaderDesc.m_name = "BtLine";
+	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
+	auto shaderID = renderer->createShader(shaderDesc);
+	m_pShader = static_cast<D3D11Shader*>(renderer->getShader(shaderID));
+
+	// マテリアル
+	auto materialID = renderer->createMaterial("BtLine", shaderID);
+	m_pMaterial = static_cast<D3D11Material*>(renderer->getMaterial(materialID));
+
+}
+
+
+// ライン描画実行
+void IBulletDebugDrawDX11::FlushLine()
+{
+	if (aLine.size() == 0)return;
+
+	// マテリアル更新
+	m_renderer->setD3D11Material(m_pMaterial->m_id);
+
+	//頂点データ構造体
+	struct VertexData
+	{
+		XMFLOAT3 pos;
+		XMFLOAT3 col;
+	};
+	ComPtr<ID3D11Buffer> vbuff, idxbuff;
+
+	HRESULT hr;
+
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(Line) * aLine.size();
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(InitData));
+	InitData.pSysMem = aLine.data();
+	hr = m_pDevice->CreateBuffer(&bd, &InitData, &vbuff);
+	if (FAILED(hr)) {
+		return;
+	}
+
+	// 入力レイアウト
+	m_pContext->IASetInputLayout(m_pShader->m_inputLayout.Get());
+
+	// 頂点バッファ
+	UINT stride = sizeof(VertexData);
+	UINT offset = 0;
+	ID3D11Buffer* vb[1] = { vbuff.Get() };
+	m_pContext->IASetVertexBuffers(0, 1, vb, &stride, &offset);
+
+	// プリミティブ形状
+	m_renderer->setD3D11PrimitiveTopology(EPrimitiveTopology::LINE_LIST);
+
+	//ポリゴン描画
+	m_pContext->Draw(aLine.size() * 2, 0);
+
+	/*cbuff.Diffuse = XMVectorSet(1, 1, 1, 1);
+	m_pContext->UpdateSubresource(pCBuff.Get(), 0, NULL, &cbuff, 0, 0);
+	m_pContext->OMSetDepthStencilState(pDsTestOn.Get(), 0);
+	m_pContext->Draw(aLine.size() * 2, 0);*/
+
+	aLine.clear();
+}
+
+
+void IBulletDebugDrawDX11::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor)
+{
+	// バッファにまとめて、あとから一括描画
+	if (aLine.size() >= MAX_LINE)return;
+	aLine.push_back(Line(from, to, fromColor, toColor));
+}
+
+void IBulletDebugDrawDX11::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
+{
+	drawLine(from, to, color, color);
+}
+

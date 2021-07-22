@@ -37,9 +37,14 @@ namespace ecs {
 		/// @brief 押し出し使用
 		bool trigger;
 
+		/// @brief 中心オフセット
+		Vector3 center;
+		/// @brief サイズ
+		Vector3 size;
+
 		/// @brief コンストラクタ
-		Collider(ColliderType type):
-		colliderType(type), trigger(false)
+		Collider(ColliderType type, Vector3 center = Vector3(), Vector3 size = Vector3(1,1,1)):
+		colliderType(type), trigger(false), center(center), size(size)
 		{}
 
 	};

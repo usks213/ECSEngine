@@ -9,6 +9,7 @@
 
 #include <Engine/ECS/Base/SystemBase.h>
 #include <Engine/Utility/Mathf.h>
+#include <Engine/Renderer/D3D11/D3D11RendererManager.h>
 
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/ColliderComponentData.h>
@@ -32,6 +33,8 @@
 #include "btBulletCollisionCommon.h"
 
 
+class IBulletDebugDrawDX11;
+
 namespace ecs {
 
 	class PhysicsSystem final : public SystemBase
@@ -48,7 +51,7 @@ namespace ecs {
 	public:
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド
-		explicit PhysicsSystem(World* pWorld):
+		explicit PhysicsSystem(World* pWorld) :
 			SystemBase(pWorld)
 		{}
 		/// デストラクタ
@@ -61,21 +64,99 @@ namespace ecs {
 		/// @brief 更新
 		void onUpdate() override;
 
-		void CreatePhysicsData(const Transform& transform, 
-			const Collider& collider, const Rigidbody& rigidbody);
+		/// @brief デバッグ表示
+		void debugDraw() {
+			if (m_pDynamicsWorld)
+				m_pDynamicsWorld->debugDrawWorld();
+		}
 
+	private:
+		void CreatePhysicsData(const Transform& transform,
+			const Collider& collider, const Rigidbody& rigidbody);
+		void updateChild(const GameObjectID& parent, const Matrix& globalMatrix);
 	private:
 		/// @brief 重力
 		Vector3 m_graviyAcceleration;
 
 		//--- bullet3
+		std::unique_ptr<IBulletDebugDrawDX11>							m_pDebugDraw;
 
 		std::unique_ptr<btDefaultCollisionConfiguration>				m_pConfig;
 		std::unique_ptr<btCollisionDispatcher>							m_pDispatcher;
 		std::unique_ptr<btBroadphaseInterface>							m_pBroadphase;
 		std::unique_ptr<btSequentialImpulseConstraintSolver>			m_pSolver;
-		std::unique_ptr<btDiscreteDynamicsWorld>						m_pWorld;
+		std::unique_ptr<btDiscreteDynamicsWorld>						m_pDynamicsWorld;
 
 		std::unordered_map<GameObjectID, std::unique_ptr<PhysicsData>>	m_physicsDatas;
+
+	private:
+
 	};
 }
+
+	// debugRender
+class IBulletDebugDrawDX11 : public btIDebugDraw
+{
+public:
+	IBulletDebugDrawDX11();
+	virtual ~IBulletDebugDrawDX11();
+
+	void Setup(D3D11RendererManager* renderer);
+
+public:
+	virtual void	setDebugMode(int debugMode) { bitDebugMode = debugMode; }
+	virtual int		getDebugMode() const { return bitDebugMode; }
+
+	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor);
+	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
+	virtual void flushLines() { FlushLine(); }
+	virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
+	{
+		drawLine(PointOnB, PointOnB + normalOnB * distance, color);
+		btVector3 ncolor(0, 0, 0);
+		drawLine(PointOnB, PointOnB + normalOnB * 0.01f, ncolor);
+	}
+
+	//未対応
+	virtual void	reportErrorWarning(const char* warningString) {}
+	virtual void	draw3dText(const btVector3& location, const char* textString) {}
+
+private:
+	//ライン描画実行
+	void FlushLine();
+
+	int bitDebugMode = 0;
+
+	D3D11RendererManager* m_renderer;
+	ID3D11Device1* m_pDevice;
+	ID3D11DeviceContext1* m_pContext;
+
+	D3D11Shader* m_pShader;
+	D3D11Material* m_pMaterial;
+
+	struct Vertex
+	{
+		Vertex() {}
+		Vertex(const btVector3& p, const btVector3& c) {
+			pos.x = p[0];
+			pos.y = p[1];
+			pos.z = p[2];
+			color.x = c[0];
+			color.y = c[1];
+			color.z = c[2];
+		}
+		Vector3 pos;
+		Vector3 color;
+	};
+	struct Line
+	{
+		Line() {}
+		Line(const Vertex& f, const Vertex& t) : from(f), to(t) {}
+		Line(const btVector3& f, const btVector3& t, const btVector3& fc, const btVector3& tc)
+			: from(f, fc), to(t, tc) {}
+
+		Vertex from, to;
+	};
+	static const size_t MAX_LINE = 100000;
+	std::vector<Line> aLine;
+};

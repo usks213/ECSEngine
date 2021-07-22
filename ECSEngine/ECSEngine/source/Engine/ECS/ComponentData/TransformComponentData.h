@@ -25,6 +25,7 @@ namespace ecs {
 
 		Matrix			localMatrix;
 		Matrix			globalMatrix;
+		//Matrix			parentMatrix;
 		//Vector3			localScale;
 		Vector3			globalScale;
 
