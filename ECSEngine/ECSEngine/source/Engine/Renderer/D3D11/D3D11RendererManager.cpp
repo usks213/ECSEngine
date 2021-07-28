@@ -1007,6 +1007,23 @@ void D3D11RendererManager::d3dRender(const RenderBufferID& renderBufferID)
 	}
 }
 
+void D3D11RendererManager::d3dMap(ID3D11Resource* pResource, D3D11_MAP mapType, bool mapWait, SubResource& out)
+{
+	D3D11_MAPPED_SUBRESOURCE subResource = {};
+	UINT mapFlags = mapWait ? 0 : D3D11_MAP_FLAG_DO_NOT_WAIT;
+	HRESULT hr = m_d3dContext->Map(pResource, 0, mapType, mapFlags, &subResource);
+	CHECK_FAILED(hr);
+
+	out.pData = subResource.pData;
+	out.RowPitch = subResource.RowPitch;
+	out.DepthPitch = subResource.DepthPitch;
+}
+
+void D3D11RendererManager::d3dUnmap(ID3D11Resource* pResource)
+{
+	m_d3dContext->Unmap(pResource, 0);
+}
+
 
 ShaderID D3D11RendererManager::createShader(ShaderDesc desc)
 {
@@ -1113,4 +1130,53 @@ BatchGroupID D3D11RendererManager::creatBatchGroup(MaterialID materialID, MeshID
 	m_batchGroupPool[id] = std::make_unique<BatchGroup>(id, materialID, meshID);
 
 	return id;
+}
+
+
+SubResource D3D11RendererManager::mapTexture(TextureID texID)
+{
+	SubResource subResource;
+	auto* pTex = getTexture(texID);
+	if (pTex == nullptr) return subResource;
+
+	auto* pD3DTex = static_cast<D3D11Texture*>(pTex);
+	d3dMap(pD3DTex->m_tex.Get(), D3D11_MAP_READ, true, subResource);
+
+	D3D11_TEXTURE2D_DESC tex;
+	pD3DTex->m_tex->GetDesc(&tex);
+	subResource.ByteWidth = DirectX::BitsPerPixel(tex.Format) / 8;
+
+	return subResource;
+}
+SubResource D3D11RendererManager::mapVertex(RenderBufferID rdID)
+{
+	SubResource subResource;
+	auto* pRD = getRenderBuffer(rdID);
+	if (pRD == nullptr) return subResource;
+
+	auto* pD3DRd = static_cast<D3D11RenderBuffer*>(pRD);
+	d3dMap(pD3DRd->m_vertexBuffer.Get(), D3D11_MAP_WRITE_DISCARD, true, subResource);
+
+	D3D11_BUFFER_DESC vertex;
+	pD3DRd->m_vertexBuffer->GetDesc(&vertex);
+	subResource.ByteWidth = vertex.ByteWidth;
+
+	return subResource;
+}
+
+void D3D11RendererManager::unmapTexture(TextureID texID)
+{
+	auto* pTex = getTexture(texID);
+	if (pTex == nullptr) return;
+
+	auto* pD3DTex = static_cast<D3D11Texture*>(pTex);
+	d3dUnmap(pD3DTex->m_tex.Get());
+}
+void D3D11RendererManager::unmapVertex(RenderBufferID rdID)
+{
+	auto* pRD = getRenderBuffer(rdID);
+	if (pRD == nullptr) return;
+
+	auto* pD3DRd = static_cast<D3D11RenderBuffer*>(pRD);
+	d3dUnmap(pD3DRd->m_vertexBuffer.Get());
 }

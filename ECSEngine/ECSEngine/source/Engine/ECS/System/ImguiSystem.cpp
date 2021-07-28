@@ -63,7 +63,8 @@ void ImguiSystem::onUpdate()
 	// ルートオブジェクト
 	for (auto& root : m_pWorld->getGameObjectManager()->getRootList())
 	{
-		GameObject* gameObject = m_pWorld->getGameObjectManager()->getGameObjectMap()[root].get();
+		GameObject* gameObject = m_pWorld->getGameObjectManager()->getGameObject(root);
+		if (gameObject == nullptr) continue;
 		std::string name(gameObject->getName());
 		std::size_t childNum = gameObject->getChildCount(); // 子がいるか
 
@@ -132,7 +133,14 @@ void ImguiSystem::onUpdate()
 	if (m_selectObjectID != NONE_GAME_OBJECT_ID)
 	{
 		// 選択オブジェクト
-		auto* curObject = getGameObjectManager()->getGameObjectMap()[m_selectObjectID].get();
+		auto* curObject = getGameObjectManager()->getGameObject(m_selectObjectID);
+		if (curObject == nullptr)
+		{
+			m_selectObjectID = NONE_GAME_OBJECT_ID;
+			ImGui::End();
+			return;
+		}
+
 		auto& chunk = m_pWorld->getChunkList()[curObject->m_chunkIndex];
 
 		Transform* transform = nullptr;
@@ -174,7 +182,8 @@ void ImguiSystem::DispChilds(const GameObjectID parentID)
 	int nIndex = 0;
 	for (auto& child : m_pWorld->getGameObjectManager()->GetChilds(parentID))
 	{
-		GameObject* gameObject = m_pWorld->getGameObjectManager()->getGameObjectMap()[child].get();
+		GameObject* gameObject = m_pWorld->getGameObjectManager()->getGameObject(child);
+		if (gameObject == nullptr) continue;
 		std::string name(gameObject->getName());
 		std::size_t childNum = gameObject->getChildCount(); // 子がいるか
 

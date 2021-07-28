@@ -59,6 +59,10 @@ public:
 
 	void d3dRender(const RenderBufferID& renderBufferID);
 
+	void d3dMap(ID3D11Resource* pResource, D3D11_MAP mapType, bool mapWait, SubResource& out);
+
+	void d3dUnmap(ID3D11Resource* pResource);
+
 public:
 	void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) override;
 
@@ -69,6 +73,12 @@ public:
 	RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) override;
 	TextureID createTextureFromFile(std::string filePath) override;
 	BatchGroupID creatBatchGroup(MaterialID materialID, MeshID meshID) override;
+
+	SubResource mapTexture(TextureID texID) override;
+	SubResource mapVertex(RenderBufferID rdID) override;
+
+	void unmapTexture(TextureID texID) override;
+	void unmapVertex(RenderBufferID rdID) override;
 
 private:
 	/// @brief デバイスの生成

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Mesh.h"
+#include "SubResource.h"
 
 class Geometry
 {
@@ -16,5 +17,5 @@ public:
 	static void Cube(Mesh& out);
 	static void Sphere(Mesh& out, int nSplit, float fSize, float fTexSize);
 	static void SkyDome(Mesh& out, int nSegment, float fTexSplit);
-
+	static void Terrain(Mesh& out, int split, float height, float texSize = 1.0f);
 };

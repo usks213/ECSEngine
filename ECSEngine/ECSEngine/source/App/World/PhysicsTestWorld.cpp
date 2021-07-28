@@ -48,17 +48,21 @@ public:
 		SystemBase(pWorld)
 	{}
 	void onUpdate() override {
-		foreach<Transform, ObjectTag>([](Transform& transform, ObjectTag& tag) {
+		foreach<Transform, ObjectTag>([this](Transform& transform, ObjectTag& tag) {
 
 			if (transform.translation.y < -5)
 			{
-				transform.translation.x = 10 - rand() % 20;
-				transform.translation.y = 30;
-				transform.translation.z = 0;
-			}
+				// 削除
+				getGameObjectManager()->destroyGameObject(transform.id);
 
+				//transform.translation.x = 10 - rand() % 20;
+				//transform.translation.y = 30;
+				//transform.translation.z = 0;
+			}
 			});
 	}
+private:
+	int m_nCnt;
 };
 
 class ControllSystem : public ecs::SystemBase {
@@ -236,8 +240,7 @@ void PhysicsTestWorld::Start()
 
 	MeshID sphereID = renderer->createMesh("Sphere");
 	auto* pSphere = renderer->getMesh(sphereID);
-	Geometry::Sphere(*pSphere, 36, 1.0f, 1.0f / 18);
-
+	Geometry::Sphere(*pSphere, 36, 1.0f, 1.0f / 36);
 
 	MeshID meshSky = renderer->createMesh("SkyDome");
 	auto* pSky = renderer->getMesh(meshSky);
@@ -245,7 +248,7 @@ void PhysicsTestWorld::Start()
 
 	MeshID meshPlane = renderer->createMesh("Plane");
 	auto* pPlaneMesh = renderer->getMesh(meshPlane);
-	Geometry::Plane(*pPlaneMesh, 20, 1.0f / 20);
+	Geometry::Terrain(*pPlaneMesh, 20, 5, 5);
 
 	// レンダーバッファの生成
 	auto rdID = renderer->createRenderBuffer(shaderLitID, meshID);
@@ -279,17 +282,17 @@ void PhysicsTestWorld::Start()
 
 	// 床
 	archetype = Archetype::create<Transform, RenderData, StaticType, Collider, Rigidbody>();
-	scale = Vector3(20, 1, 20);
+	scale = Vector3(5, 1, 5);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	RenderData rdPlane;
-	rdPlane.materialID = matUnlitID;
+	rdPlane.materialID = matLitID;
 	rdPlane.meshID = meshPlane;
 
-	//auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
-	//getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
-	//getGameObjectManager()->setComponentData(plane, 
-	//	Physics(Physics::ColliderType::OBB, false, false));
-	//getGameObjectManager()->setComponentData(plane, rdPlane);
+	auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
+	getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
+	getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::TERRAIN, meshPlane));
+	getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
+	getGameObjectManager()->setComponentData(plane, rdPlane);
 
 	// カメラ生成
 	Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag, DynamicType>();
@@ -304,6 +307,7 @@ void PhysicsTestWorld::Start()
 	pos.z = -30;
 	pos.y = 10;
 	rot = Quaternion::CreateFromYawPitchRoll(3.141592f, 0, 0);
+	scale = Vector3(10, 10, 10);
 
 	getGameObjectManager()->setComponentData<Transform>(entity, Transform(entity, pos, rot, scale));
 	getGameObjectManager()->setComponentData(entity, cameraData);
@@ -319,24 +323,25 @@ void PhysicsTestWorld::Start()
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	scale = Vector3(1, 1, 1);
 	getGameObjectManager()->setComponentData<Transform>(Stage, Transform(Stage, pos, rot, scale));
+	getGameObjectManager()->setComponentData(Stage, Collider(Collider::ColliderType::BOX));
 	getGameObjectManager()->setComponentData(Stage, Rigidbody(0.0f));
 
 
-	// 杭
-	for (int y = 0; y < 10; y++)
-	{
-		for (int x = 0; x < 10; x++)
-		{
-			auto Kui = getGameObjectManager()->createGameObject("Kui", stageArchetype);
-			getGameObjectManager()->SetParent(Kui, Stage);
-			pos = Vector3(x * 3 - 20 + y, y * 3 - 5, 0);
-			rot = Quaternion::CreateFromYawPitchRoll(0, 0, rand() % 180 / 3.1415f);
-			scale = Vector3(1, 1, 30);
-			getGameObjectManager()->setComponentData<Transform>(Kui, Transform(Kui, pos, rot, scale));
-			getGameObjectManager()->setComponentData(Kui, Rigidbody(0.0f));
-			getGameObjectManager()->setComponentData(Kui, Collider(Collider::ColliderType::BOX));
-		}
-	}
+	//// 杭
+	//for (int y = 0; y < 10; y++)
+	//{
+	//	for (int x = 0; x < 10; x++)
+	//	{
+	//		auto Kui = getGameObjectManager()->createGameObject("Kui", stageArchetype);
+	//		getGameObjectManager()->SetParent(Kui, Stage);
+	//		pos = Vector3(x * 3 - 20 + y, y * 3 - 5, 0);
+	//		rot = Quaternion::CreateFromYawPitchRoll(0, 0, rand() % 180 / 3.1415f);
+	//		scale = Vector3(1, 1, 30);
+	//		getGameObjectManager()->setComponentData<Transform>(Kui, Transform(Kui, pos, rot, scale));
+	//		getGameObjectManager()->setComponentData(Kui, Rigidbody(0.0f));
+	//		getGameObjectManager()->setComponentData(Kui, Collider(Collider::ColliderType::BOX));
+	//	}
+	//}
 
 	// ボール
 	Archetype sphereArch = Archetype::create<Transform, DynamicType, Collider, Rigidbody, ObjectTag>();
@@ -350,7 +355,7 @@ void PhysicsTestWorld::Start()
 		scale = Vector3(0.5f, 0.5f, 0.5f);
 		getGameObjectManager()->setComponentData<Transform>(Ball, Transform(Ball, pos, rot, scale));
 		getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
-		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE, Vector3()));
+		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
 	}
 
 	// システムの追加
@@ -360,8 +365,6 @@ void PhysicsTestWorld::Start()
 	addSystem<ControllSystem>();
 	addSystem<ParentSystem>();
 	addSystem<PhysicsSystem>();
-	//addSystem<QuadTreeSystem>();
-	//addSystem<CollisionSystem>();
 	addSystem<RenderingSystem>();
 }
 

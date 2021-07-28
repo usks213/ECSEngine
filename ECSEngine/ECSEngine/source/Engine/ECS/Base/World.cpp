@@ -53,6 +53,9 @@ void World::update()
 	{
 		system->onUpdate();
 	}
+
+	// クリーンアップ
+	m_pGameObjectManager->CleanUp();
 }
 
 /// @brief 他のワールドのデータを結合する

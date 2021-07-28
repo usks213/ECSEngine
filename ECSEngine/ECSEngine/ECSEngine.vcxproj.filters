@@ -418,6 +418,9 @@
     <ClInclude Include="source\Engine\ECS\ComponentData\RigidbodyComponentData.h">
       <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
     </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\SubResource.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">

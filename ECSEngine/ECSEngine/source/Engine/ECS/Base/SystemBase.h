@@ -45,6 +45,10 @@ namespace ecs {
 		/// @brief 更新
 		virtual void onUpdate() = 0;
 
+		/// @brief ゲームオブジェクト削除時コールバック
+		/// @param id ゲームオブジェクトID
+		virtual void onDestroyGameObject(const GameObjectID& id){}
+
 		/// @brief 更新順番号取得
 		[[nodiscard]] int getExecutionOrder() const;
 

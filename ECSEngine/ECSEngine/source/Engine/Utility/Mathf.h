@@ -161,4 +161,50 @@ namespace Mathf
 
 		return v;
 	}
+
+	inline float lerpf(float a, float b, float t) noexcept
+	{
+		return a + t * (b - a);
+	}
+
+	inline Vector2 random2(Vector2 st) {
+		st = Vector2(st.Dot(Vector2(127.1f, 311.7f)),
+			st.Dot(Vector2(269.5f, 183.3f)));
+		Vector2 result;
+		float temp = 0;
+		result.x = -1.0f + 2.0f * modf(sinf(st.x) * 43758.5453123f, &temp);
+		result.y = -1.0f + 2.0f * modf(sinf(st.y) * 43758.5453123f, &temp);
+		return result;
+	}
+
+	inline float perlinNoise(Vector2 st)
+	{
+		Vector2 p = Vector2(floorf(st.x), floorf(st.y));
+		float temp = 0;
+		Vector2 f = Vector2(modf(st.x, &temp), modf(st.y, &temp));
+		Vector2 u = f * f * (Vector2(1.0f, 1.0f) * 3.0f - 2.0f * f);
+
+		Vector2 v00 = random2(p + Vector2(0, 0));
+		Vector2 v10 = random2(p + Vector2(1, 0));
+		Vector2 v01 = random2(p + Vector2(0, 1));
+		Vector2 v11 = random2(p + Vector2(1, 1));
+
+		return lerpf(
+			lerpf(v00.Dot(f - Vector2(0, 0)), v10.Dot(f - Vector2(1, 0)), u.x),
+			lerpf(v01.Dot(f - Vector2(0, 1)), v11.Dot(f - Vector2(1, 1)), u.x),
+			u.y) + 0.5f;
+	}
+
+	inline float fBm(Vector2 st)
+	{
+		float f = 0;
+		Vector2 q = st;
+
+		f += 0.5000f * perlinNoise(q); q = q * 2.01f;
+		f += 0.2500f * perlinNoise(q); q = q * 2.02f;
+		f += 0.1250f * perlinNoise(q); q = q * 2.03f;
+		f += 0.0625f * perlinNoise(q); q = q * 2.01f;
+
+		return f;
+	}
 }

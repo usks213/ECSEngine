@@ -10,6 +10,7 @@
 #include "IComponentData.h"
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 
 namespace ecs {
@@ -51,6 +52,15 @@ namespace ecs {
 		/// @return 子の数
 		std::size_t getChildCount() { return m_childsID.size(); }
 
+		/// @brief イベントの格納
+		/// @param  イベント関数(name:イベント名, value:値)
+		void registerEvent(std::function<void(std::string_view name, void* value)> event);
+
+		/// @brief イベントの呼び出し
+		/// @param name イベント名
+		/// @param value 値
+		void invokeEvent(std::string_view name, void* value);
+
 	protected:
 
 
@@ -88,5 +98,8 @@ namespace ecs {
 		GameObjectID	m_parentID;
 		/// @brief 子のIDリスト
 		std::vector<GameObjectID> m_childsID;
+
+		/// @brief イベントリスト
+		std::list<std::function<void(std::string_view name, void* value)>>	m_eventList;
 	};
 }

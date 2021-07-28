@@ -51,7 +51,9 @@ public:
 	VertexInfo					m_vertexData;
 	std::uint32_t				m_indexCount;
 	std::vector<std::uint32_t>  m_indexData;
-	AABB						m_aabb;
+	std::uint32_t				m_heightWidth;
+	std::vector<float>			m_heightData;
 
+	AABB						m_aabb;
 	EPrimitiveTopology			m_topology;
 };

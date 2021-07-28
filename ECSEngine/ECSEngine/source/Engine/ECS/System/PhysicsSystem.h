@@ -19,6 +19,7 @@
 #include "BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h"
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 #include "BulletCollision/CollisionShapes/btShapeHull.h"
+#include "BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 #include "BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h"
 #include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h"
 #include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h"
@@ -63,6 +64,11 @@ namespace ecs {
 		void onDestroy() override;
 		/// @brief 更新
 		void onUpdate() override;
+
+		/// @brief ゲームオブジェクト削除時コールバック
+		/// @param id ゲームオブジェクトID
+		void onDestroyGameObject(const GameObjectID& id) override;
+
 
 		/// @brief デバッグ表示
 		void debugDraw() {

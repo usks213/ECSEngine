@@ -272,6 +272,7 @@
     <ClInclude Include="source\Engine\Renderer\Base\RenderBuffer.h" />
     <ClInclude Include="source\Engine\Renderer\Base\RendererManager.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Shader.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\SubResource.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Texture.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Vertex.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Material.h" />

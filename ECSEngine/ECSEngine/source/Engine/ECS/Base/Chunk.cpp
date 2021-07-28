@@ -95,13 +95,22 @@ void Chunk::destroyEntity(const Entity& entity)
 {
 	for (size_t i = 0; i < m_Archetype.getArchetypeSize(); ++i)
 	{
+		//const auto offset = m_Archetype.getOffsetByIndex(i) * m_Capacity;
+		//const auto currentIndex = offset + m_Archetype.getSize(i) * entity.m_index;
+		//// Œã‚ë‚ðØ‚è‹l‚ß‚é
+		//std::memmove(
+		//	m_pBegin.get() + currentIndex,
+		//	m_pBegin.get() + currentIndex + m_Archetype.getSize(i),
+		//	m_Archetype.getSize(i) * (m_Size - entity.m_index - 1));
+
 		const auto offset = m_Archetype.getOffsetByIndex(i) * m_Capacity;
 		const auto currentIndex = offset + m_Archetype.getSize(i) * entity.m_index;
-		// Œã‚ë‚ðØ‚è‹l‚ß‚é
+		const auto endIndex = offset + m_Archetype.getSize(i) * (m_Size - 1);
+		// ÅŒã”ö‚ðã‘‚«
 		std::memmove(
 			m_pBegin.get() + currentIndex,
-			m_pBegin.get() + currentIndex + m_Archetype.getSize(i),
-			m_Archetype.getSize(i) * (m_Size - entity.m_index - 1));
+			m_pBegin.get() + endIndex,
+			m_Archetype.getSize(i));
 	}
 	--m_Size;
 }

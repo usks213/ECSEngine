@@ -12,7 +12,6 @@
 #include <unordered_map>
 
 
-
 namespace ecs {
 
 	class GameObjectManager
@@ -45,6 +44,9 @@ namespace ecs {
 		/// @brief ゲームオブジェクトの削除
 		/// @param gameObjectID 削除するゲームオブジェクトID
 		void destroyGameObject(const GameObjectID& gameObjectID);
+
+		/// @brief 削除リストの実行
+		void CleanUp();
 
 		/// @brief コンポーネントデータの追加
 		/// @tparam T コンポーネントデータ型
@@ -86,6 +88,15 @@ namespace ecs {
 		}
 
 	public:
+		/// @brief ゲームオブジェクトの取得
+		/// @param id ゲームオブジェクトID
+		/// @return ポインタ
+		GameObject* getGameObject(const GameObjectID& id) {
+			auto itr = m_game0bjectMap.find(id);
+			if (m_game0bjectMap.end() == itr) return nullptr;
+			return itr->second.get();
+		}
+
 		/// @brief ゲームオブジェクトマップの取得
 		/// @return マップ
 		std::unordered_map<GameObjectID, std::unique_ptr<GameObject>>& 
@@ -120,6 +131,8 @@ namespace ecs {
 
 	private:
 		
+		void cleanUpGameObject(const GameObjectID& gameObjectID);
+
 		/// @brief ルートリストのソート
 		void sortRootList() { std::sort(m_rootList.begin(), m_rootList.end(), GameObject::UpOrder); }
 		/// @brief 
@@ -143,6 +156,9 @@ namespace ecs {
 
 		/// @brief ゲームオブジェクトマップ
 		std::unordered_map<GameObjectID, std::unique_ptr<GameObject>> m_game0bjectMap;
+
+		/// @brief 削除ゲームオブジェクトリスト
+		std::list<GameObjectID> m_destroyList;
 
 		/// @brief 親子関係のルートオブジェクトリスト(二分探索)
 		std::vector<GameObjectID> m_rootList;

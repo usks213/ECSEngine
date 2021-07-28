@@ -99,14 +99,14 @@ void Geometry::Cube(Mesh& out)
 	const float	SIZE_Y = (-0.5f); // 立方体のサイズ(Y方向)
 	const float	SIZE_Z = (-0.5f); // 立方体のサイズ(Z方向)
 
-	const int CUBE_VERTEX = (24);
-	const int CUBE_INDEX = (36);
+	const std::uint32_t CUBE_VERTEX = (24);
+	const std::uint32_t CUBE_INDEX = (36);
 
 	// プリミティブ設定
 	out.m_topology = EPrimitiveTopology::TRIANGLE_LIST;
 
 	VERTEX_3D	vertexWk[CUBE_VERTEX];	// 頂点情報格納ワーク
-	int			indexWk[CUBE_INDEX];	// インデックス格納ワーク
+	std::uint32_t			indexWk[CUBE_INDEX];	// インデックス格納ワーク
 
 	// 頂点座標の設定
 	// 前
@@ -175,13 +175,13 @@ void Geometry::Cube(Mesh& out)
 
 
 	// 拡散反射光の設定
-	for (int i = 0; i < CUBE_VERTEX; i++)
+	for (std::uint32_t i = 0; i < CUBE_VERTEX; i++)
 	{
 		vertexWk[i].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	// テクスチャ座標の設定
-	for (int i = 0; i < CUBE_VERTEX; i += 4)
+	for (std::uint32_t i = 0; i < CUBE_VERTEX; i += 4)
 	{
 		vertexWk[0 + i].tex = XMFLOAT2(0.0f, 0.0f);
 		vertexWk[1 + i].tex = XMFLOAT2(1.0f, 0.0f);
@@ -190,7 +190,7 @@ void Geometry::Cube(Mesh& out)
 	}
 
 	// インデックス配列の設定
-	for (int i = 0, j = 0; i < CUBE_INDEX; i += 6, j += 4)
+	for (std::uint32_t i = 0, j = 0; i < CUBE_INDEX; i += 6, j += 4)
 	{
 		indexWk[0 + i] = 0 + j;
 		indexWk[1 + i] = 1 + j;
@@ -202,7 +202,7 @@ void Geometry::Cube(Mesh& out)
 
 	// 頂点生成
 	out.m_vertexCount = CUBE_VERTEX;
-	for (int i = 0; i < out.m_vertexCount; ++i)
+	for (std::uint32_t i = 0; i < out.m_vertexCount; ++i)
 	{
 		out.m_vertexData.positions.push_back(vertexWk[i].vtx);
 		out.m_vertexData.normals.push_back(vertexWk[i].nor);
@@ -212,7 +212,7 @@ void Geometry::Cube(Mesh& out)
 
 	// インデックス
 	out.m_indexCount = CUBE_INDEX;
-	for (int i = 0; i < out.m_indexCount; ++i)
+	for (std::uint32_t i = 0; i < out.m_indexCount; ++i)
 	{
 		out.m_indexData.push_back(static_cast<std::uint32_t>(indexWk[i]));
 	}
@@ -226,26 +226,26 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 	// プリミティブ種別設定
 	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
 	// 頂点数の設定
-	int nNumVertex = (nNumBlockX + 1) * (nNumBlockY + 1);
+	std::uint32_t nNumVertex = (nNumBlockX + 1) * (nNumBlockY + 1);
 	// インデックス数の設定(縮退ポリゴン用を考慮する)
-	int nNumIndex = (nNumBlockX + 1) * 2 * nNumBlockY + (nNumBlockY - 1) * 2;
+	std::uint32_t nNumIndex = (nNumBlockX + 1) * 2 * nNumBlockY + (nNumBlockY - 1) * 2;
 	// 頂点配列の作成
 	VERTEX_3D* pVertexWk = new VERTEX_3D[nNumVertex];
 	// インデックス配列の作成
-	int* pIndexWk = new int[nNumIndex];
+	std::uint32_t* pIndexWk = new std::uint32_t[nNumIndex];
 	// 頂点配列の中身を埋める
 	VERTEX_3D* pVtx = pVertexWk;
 
-	for (int y = 0; y < nNumBlockY + 1; ++y) {
-		for (int x = 0; x < nNumBlockX + 1; ++x) {
+	for (std::uint32_t y = 0; y < nNumBlockY + 1; ++y) {
+		for (std::uint32_t x = 0; x < nNumBlockX + 1; ++x) {
 
 			// 頂点座標の設定
 			pVtx->vtx.x = 0.0f;
 			pVtx->vtx.y = 1.0f;
 			pVtx->vtx.z = 0.0f;
 			// 角度に対する回転マトリックスを求める
-			XMMATRIX mR = XMMatrixRotationX(XMConvertToRadians(-x * (-180.0f / nNumBlockX)));
-			mR *= XMMatrixRotationY(XMConvertToRadians(-y * (360.0f / nNumBlockY)));
+			XMMATRIX mR = XMMatrixRotationX(XMConvertToRadians(x * (180.0f / nNumBlockX)));
+			mR *= XMMatrixRotationY(XMConvertToRadians(y * -(360.0f / nNumBlockY)));
 			// 座標を回転マトリックスで回転させる
 			XMVECTOR v = XMLoadFloat3(&pVtx->vtx);
 			v = XMVector3TransformCoord(v, mR);
@@ -274,13 +274,13 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 		}
 	}
 	//インデックス配列の中身を埋める
-	int* pIdx = pIndexWk;
-	for (int z = 0; z < nNumBlockY; ++z) {
+	std::uint32_t* pIdx = pIndexWk;
+	for (std::uint32_t z = 0; z < nNumBlockY; ++z) {
 		if (z > 0) {
 			// 縮退ポリゴンのためのダブりの設定
 			*pIdx++ = (z + 1) * (nNumBlockX + 1);
 		}
-		for (int x = 0; x < nNumBlockX + 1; ++x) {
+		for (std::uint32_t x = 0; x < nNumBlockX + 1; ++x) {
 			*pIdx++ = (z + 1) * (nNumBlockX + 1) + x;
 			*pIdx++ = z * (nNumBlockX + 1) + x;
 		}
@@ -293,7 +293,7 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 	// 頂点バッファ/インデックス バッファ生成
 	// 頂点生成
 	out.m_vertexCount = nNumVertex;
-	for (int i = 0; i < out.m_vertexCount; ++i)
+	for (std::uint32_t i = 0; i < out.m_vertexCount; ++i)
 	{
 		out.m_vertexData.positions.push_back(pVertexWk[i].vtx);
 		out.m_vertexData.normals.push_back(pVertexWk[i].nor);
@@ -303,7 +303,7 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 
 	// インデックス
 	out.m_indexCount = nNumIndex;
-	for (int i = 0; i < out.m_indexCount; ++i)
+	for (std::uint32_t i = 0; i < out.m_indexCount; ++i)
 	{
 		out.m_indexData.push_back(pIndexWk[i]);
 	}
@@ -348,18 +348,18 @@ void Geometry::SkyDome(Mesh& out, int nSegment, float fTexSplit)
 
 	// インデックスバッファの作成
 	out.m_indexCount = nSegment * 3 + nSegment * (nSegment / 2 - 1) * 6 + nSegment * 3;
-	int* pIndexWk = new int[out.m_indexCount];
+	std::uint32_t* pIndexWk = new std::uint32_t[out.m_indexCount];
 
-	int icount = 0;
-	int i = 0;
-	for (int j = 0; j < nSegment; ++j) {
+	std::uint32_t icount = 0;
+	std::uint32_t i = 0;
+	for (std::uint32_t j = 0; j < nSegment; ++j) {
 		pIndexWk[icount] = i * (nSegment + 1) + j;
 		pIndexWk[icount + 1] = (i + 1) * (nSegment + 1) + j + 1;
 		pIndexWk[icount + 2] = (i + 1) * (nSegment + 1) + j;
 		icount += 3;
 	}
 	for (i = 1; i < nSegment / 2; ++i) {
-		for (int j = 0; j < nSegment; ++j) {
+		for (std::uint32_t j = 0; j < nSegment; ++j) {
 			pIndexWk[icount] = i * (nSegment + 1) + j;
 			pIndexWk[icount + 1] = i * (nSegment + 1) + j + 1;
 			pIndexWk[icount + 2] = (i + 1) * (nSegment + 1) + j;
@@ -371,7 +371,7 @@ void Geometry::SkyDome(Mesh& out, int nSegment, float fTexSplit)
 		}
 	}
 	i = nSegment / 2;
-	for (int j = 0; j < nSegment; ++j) {
+	for (std::uint32_t j = 0; j < nSegment; ++j) {
 		pIndexWk[icount] = i * (nSegment + 1) + j;
 		pIndexWk[icount + 1] = (i + 1) * (nSegment + 1) + j + 1;
 		pIndexWk[icount + 2] = (i + 1) * (nSegment + 1) + j;
@@ -380,7 +380,7 @@ void Geometry::SkyDome(Mesh& out, int nSegment, float fTexSplit)
 
 	// 頂点バッファ/インデックス バッファ生成
 	// 頂点生成
-	for (int i = 0; i < out.m_vertexCount; ++i)
+	for (std::uint32_t i = 0; i < out.m_vertexCount; ++i)
 	{
 		out.m_vertexData.positions.push_back(pVertexWk[i].vtx);
 		out.m_vertexData.normals.push_back(pVertexWk[i].nor);
@@ -389,7 +389,110 @@ void Geometry::SkyDome(Mesh& out, int nSegment, float fTexSplit)
 	}
 
 	// インデックス
-	for (int i = 0; i < out.m_indexCount; ++i)
+	for (std::uint32_t i = 0; i < out.m_indexCount; ++i)
+	{
+		out.m_indexData.push_back(pIndexWk[i]);
+	}
+
+	// 一時配列の解放
+	delete[] pVertexWk;
+	delete[] pIndexWk;
+}
+
+void Geometry::Terrain(Mesh& out, int split, float height, float texSize)
+{
+	int nNumBlockX = split;
+	int nNumBlockZ = split;
+	float fSizeBlockX = 1.0f;
+	float fSizeBlockZ = -1.0f;
+	float fTexSizeX = 1.0f / split * texSize;
+	float fTexSizeZ = 1.0f / split * texSize;
+
+	// プリミティブ種別設定
+	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
+	// 頂点数の設定
+	out.m_vertexCount = (nNumBlockX + 1) * (nNumBlockZ + 1);
+	out.m_heightWidth = nNumBlockX + 1;
+	// インデックス数の設定(縮退ポリゴン用を考慮する)
+	out.m_indexCount = (nNumBlockX + 1) * 2 * nNumBlockZ + (nNumBlockZ - 1) * 2;
+	// 頂点配列の作成
+	VERTEX_3D* pVertexWk = new VERTEX_3D[out.m_vertexCount];
+	// インデックス配列の作成
+	int* pIndexWk = new int[out.m_indexCount];
+	// 頂点配列の中身を埋める
+	VERTEX_3D* pVtx = pVertexWk;
+
+	for (int z = 0; z < nNumBlockZ + 1; ++z) {
+		for (int x = 0; x < nNumBlockX + 1; ++x) {
+
+			// 頂点座標の設定
+			pVtx->vtx.x = x * fSizeBlockX - (nNumBlockX * 0.5f) * fSizeBlockX;
+			pVtx->vtx.y = Mathf::perlinNoise(Vector2(
+				1.0f / nNumBlockZ * z * texSize, 
+				1.0f / nNumBlockX * x * texSize)) * height;
+			pVtx->vtx.z = -z * fSizeBlockZ + (nNumBlockZ * 0.5f) * fSizeBlockZ;
+			// 法線の設定
+			pVtx->nor = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			// 反射光の設定
+			pVtx->diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			// テクスチャ座標の設定
+			pVtx->tex.x = fTexSizeX * x;
+			pVtx->tex.y = fTexSizeZ * z;
+
+			out.m_heightData.push_back(pVtx->vtx.y);
+
+			++pVtx;
+		}
+	}
+	//インデックス配列の中身を埋める
+	int* pIdx = pIndexWk;
+	for (int z = 0; z < nNumBlockZ; ++z) {
+		if (z > 0) {
+			// 縮退ポリゴンのためのダブりの設定
+			*pIdx++ = (z + 1) * (nNumBlockX + 1);
+		}
+		for (int x = 0; x < nNumBlockX + 1; ++x) {
+			*pIdx++ = (z + 1) * (nNumBlockX + 1) + x;
+			*pIdx++ = z * (nNumBlockX + 1) + x;
+		}
+		if (z < nNumBlockZ - 1) {
+			// 縮退ポリゴンのためのダブりの設定
+			*pIdx++ = z * (nNumBlockX + 1) + nNumBlockX;
+		}
+	}
+
+	// 法線ベクトルの設定
+	for (int i = 0; i < out.m_indexCount - out.m_indexCount % 3; i += 3)
+	{
+		if (i % 6 == 0)
+		{
+			Vector3 n = Mathf::Cross(pVertexWk[pIndexWk[i + 0]].vtx,
+				pVertexWk[pIndexWk[i + 1]].vtx, pVertexWk[pIndexWk[i + 2]].vtx);
+			pVertexWk[pIndexWk[i + 0]].nor = n;
+			pVertexWk[pIndexWk[i + 1]].nor = n;
+			pVertexWk[pIndexWk[i + 2]].nor = n;
+		}
+		else
+		{
+			Vector3 n = Mathf::Cross(pVertexWk[pIndexWk[i + 0]].vtx,
+				pVertexWk[pIndexWk[i + 1]].vtx, pVertexWk[pIndexWk[i + 2]].vtx);
+			pVertexWk[pIndexWk[i + 0]].nor = -n;
+			pVertexWk[pIndexWk[i + 1]].nor = -n;
+			pVertexWk[pIndexWk[i + 2]].nor = -n;
+		}
+	}
+
+	// 頂点生成
+	for (auto i = 0u; i < out.m_vertexCount; ++i)
+	{
+		out.m_vertexData.positions.push_back(pVertexWk[i].vtx);
+		out.m_vertexData.normals.push_back(pVertexWk[i].nor);
+		out.m_vertexData.texcoord0s.push_back(pVertexWk[i].tex);
+		out.m_vertexData.colors.push_back(pVertexWk[i].diffuse);
+	}
+
+	// インデックス
+	for (auto i = 0; i < out.m_indexCount; ++i)
 	{
 		out.m_indexData.push_back(pIndexWk[i]);
 	}

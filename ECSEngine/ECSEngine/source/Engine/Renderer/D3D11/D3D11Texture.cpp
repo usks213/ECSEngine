@@ -49,6 +49,8 @@ void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 	d3d11Desc.SampleDesc.Quality = 0;
 	d3d11Desc.Usage = D3D11_USAGE_DEFAULT;
 	d3d11Desc.CPUAccessFlags = 0;
+	//d3d11Desc.Usage = D3D11_USAGE_DYNAMIC;
+	//d3d11Desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	d3d11Desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	//if (isCubeMap == 0) {
 	//	//d3d11Desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
@@ -101,8 +103,9 @@ void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 	{
 		 LoadFromHDRFile(szFileName, &meta, image);
 		 //DirectX::CreateTexture();
-
-		 //meta.mipLevels = 0;
+		d3d11Desc.Usage = D3D11_USAGE_DEFAULT;
+		d3d11Desc.CPUAccessFlags = 0;
+		 //meta.mipLevels = 0;	
 		 //if (meta.mipLevels == 0) {
 			 d3d11Desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
 			 d3d11Desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;

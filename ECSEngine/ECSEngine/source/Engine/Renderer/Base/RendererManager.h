@@ -13,6 +13,7 @@
 #include "Mesh.h"
 #include "RenderBuffer.h"
 #include "BatchGroup.h"
+#include "SubResource.h"
 
 #include <Engine/Utility/Mathf.h>
 
@@ -63,6 +64,12 @@ public:
 	RenderBuffer* getRenderBuffer(RenderBufferID id);
 	Texture* getTexture(TextureID id);
 	BatchGroup* getBatchGroup(BatchGroupID id);
+
+	virtual SubResource mapTexture(TextureID texID) = 0;
+	virtual SubResource mapVertex(RenderBufferID rdID) = 0;
+
+	virtual void unmapTexture(TextureID texID) = 0;
+	virtual void unmapVertex(RenderBufferID rdID) = 0;
 
 protected:
 	Engine* m_pEngine;

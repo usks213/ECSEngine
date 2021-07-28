@@ -11,6 +11,7 @@
 #include <Engine/ECS/ComponentData/PhysicsComponentData.h>
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/Engine.h>
+#include <Engine/Renderer/Base/RendererManager.h>
 
 using namespace ecs;
 
@@ -70,45 +71,26 @@ void PhysicsSystem::onDestroy()
 	m_pDynamicsWorld.reset();
 }
 
+/// @brief ゲームオブジェクト削除時コールバック
+/// @param id ゲームオブジェクトID
+void PhysicsSystem::onDestroyGameObject(const GameObjectID& id)
+{
+	// 検索
+	auto itr = m_physicsDatas.find(id);
+	if (m_physicsDatas.end() == itr) return;
+
+	// bulletWorldから削除
+	m_pDynamicsWorld->removeCollisionObject(itr->second->body.get());
+
+	// リストから削除
+	m_physicsDatas.erase(itr);
+}
+
 /// @brief 更新
 void PhysicsSystem::onUpdate()
 {
 	// デルタタイム
 	float delta = (1.0f / 60.0f);
-
-	//foreach<Transform, Physics, DynamicType>(
-	//	[this, delta](Transform& transform, Physics& physics, DynamicType& type)
-	//	{
-	//		//===== 回転 =====
-
-	//		// 角速度
-	//		physics.angularVelocity = Quaternion();
-	//		// トルク加算
-	//		physics.angularVelocity *= physics.torque;
-	//		// 回転の更新
-	//		transform.rotation *= physics.angularVelocity;
-	//		// 抵抗
-
-
-	//		//===== 移動 =====
-	//		// 重力
-	//		if (physics.gravity)
-	//		{
-	//			physics.force += m_graviyAcceleration * physics.mass;
-	//		}
-	//		// 抵抗
-	//		physics.force *= (Vector3(1, 1, 1) - physics.drag);
-	//		if (physics.force.Length() < 0.01f)
-	//			physics.force = Vector3();
-	//		// 加速度
-	//		physics.acceleration = physics.force / physics.mass;
-	//		// 速度更新
-	//		physics.velocity += physics.acceleration * delta;
-	//		// 位置の更新
-	//		transform.translation += physics.velocity * delta;
-
-	//	});
-
 
 	// 前処理
 	foreach<Transform, Collider, Rigidbody>(
@@ -289,15 +271,67 @@ void PhysicsSystem::CreatePhysicsData(const Transform& transform,
 		physics->shape = std::make_unique<btStaticPlaneShape>(normal, 0.0f);
 		break;
 	case Collider::ColliderType::POLYGON:
-		physics->shape = std::make_unique<btBoxShape>(scale);
+	{
+		auto* renderer = m_pWorld->getWorldManager()->getEngine()->getRendererManager();
+		auto* pMesh = renderer->getMesh(collider.mesh);
+		if (pMesh == nullptr)
+		{
+			physics->shape = std::make_unique<btBoxShape>(scale);
+			break;
+		}
+
+		std::unique_ptr<btTriangleMesh> triangles = std::make_unique<btTriangleMesh>();
+		for (std::uint32_t i = 0; i < pMesh->m_indexCount - pMesh->m_indexCount % 3; i += 3) {
+			btVector3 v0, v1, v2;
+			v0 = btVector3(
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].x,
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].y,
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].z);
+			v1 = btVector3(
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].x,
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].y,
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].z);
+			v2 = btVector3(
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].x,
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].y,
+				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].z);
+			triangles->addTriangle(v0, v1, v2);
+		}
+		std::unique_ptr<btConvexShape> convex = std::make_unique<btConvexTriangleMeshShape>(triangles.get());
+		std::unique_ptr<btShapeHull>   hull = std::make_unique<btShapeHull>(convex.get());
+		hull->buildHull(convex->getMargin());
+		physics->shape = std::make_unique<btConvexHullShape>();
+		btConvexHullShape* convexHullShape = static_cast<btConvexHullShape*>(physics->shape.get());
+		for (int i = 0; i < hull->numVertices(); ++i) {
+			convexHullShape->addPoint(hull->getVertexPointer()[i]);
+		}
+	}
 		break;
 	case Collider::ColliderType::COMPOUND:
 		physics->shape = std::make_unique<btBoxShape>(scale);
+		break;
+	case Collider::ColliderType::TERRAIN:
+	{
+		auto* renderer = m_pWorld->getWorldManager()->getEngine()->getRendererManager();
+		auto* pMesh = renderer->getMesh(collider.mesh);
+		if (pMesh == nullptr)
+		{
+			physics->shape = std::make_unique<btBoxShape>(scale);
+			break;
+		}
+		btScalar worldMin(-10);
+		btScalar worldMax(10);
+		physics->shape = std::make_unique<btHeightfieldTerrainShape>
+			(pMesh->m_heightWidth, pMesh->m_heightWidth, pMesh->m_heightData.data(), worldMin, worldMax, 1, false);
+	}
 		break;
 	default:
 		physics->shape = std::make_unique<btBoxShape>(scale);
 		break;
 	}
+
+	// スケール
+	physics->shape->setLocalScaling(scale);
 
 	// 質量で静的・動的
 	float mass = rigidbody.mass;

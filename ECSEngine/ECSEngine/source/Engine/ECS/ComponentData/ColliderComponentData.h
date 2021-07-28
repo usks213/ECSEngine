@@ -9,6 +9,7 @@
 
 #include <Engine/ECS/Base/IComponentData.h>
 #include <Engine/Utility/Mathf.h>
+#include <Engine/Renderer/Base/Mesh.h>
 
 
 namespace ecs {
@@ -29,7 +30,8 @@ namespace ecs {
 			CONE,        // コーン
 			PLANE,       // 平面
 			POLYGON,     // ポリゴン
-			COMPOUND     // 混合シェイプ
+			COMPOUND,    // 混合シェイプ
+			TERRAIN,	 // 地形
 		};
 		
 		/// @brief コライダータイプ
@@ -42,10 +44,17 @@ namespace ecs {
 		/// @brief サイズ
 		Vector3 size;
 
+		/// @brief メッシュ(コライダー)
+		MeshID mesh;
+
 		/// @brief コンストラクタ
 		Collider(ColliderType type, Vector3 center = Vector3(), Vector3 size = Vector3(1,1,1)):
-		colliderType(type), trigger(false), center(center), size(size)
+		colliderType(type), trigger(false), center(center), size(size), mesh(NONE_MESH_ID)
 		{}
 
+		/// @brief コンストラクタ
+		Collider(ColliderType type, MeshID meshID) :
+			colliderType(type), trigger(false), center(), size(1,1,1), mesh(meshID)
+		{}
 	};
 }
