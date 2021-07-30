@@ -58,7 +58,7 @@ namespace ecs {
 			const auto& itr = m_game0bjectMap.find(gameObjectID);
 			if (m_game0bjectMap.end() == itr) return;
 
-			m_pWorld->getEntityManager()->addComponentData<T>(*itr->second.get(), data);
+			m_pWorld->getEntityManager()->addComponentData<T>(itr->second->m_entity, data);
 		}
 
 		/// @brief コンポーネントデータを設定
@@ -71,7 +71,7 @@ namespace ecs {
 			const auto& itr = m_game0bjectMap.find(gameObjectID);
 			if (m_game0bjectMap.end() == itr) return;
 
-			m_pWorld->getEntityManager()->setComponentData<T>(*itr->second.get(), data);
+			m_pWorld->getEntityManager()->setComponentData<T>(itr->second->m_entity, data);
 		}
 
 		/// @brief コンポーネントデータを設定
@@ -84,7 +84,7 @@ namespace ecs {
 			const auto& itr = m_game0bjectMap.find(gameObjectID);
 			if (m_game0bjectMap.end() == itr) return nullptr;
 
-			return m_pWorld->getEntityManager()->getComponentData<T>(*itr->second.get());
+			return m_pWorld->getEntityManager()->getComponentData<T>(itr->second->m_entity);
 		}
 
 	public:

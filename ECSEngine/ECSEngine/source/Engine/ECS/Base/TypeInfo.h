@@ -7,50 +7,12 @@
  *********************************************************************/
 #pragma once
 
-#include <iostream>
-#include <string>
-
-/// @brief Œ^î•ñ•t‰Á
-#define DECLARE_TYPE_INFO(T) 						   \
-public:												   \
-	static constexpr std::string_view getTypeName()	   \
-	{												   \
-		return #T;									   \
-	}												   \
-	static constexpr std::size_t getTypeHash()		   \
-	{												   \
-		auto fnvOffsetBasis = 14695981039346656037ULL; \
-		constexpr auto cFnvPrime = 1099511628211ULL;   \
-													   \
-		for (auto idx : #T)							   \
-		{											   \
-			fnvOffsetBasis ^= static_cast<size_t>(idx);\
-			fnvOffsetBasis *= cFnvPrime;			   \
-		}											   \
-		return fnvOffsetBasis;						   \
-	}												   \
-	void _dumyFunction() = delete
+#include <Engine/Utility/TypeUtil.h>
 
 
-/// @brief Œ^‚ğ•¶š—ñ‚É•ÏŠ·
-#define TypeToString(Type) #Type
-
-/// @brief Œ^–¼‚ÌÅ‘å•¶š”
+ /// @brief Œ^–¼‚ÌÅ‘å•¶š”
 constexpr int MAX_TYPE_NAME = 256;
 
-
-constexpr std::size_t TypeNameToTypeHash(std::string_view typeName)
-{
-	auto fnvOffsetBasis = 14695981039346656037ULL;
-	constexpr auto cFnvPrime = 1099511628211ULL;
-
-	for (auto idx : typeName)
-	{
-		fnvOffsetBasis ^= static_cast<size_t>(idx);
-		fnvOffsetBasis *= cFnvPrime;
-	}
-	return fnvOffsetBasis;
-}
 
 namespace type
 {

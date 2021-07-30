@@ -8,6 +8,7 @@
 #pragma once
 
 #include "IComponentData.h"
+#include <Engine/Object.h>
 #include <vector>
 #include <algorithm>
 #include <functional>
@@ -16,7 +17,7 @@
 namespace ecs {
 
 	/// @brief ゲームオブジェクトID
-	using GameObjectID = std::uint32_t;
+	using GameObjectID = InstanceID;
 	/// @brief 存在しないゲームオブジェクトID
 	constexpr GameObjectID NONE_GAME_OBJECT_ID = std::numeric_limits<GameObjectID>::max();
 
@@ -25,28 +26,22 @@ namespace ecs {
 
 	/// @brief ゲームオブジェクト
 	/// @detail エンティティを扱いやすくするラッパークラス
-	class GameObject : public Entity
+	class GameObject : public Object
 	{
 		friend class GameObjectManager;
+		DECLARE_TYPE_ID(GameObject);
 	public:
 		/// @brief コンストラクタ
 		/// @param id ゲームオブジェクトID
 		/// @param entity エンティティ
 		explicit GameObject(const GameObjectID& id, std::string_view name, const Entity& entity) :
-			m_id(id), m_name(name), m_parentID(NONE_GAME_OBJECT_ID), Entity(entity)
+			Object(id, name), m_parentID(NONE_GAME_OBJECT_ID), m_entity(entity)
 		{
 		}
 
 		/// @brief デストラクタ
 		~GameObject() = default;
 
-		/// @brief IDの取得
-		/// @return ゲームオブジェクトID
-		GameObjectID getID() { return m_id; }
-
-		/// @brief 名前の取得
-		/// @return 名前
-		std::string_view getName() { return m_name; }
 
 		/// @brief 子の数を取得
 		/// @return 子の数
@@ -88,12 +83,12 @@ namespace ecs {
 		static bool DownOrder(const GameObjectID& lhs, const GameObjectID& rhs) {
 			return lhs > rhs;
 		}
-	private:
-		/// @brief ゲームオブジェクトID
-		GameObjectID	m_id;
-		/// @brief 名前
-		std::string		m_name;
 
+	public:
+		/// @brief エンティティ
+		Entity m_entity;
+
+	private:
 		/// @brief 親のID
 		GameObjectID	m_parentID;
 		/// @brief 子のIDリスト

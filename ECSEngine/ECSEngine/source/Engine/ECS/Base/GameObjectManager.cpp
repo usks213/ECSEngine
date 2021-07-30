@@ -239,7 +239,7 @@ void GameObjectManager::cleanUpGameObject(const GameObjectID& gameObjectID)
 	}
 
 	// チャンク
-	auto& chunk = m_pWorld->getChunkList()[itr->second->m_chunkIndex];
+	auto& chunk = m_pWorld->getChunkList()[itr->second->m_entity.m_chunkIndex];
 	auto curSize = chunk.getSize() - 1;
 
 	//// 自身より後ろのオブジェクトのインデックスを詰める
@@ -253,10 +253,10 @@ void GameObjectManager::cleanUpGameObject(const GameObjectID& gameObjectID)
 	// 最後尾に自身のインデックスを上書き
 	auto* transform = chunk.getComponentData<Transform>(curSize);
 	auto* other = getGameObject(transform->id);
-	other->m_index = itr->second->m_index;
+	other->m_entity.m_index = itr->second->m_entity.m_index;
 
 	// エンティティの削除
-	chunk.destroyEntity(Entity(itr->second->m_chunkIndex, itr->second->m_index));
+	chunk.destroyEntity(Entity(itr->second->m_entity));
 
 	// 親子関係解除
 	ResetParent(gameObjectID);

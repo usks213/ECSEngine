@@ -260,6 +260,7 @@
     <ClInclude Include="source\Engine\ECS\System\RenderingSystem.h" />
     <ClInclude Include="source\Engine\ECS\System\TransformSystem.h" />
     <ClInclude Include="source\Engine\Engine.h" />
+    <ClInclude Include="source\Engine\Object.h" />
     <ClInclude Include="source\Engine\OS\Base\WindowManager.h" />
     <ClInclude Include="source\Engine\OS\Win\WindowsWindow.h" />
     <ClInclude Include="source\Engine\Renderer\Base\BatchGroup.h" />
@@ -285,6 +286,7 @@
     <ClInclude Include="source\Engine\Utility\Input.h" />
     <ClInclude Include="source\Engine\Utility\Mathf.h" />
     <ClInclude Include="source\Engine\Utility\Singleton.h" />
+    <ClInclude Include="source\Engine\Utility\TypeUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc" />

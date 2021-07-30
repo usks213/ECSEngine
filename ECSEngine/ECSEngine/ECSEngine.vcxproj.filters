@@ -66,6 +66,12 @@
     <Filter Include="ライブラリ\imgui\ImGuizmo">
       <UniqueIdentifier>{8b356034-59b5-46df-bdd5-29802887eb64}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine\GUI">
+      <UniqueIdentifier>{d2de9698-6503-402f-b0a3-f27534f12415}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Asset">
+      <UniqueIdentifier>{5a93a0f1-913c-4a31-8224-8ceac9a660c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\App\main.cpp">
@@ -420,6 +426,12 @@
     </ClInclude>
     <ClInclude Include="source\Engine\Renderer\Base\SubResource.h">
       <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Object.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Utility\TypeUtil.h">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

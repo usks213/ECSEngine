@@ -68,6 +68,7 @@ void ImguiSystem::onUpdate()
 		std::string name(gameObject->getName());
 		std::size_t childNum = gameObject->getChildCount(); // 子がいるか
 
+		// 子ノード
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
 		bool open = ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_FramePadding |
 			ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick |
@@ -141,7 +142,7 @@ void ImguiSystem::onUpdate()
 			return;
 		}
 
-		auto& chunk = m_pWorld->getChunkList()[curObject->m_chunkIndex];
+		auto& chunk = m_pWorld->getChunkList()[curObject->m_entity.m_chunkIndex];
 
 		Transform* transform = nullptr;
 		const auto& archetype = chunk.getArchetype();
@@ -151,7 +152,7 @@ void ImguiSystem::onUpdate()
 		{
 			const auto& type = archetype.getTypeInfo(i);
 			std::string_view typeName = type.getName();
-			void* data = chunk.getComponentData(type.getName(), curObject->m_index);
+			void* data = chunk.getComponentData(type.getName(), curObject->m_entity.m_index);
 			if (CheckType(Transform))		transform = (Transform*)data;
 		}
 
@@ -170,7 +171,7 @@ void ImguiSystem::onUpdate()
 		{
 			const auto& type = archetype.getTypeInfo(i);
 			ImGui::Text(type.getName().data());
-			DispGui(type.getName(), chunk.getComponentData(type.getName(), curObject->m_index));
+			DispGui(type.getName(), chunk.getComponentData(type.getName(), curObject->m_entity.m_index));
 		}
 	}
 	ImGui::End();
