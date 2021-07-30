@@ -9,6 +9,10 @@
 
 #include <Engine/ECS/Base/SystemBase.h>
 
+#include <Engine/ECS/ComponentData/TransformComponentData.h>
+#include <Engine/ECS/ComponentData/RenderingComponentData.h>
+#include <Engine/ECS/ComponentData/CameraComponentData.h>
+
 namespace ecs {
 
 	class RenderingSystem final : public SystemBase
@@ -29,6 +33,10 @@ namespace ecs {
 		void onDestroy() override;
 		/// @brief çXêV
 		void onUpdate() override;
+
+
+		static inline void updateTransform(Transform& transform);
+		static inline void updateCamera(Camera& camera, Transform& transform, float width, float height);
 
 	private:
 

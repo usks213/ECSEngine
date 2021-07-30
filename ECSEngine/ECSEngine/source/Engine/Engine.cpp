@@ -28,9 +28,12 @@ Engine::Engine()
 bool Engine::initialize()
 {
 	// ワールドマネージャーの初期化
-	m_worldManager = std::make_unique<WorldManager>();
-	m_worldManager->m_pEngine = this;
+	m_worldManager = std::make_unique<WorldManager>(this);
 	m_worldManager->initialize();
+
+	// エディタマネージャーの初期化
+	m_editorManager = std::make_unique<EditorManager>(this);
+	m_editorManager->initialize();
 
 	// フレームカウント初期化
 	m_ExecLastTime = m_FPSLastTime = 
@@ -77,6 +80,9 @@ void Engine::tick()
 
 		// レンダラーのクリア
 		m_rendererManager->clear();
+
+		// エディタの更新
+		m_editorManager->update();
 
 		// Update
 		m_worldManager->update();

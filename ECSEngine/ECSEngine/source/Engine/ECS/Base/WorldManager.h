@@ -11,12 +11,16 @@
 
 class Engine;
 
-class WorldManager
+class WorldManager final
 {
 	friend class Engine;
 public:
-	WorldManager() = default;
-	virtual ~WorldManager() = default;
+	WorldManager(Engine* pEngine) :
+		m_pEngine(pEngine)
+	{
+	}
+
+	~WorldManager() = default;
 
 	void initialize();
 	void finalize();
@@ -38,6 +42,9 @@ public:
 
 	/// @brief エンジンの取得
 	Engine* getEngine() { return m_pEngine; }
+
+	/// @brief 現在のワールド取得
+	ecs::World* getCurrentWorld() { return m_pWorld.get(); }
 
 protected:
 	Engine* m_pEngine;

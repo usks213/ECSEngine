@@ -12,6 +12,7 @@
 #include <Engine/ECS/Base/WorldManager.h>
 #include <Engine/ECS/Base/EntityManager.h>
 #include <Engine/ECS/Base/GameObjectManager.h>
+#include <Engine/ECS/Base/RenderPipeline.h>
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/ColliderComponentData.h>
@@ -294,23 +295,23 @@ void PhysicsTestWorld::Start()
 	getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
 	getGameObjectManager()->setComponentData(plane, rdPlane);
 
-	// カメラ生成
-	Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag, DynamicType>();
+	//// カメラ生成
+	//Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag, DynamicType>();
 
-	auto entity = getGameObjectManager()->createGameObject("Camera", cameraArchetype);
-	Camera cameraData;
-	cameraData.isOrthographic = false;
-	cameraData.fovY = 60;
-	cameraData.nearZ = 1.0f;
-	cameraData.farZ = 1000.0f;
-	pos.x = 0;
-	pos.z = -30;
-	pos.y = 10;
-	rot = Quaternion::CreateFromYawPitchRoll(3.141592f, 0, 0);
-	scale = Vector3(10, 10, 10);
+	//auto entity = getGameObjectManager()->createGameObject("Camera", cameraArchetype);
+	//Camera cameraData;
+	//cameraData.isOrthographic = false;
+	//cameraData.fovY = 60;
+	//cameraData.nearZ = 1.0f;
+	//cameraData.farZ = 1000.0f;
+	//pos.x = 0;
+	//pos.z = -30;
+	//pos.y = 10;
+	//rot = Quaternion::CreateFromYawPitchRoll(3.141592f, 0, 0);
+	//scale = Vector3(10, 10, 10);
 
-	getGameObjectManager()->setComponentData<Transform>(entity, Transform(entity, pos, rot, scale));
-	getGameObjectManager()->setComponentData(entity, cameraData);
+	//getGameObjectManager()->setComponentData<Transform>(entity, Transform(entity, pos, rot, scale));
+	//getGameObjectManager()->setComponentData(entity, cameraData);
 
 
 	// ステージ
@@ -359,13 +360,16 @@ void PhysicsTestWorld::Start()
 	}
 
 	// システムの追加
-	addSystem<ImguiSystem>();
-	addSystem<SphereSystem>();
-	addSystem<TransformSystem>();
-	addSystem<ControllSystem>();
-	addSystem<ParentSystem>();
-	addSystem<PhysicsSystem>();
-	addSystem<RenderingSystem>();
+	//addSystem<ImguiSystem>();
+	//addSystem<SphereSystem>();
+	//addSystem<TransformSystem>();
+	//addSystem<ControllSystem>();
+	//addSystem<ParentSystem>();
+	//addSystem<PhysicsSystem>();
+	//addSystem<RenderingSystem>();
+
+
+	getRenderPipeline()->onCreate();
 }
 
 /// @brief エンド

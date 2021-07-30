@@ -16,6 +16,7 @@ namespace ecs {
 	class EntityManager;
 	class GameObjectManager;
 	class SystemBase;
+	class RenderPipeline;
 
 	/// @class World
 	/// @brief ワールド
@@ -38,6 +39,9 @@ namespace ecs {
 
 		/// @brief システムの更新
 		void update();
+
+		/// @brief パイプラインの描画
+		void render();
 
 		/// @brief  システムの追加
 		/// @tparam システムの型
@@ -84,6 +88,10 @@ namespace ecs {
 		/// @return ゲームオブジェクトマネージャー
 		[[nodiscard]] GameObjectManager* getGameObjectManager() const;
 
+		/// @brief レンダーパイプラインの取得
+		/// @return レンダーパイプライン
+		[[nodiscard]] RenderPipeline* getRenderPipeline() const;
+
 		/// @brief ワールドマネージャー取得
 		/// @return ワールドマネージャー
 		[[nodiscard]] WorldManager* getWorldManager() const { return m_pWorldManager; }
@@ -108,6 +116,8 @@ namespace ecs {
 		std::vector<Chunk> m_ChunkList;
 		/// @brief システムリスト
 		std::vector<std::unique_ptr<SystemBase>> m_SystemList;
+		/// @brief レンダーパイプライン
+		std::unique_ptr<RenderPipeline> m_pRenderPipeline;
 		/// @brief エンティティマネージャー
 		std::unique_ptr<EntityManager> m_pEntityManager;
 		/// @brief ゲームオブジェクトマネージャー

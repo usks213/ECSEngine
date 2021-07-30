@@ -19,6 +19,7 @@ namespace ecs {
 
 		bool isOrthographic;
 
+		Matrix world;
 		Matrix view;
 		Matrix projection;
 

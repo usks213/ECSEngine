@@ -32,7 +32,7 @@ void WorldManager::update()
 
 void WorldManager::render()
 {
-	
+	m_pWorld->render();
 }
 
 

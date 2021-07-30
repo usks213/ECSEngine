@@ -10,6 +10,7 @@
 #include "EntityManager.h"
 #include "GameObjectManager.h"
 #include "SystemBase.h"
+#include "RenderPipeline.h"
 #include <algorithm>
 
 using namespace ecs;
@@ -19,8 +20,9 @@ using namespace ecs;
 World::World(WorldManager* pWorldManager):
 	m_pWorldManager(pWorldManager)
 {
-	m_pEntityManager.reset(new EntityManager(this));
-	m_pGameObjectManager.reset(new GameObjectManager(this));
+	m_pEntityManager = std::make_unique<EntityManager>(this);
+	m_pGameObjectManager = std::make_unique<GameObjectManager>(this);
+	m_pRenderPipeline = std::make_unique<RenderPipeline>(this);
 }
 
 /// @brief デストラクタ
@@ -46,9 +48,19 @@ GameObjectManager* World::getGameObjectManager() const
 	return m_pGameObjectManager.get();
 }
 
+/// @brief レンダーパイプラインの取得
+/// @return レンダーパイプライン
+RenderPipeline* World::getRenderPipeline() const
+{
+	return m_pRenderPipeline.get();
+}
+
 /// @brief システムの更新
 void World::update()
 {
+	// スタート
+
+
 	for (auto&& system : m_SystemList)
 	{
 		system->onUpdate();
@@ -56,6 +68,12 @@ void World::update()
 
 	// クリーンアップ
 	m_pGameObjectManager->CleanUp();
+}
+
+void World::render()
+{
+	// 描画
+	m_pRenderPipeline->onUpdate();
 }
 
 /// @brief 他のワールドのデータを結合する

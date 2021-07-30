@@ -66,11 +66,11 @@
     <Filter Include="ライブラリ\imgui\ImGuizmo">
       <UniqueIdentifier>{8b356034-59b5-46df-bdd5-29802887eb64}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\GUI">
-      <UniqueIdentifier>{d2de9698-6503-402f-b0a3-f27534f12415}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\Engine\Asset">
       <UniqueIdentifier>{5a93a0f1-913c-4a31-8224-8ceac9a660c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\Editor">
+      <UniqueIdentifier>{733d00d0-bf51-4f7e-81ff-6ee479ea4d81}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +205,15 @@
     </ClCompile>
     <ClCompile Include="source\App\World\PhysicsTestWorld.cpp">
       <Filter>ソース ファイル\App\World</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Asset\AssetManager.cpp">
+      <Filter>ソース ファイル\Engine\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Editor\EditorManager.cpp">
+      <Filter>ソース ファイル\Engine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\ECS\Base\RenderPipeline.cpp">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -432,6 +441,18 @@
     </ClInclude>
     <ClInclude Include="source\Engine\Utility\TypeUtil.h">
       <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Asset\Asset.h">
+      <Filter>ソース ファイル\Engine\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Asset\AssetManager.h">
+      <Filter>ソース ファイル\Engine\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Editor\EditorManager.h">
+      <Filter>ソース ファイル\Engine\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\Base\RenderPipeline.h">
+      <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

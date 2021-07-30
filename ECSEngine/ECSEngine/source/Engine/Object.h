@@ -1,6 +1,7 @@
 /*****************************************************************//**
  * \file   Object.h
  * \brief  オブジェクト
+ * \detail インスペクターに表示可能
  * 
  * \author USAMI KOSHI
  * \date   2021/07/30
@@ -10,17 +11,19 @@
 #include "Utility/TypeUtil.h"
 
 
+ /// @brief インスタンスID
+using InstanceID = std::uint32_t;
+/// @brief タイプID
+using TypeID = std::size_t;
+
  /// @brief オブジェクトの型IDを付加
 #define DECLARE_TYPE_ID(T)							\
 DECLARE_TYPE_INFO( T );								\
-[[nodiscard]] std::size_t getTypeID() override {	\
+[[nodiscard]] TypeID getTypeID() override {	\
 	return getTypeHash();							\
 }													\
 void _dumyFunction2() = delete
 
-
-/// @brief インスタンスID
-using InstanceID = std::uint32_t;
 
 
 /// @brief オブジェクト
@@ -40,7 +43,7 @@ public:
 
 	/// @brief タイプID取得
 	/// @return ID
-	[[nodiscard]] virtual std::size_t getTypeID() = 0;
+	[[nodiscard]] virtual TypeID getTypeID() = 0;
 
 	/// @brief インスタンスID取得
 	/// @return ID

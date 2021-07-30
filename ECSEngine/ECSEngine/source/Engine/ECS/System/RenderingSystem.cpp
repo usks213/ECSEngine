@@ -9,10 +9,6 @@
 #include "RenderingSystem.h"
 #include <Engine/ECS/Base/EntityManager.h>
 
-#include <Engine/ECS/ComponentData/TransformComponentData.h>
-#include <Engine/ECS/ComponentData/RenderingComponentData.h>
-#include <Engine/ECS/ComponentData/CameraComponentData.h>
-
 #include <Engine/Engine.h>
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
 
@@ -158,3 +154,41 @@ void RenderingSystem::onUpdate()
 }
 
 
+inline void RenderingSystem::updateTransform(Transform& transform)
+{
+	// 拡縮
+	transform.localMatrix = Matrix::CreateScale(transform.scale);
+	// 回転
+	transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
+	// 移動
+	transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
+}
+
+inline void RenderingSystem::updateCamera(Camera& camera, Transform& transform, float width, float height)
+{
+	// ビューマトリックス更新
+	Matrix mtxWorld = transform.globalMatrix;
+	Vector3 pos = mtxWorld.Translation();
+	Vector3 target = pos + mtxWorld.Forward();
+	Vector3 up = mtxWorld.Up();
+	camera.view = Matrix::CreateLookAt(pos, target, up);
+
+	// ウィンドウサイズ
+	camera.width = width;
+	camera.height = height;
+	camera.aspect = camera.width / camera.height;
+
+	// プロジェクションマトリックス更新
+	if (camera.isOrthographic)
+	{
+		// 並行投影
+		camera.projection = Matrix::CreateOrthographic(
+			camera.width, camera.height, camera.nearZ, camera.farZ);
+	}
+	else
+	{
+		// 透視投影
+		camera.projection = Matrix::CreatePerspectiveFieldOfView(
+			XMConvertToRadians(camera.fovY), camera.aspect, camera.nearZ, camera.farZ);
+	}
+}

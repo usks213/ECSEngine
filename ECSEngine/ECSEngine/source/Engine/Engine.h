@@ -15,6 +15,7 @@
 #include "OS/Base/WindowManager.h"
 #include "Renderer/Base/RendererManager.h"
 #include "ECS/Base/WorldManager.h"
+#include "Editor/EditorManager.h"
 
 
 /// @class Engine
@@ -56,6 +57,7 @@ public:
 	[[nodiscard]] WindowManager* getWindowManager()		{ return m_windowManager.get(); }
 	[[nodiscard]] RendererManager* getRendererManager() { return m_rendererManager.get(); }
 	[[nodiscard]] WorldManager* getWorldManager()		{ return m_worldManager.get(); }
+	[[nodiscard]] EditorManager* getEditorManager()		{ return m_editorManager.get(); }
 
 	[[nodiscard]] int getWindowWidth()	{ return m_windowManager.get()->getWindowWidth(); }
 	[[nodiscard]] int getWindowHeight() { return m_windowManager.get()->getWindowHeight(); }
@@ -73,6 +75,7 @@ private:
 	std::unique_ptr<WindowManager>		m_windowManager;
 	std::unique_ptr<RendererManager>	m_rendererManager;
 	std::unique_ptr<WorldManager>		m_worldManager;
+	std::unique_ptr<EditorManager>		m_editorManager;
 
 	//--- タイマー 
 	std::uint32_t m_nCurrentFPS;
