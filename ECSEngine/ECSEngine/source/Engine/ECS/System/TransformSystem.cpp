@@ -19,13 +19,12 @@ void TransformSystem::onCreate()
 	foreach<Transform>(
 		[](Transform& transform)
 		{
-			// Šgk
-			transform.localMatrix = Matrix::CreateScale(transform.scale);
-			// ‰ñ“]
-			transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
-			// ˆÚ“®
-			transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
+			updateTransform(transform);
 		});
+
+	// ŠK‘w\‘¢XV
+	auto* mgr = getGameObjectManager();
+	updateHierarchy(mgr, m_pWorld->getGameObjectManager()->getRootList());
 }
 
 /// @brief íœ
@@ -37,16 +36,52 @@ void TransformSystem::onDestroy()
 /// @brief XV
 void TransformSystem::onUpdate()
 {
+	// ƒgƒ‰ƒ“ƒXƒtƒH[ƒ€XV
 	foreach<Transform, DynamicType>(
 		[](Transform& transform, DynamicType& type)
 		{
-			// Šgk
-			transform.localMatrix = Matrix::CreateScale(transform.scale);
-			// ‰ñ“]
-			transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
-			// ˆÚ“®
-			transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
+			updateTransform(transform);
 		});
+
+	// ŠK‘w\‘¢XV
+	auto* mgr = getGameObjectManager();
+	updateHierarchy(mgr, m_pWorld->getGameObjectManager()->getRootList());
 }
 
+inline void TransformSystem::updateTransform(Transform& transform)
+{
+	// Šgk
+	transform.localMatrix = Matrix::CreateScale(transform.scale);
+	// ‰ñ“]
+	transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
+	// ˆÚ“®
+	transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
+}
 
+inline void TransformSystem::updateHierarchy(GameObjectManager* mgr, std::vector<GameObjectID>& rootList)
+{
+	for (const auto& id : rootList)
+	{
+		auto* transform = mgr->getComponentData<Transform>(id);
+		if (transform == nullptr) continue;
+		transform->globalMatrix = transform->localMatrix;
+		transform->globalScale = transform->scale;
+
+		for (auto child : mgr->GetChilds(id))
+		{
+			updateChildsTransform(mgr, child, transform->globalMatrix, transform->globalScale);
+		}
+	}
+}
+
+inline void TransformSystem::updateChildsTransform(GameObjectManager* mgr, const GameObjectID& parent, const Matrix& globalMatrix, const Vector3& globalScale)
+{
+	auto* transform = mgr->getComponentData<Transform>(parent);
+	transform->globalMatrix = transform->localMatrix * globalMatrix;
+	transform->globalScale = transform->scale * globalScale;
+
+	for (auto child : mgr->GetChilds(parent))
+	{
+		updateChildsTransform(mgr, child, transform->globalMatrix, transform->globalScale);
+	}
+}

@@ -41,7 +41,9 @@ private:
 	void dispWorld();
 
 	void DispChilds(const InstanceID parentID);
-	void UpdateView();
+
+	void updateTransform();
+	void updateView();
 private:
 	Engine* m_pEngine;
 

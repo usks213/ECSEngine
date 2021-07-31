@@ -13,6 +13,7 @@
 #include <Engine/Engine.h>
 #include <Engine/Utility/Input.h>
 #include <Engine/ECS/Base/RenderPipeline.h>
+#include <Engine/ECS/System/TransformSystem.h>
 
 #include <Engine/ECS/Base/WorldManager.h>
 #include <Engine/ECS/Base/GameObjectManager.h>
@@ -57,7 +58,8 @@ void EditorManager::finalize()
 void EditorManager::update()
 {
 	// シーンビュー更新
-	UpdateView();
+	updateTransform();
+	updateView();
 
 	// GUI表示
 	dispHierarchy();
@@ -229,9 +231,6 @@ void EditorManager::dispWorld()
 	// パイプライン取得
 	auto* pipeline = pWorld->getRenderPipeline();
 
-	// トランスフォーム更新
-	pipeline->transformPass();
-
 	// システム更新
 	pipeline->systemPass(m_editorCamera.camera);
 
@@ -249,7 +248,30 @@ void EditorManager::dispWorld()
 	}
 }
 
-void EditorManager::UpdateView()
+void EditorManager::updateTransform()
+{
+	// ワールドマネージャー取得
+	auto* pWorldManager = m_pEngine->getWorldManager();
+	// 現在のワールド取得
+	auto* pWorld = pWorldManager->getCurrentWorld();
+
+	// トランスフォーム更新
+	auto chunkList = pWorld->getEntityManager()->getChunkList<Transform>();
+	for (auto& chunk : chunkList)
+	{
+		auto transforms = chunk->getComponentArray<Transform>();
+		for (int i = 0; i < transforms.Count(); ++i)
+		{
+			TransformSystem::updateTransform(transforms[i]);
+		}
+	}
+
+	// 階層構造更新
+	TransformSystem::updateHierarchy(pWorld->getGameObjectManager(),
+		pWorld->getGameObjectManager()->getRootList());
+}
+
+void EditorManager::updateView()
 {
 	// カメラ操作
 	Transform& transform = m_editorCamera.transform;

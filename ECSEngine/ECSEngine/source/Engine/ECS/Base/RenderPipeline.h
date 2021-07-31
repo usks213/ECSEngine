@@ -36,18 +36,15 @@ namespace ecs {
 
 		
 		void beginPass();
-		void transformPass();
 		void systemPass(Camera& camera);
 		void cullingPass(Camera& camera);
 		void renderingPass();
 		void endPass();
 
 
-		static inline void updateTransform(Transform& transform);
 		static inline void updateCamera(Camera& camera, Transform& transform, float width, float height);
 
 	private:
-		inline void updateChilds(const GameObjectID& parent, const Matrix& localToParent, const Vector3& parentScale);
 
 	};
 }

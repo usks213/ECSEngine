@@ -8,6 +8,9 @@
 #pragma once
 
 #include <Engine/ECS/Base/SystemBase.h>
+#include <Engine/ECS/Base/GameObjectManager.h>
+#include <Engine/ECS/ComponentData/TransformComponentData.h>
+
 
 namespace ecs {
 
@@ -29,6 +32,11 @@ namespace ecs {
 		void onDestroy() override;
 		/// @brief çXêV
 		void onUpdate() override;
+
+
+		static inline void updateTransform(Transform& transform);
+		static inline void updateHierarchy(GameObjectManager* mgr, std::vector<GameObjectID>& rootList);
+		static inline void updateChildsTransform(GameObjectManager* mgr, const GameObjectID& parent, const Matrix& globalMatrix, const Vector3& globalScale);
 
 	private:
 

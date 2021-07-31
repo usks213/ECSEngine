@@ -10,6 +10,8 @@
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/PhysicsComponentData.h>
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
+#include <Engine/ECS/System/TransformSystem.h>
+
 #include <Engine/Engine.h>
 #include <Engine/Renderer/Base/RendererManager.h>
 
@@ -144,12 +146,12 @@ void PhysicsSystem::onUpdate()
 	// シミュレーション開始
 	m_pDynamicsWorld->stepSimulation(delta);
 
-	std::vector<GameObjectID> m_updateList;
-	m_updateList.reserve(m_pDynamicsWorld->getNumCollisionObjects());
+	std::vector<GameObjectID> updateList;
+	updateList.reserve(m_pDynamicsWorld->getNumCollisionObjects());
 
 	// パラメータ反映
 	foreach<Transform, Collider, Rigidbody, DynamicType>(
-		[this, delta, &m_updateList](Transform& transform, Collider& collider, Rigidbody& rigidbody, DynamicType& type)
+		[this, delta, &updateList](Transform& transform, Collider& collider, Rigidbody& rigidbody, DynamicType& type)
 		{
 			if (rigidbody.mass == 0.0f) return;
 
@@ -180,27 +182,16 @@ void PhysicsSystem::onUpdate()
 			transform.rotation = Quaternion::CreateFromRotationMatrix(globalMatrix);
 
 			// マトリックス更新
-			transform.localMatrix = Matrix::CreateScale(transform.scale);
-			transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
-			transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
+			TransformSystem::updateTransform(transform);
 
 			// 更新リストに追加
-			m_updateList.push_back(transform.id);
+			updateList.push_back(transform.id);
 		});
 
 
 	// 親子関係更新
-	for (const auto& id : m_updateList)
-	{
-		auto* transform = getGameObjectManager()->getComponentData<Transform>(id);
-		if (transform == nullptr) continue;
-		transform->globalMatrix = transform->localMatrix;
-
-		for (auto child : getGameObjectManager()->GetChilds(id))
-		{
-			updateChild(child, transform->globalMatrix);
-		}
-	}
+	auto* mgr = getGameObjectManager();
+	TransformSystem::updateHierarchy(mgr, updateList);
 }
 
 void PhysicsSystem::updateChild(const GameObjectID& parent, const Matrix& globalMatrix)

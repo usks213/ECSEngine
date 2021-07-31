@@ -22,19 +22,7 @@ using namespace ecs;
 /// @brief 生成時
 void RenderPipeline::onCreate()
 {
-	foreach<Transform>(
-		[](Transform& transform)
-		{
-			// 拡縮
-			transform.localMatrix = Matrix::CreateScale(transform.scale);
-			// 回転
-			transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
-			// 移動
-			transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
-		});
 
-	// トランスフォーム更新
-	transformPass();
 }
 
 /// @brief 削除時
@@ -49,9 +37,6 @@ void RenderPipeline::onUpdate()
 	// レンダラーマネージャー
 	auto* engine = m_pWorld->getWorldManager()->getEngine();
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
-
-	// トランスフォーム更新
-	transformPass();
 
 	// カメラ設定
 	Camera* mainCamera = nullptr;
@@ -81,30 +66,6 @@ void RenderPipeline::onUpdate()
 void RenderPipeline::beginPass()
 {
 
-}
-
-void RenderPipeline::transformPass()
-{
-	// トランスフォーム更新
-	foreach<Transform, DynamicType>(
-		[](Transform& transform, DynamicType& type)
-		{
-			updateTransform(transform);
-		});
-
-	// 階層構造更新
-	for (const auto& id : m_pWorld->getGameObjectManager()->getRootList())
-	{
-		auto* transform = getGameObjectManager()->getComponentData<Transform>(id);
-		if (transform == nullptr) continue;
-		transform->globalMatrix = transform->localMatrix;
-		transform->globalScale = transform->scale;
-
-		for (auto child : getGameObjectManager()->GetChilds(id))
-		{
-			updateChilds(child, transform->globalMatrix, transform->globalScale);
-		}
-	}
 }
 
 void RenderPipeline::systemPass(Camera& camera)
@@ -189,16 +150,6 @@ void RenderPipeline::endPass()
 
 }
 
-inline void RenderPipeline::updateTransform(Transform& transform)
-{
-	// 拡縮
-	transform.localMatrix = Matrix::CreateScale(transform.scale);
-	// 回転
-	transform.localMatrix *= Matrix::CreateFromQuaternion(transform.rotation);
-	// 移動
-	transform.localMatrix *= Matrix::CreateTranslation(transform.translation);
-}
-
 inline void RenderPipeline::updateCamera(Camera& camera, Transform& transform, float width, float height)
 {
 	// ワールドマトリックス更新
@@ -227,17 +178,5 @@ inline void RenderPipeline::updateCamera(Camera& camera, Transform& transform, f
 		// 透視投影
 		camera.projection = Matrix::CreatePerspectiveFieldOfView(
 			XMConvertToRadians(camera.fovY), camera.aspect, camera.nearZ, camera.farZ);
-	}
-}
-
-inline void RenderPipeline::updateChilds(const GameObjectID& parent, const Matrix& globalMatrix, const Vector3& globalScale)
-{
-	auto* transform = getGameObjectManager()->getComponentData<Transform>(parent);
-	transform->globalMatrix = transform->localMatrix * globalMatrix;
-	transform->globalScale = transform->scale * globalScale;
-
-	for (auto child : getGameObjectManager()->GetChilds(parent))
-	{
-		updateChilds(child, transform->globalMatrix, transform->globalScale);
 	}
 }
