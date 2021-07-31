@@ -53,6 +53,7 @@ public:
 
 	void setD3D11PrimitiveTopology(EPrimitiveTopology topology);
 
+public:
 	void setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer);
 
 	void setD3DTransformBuffer(const Matrix& mtxWorld);
@@ -66,7 +67,12 @@ public:
 public:
 	void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) override;
 
+	void setViewport(Viewport viewport) override;
 
+public:
+	Viewport getViewport() override { return Viewport(m_vireport); }
+
+public:
 	ShaderID createShader(ShaderDesc desc) override;
 	MaterialID createMaterial(std::string name, ShaderID shaderID) override;
 	MeshID createMesh(std::string name) override;

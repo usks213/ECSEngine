@@ -81,14 +81,18 @@ void Engine::tick()
 		// レンダラーのクリア
 		m_rendererManager->clear();
 
+		// ランタイム
+		if (m_editorManager->m_isRunTime)
+		{
+			// Update
+			m_worldManager->update();
+
+			// Render
+			m_worldManager->render();
+		}
+		
 		// エディタの更新
 		m_editorManager->update();
-
-		// Update
-		m_worldManager->update();
-
-		// Render
-		m_worldManager->render();
 
 		// 画面更新
 		m_rendererManager->present();

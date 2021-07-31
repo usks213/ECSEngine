@@ -45,6 +45,9 @@ namespace ecs {
 		/// @param gameObjectID 削除するゲームオブジェクトID
 		void destroyGameObject(const GameObjectID& gameObjectID);
 
+		/// @brief 生成リストの実行
+		void StartUp();
+
 		/// @brief 削除リストの実行
 		void CleanUp();
 
@@ -156,6 +159,9 @@ namespace ecs {
 
 		/// @brief ゲームオブジェクトマップ
 		std::unordered_map<GameObjectID, std::unique_ptr<GameObject>> m_game0bjectMap;
+
+		/// @brief 生成ゲームオブジェクトリスト
+		std::list<GameObjectID> m_createList;
 
 		/// @brief 削除ゲームオブジェクトリスト
 		std::list<GameObjectID> m_destroyList;

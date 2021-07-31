@@ -65,8 +65,9 @@ namespace ecs {
 		/// @brief 更新
 		void onUpdate() override;
 
+		/// @brief ゲームオブジェクト更新前に一度だけ呼ばれるコールバック
+		void onStartGameObject(const GameObjectID& id) override;
 		/// @brief ゲームオブジェクト削除時コールバック
-		/// @param id ゲームオブジェクトID
 		void onDestroyGameObject(const GameObjectID& id) override;
 
 
@@ -79,7 +80,6 @@ namespace ecs {
 	private:
 		void CreatePhysicsData(const Transform& transform,
 			const Collider& collider, const Rigidbody& rigidbody);
-		void updateChild(const GameObjectID& parent, const Matrix& globalMatrix);
 	private:
 		/// @brief 重力
 		Vector3 m_graviyAcceleration;

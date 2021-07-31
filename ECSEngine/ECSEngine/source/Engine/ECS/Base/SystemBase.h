@@ -45,8 +45,11 @@ namespace ecs {
 		/// @brief 更新
 		virtual void onUpdate() = 0;
 
+		/// @brief ゲームオブジェクト生成時コールバック
+		//virtual void onCreateGameObject(const GameObjectID& id) {}
+		/// @brief ゲームオブジェクト更新前に一度だけ呼ばれるコールバック
+		virtual void onStartGameObject(const GameObjectID& id) {}
 		/// @brief ゲームオブジェクト削除時コールバック
-		/// @param id ゲームオブジェクトID
 		virtual void onDestroyGameObject(const GameObjectID& id){}
 
 		/// @brief 更新順番号取得

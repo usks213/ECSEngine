@@ -32,6 +32,9 @@ GameObjectID GameObjectManager::createGameObject(std::string_view name, const Ar
 	m_rootList.push_back(id);
 	sortRootList();
 
+	// 生成リストに格納
+	m_createList.push_back(id);
+
 	return id;
 }
 
@@ -49,15 +52,26 @@ void GameObjectManager::destroyGameObject(const GameObjectID& gameObjectID)
 	}
 }
 
+/// @brief 生成リストの実行
+void GameObjectManager::StartUp()
+{
+	// スタートアップ
+	for (const auto& id : m_createList)
+	{
+		// 更新前コールバック
+		for (auto&& system : m_pWorld->getSystemList())
+		{
+			system->onStartGameObject(id);
+		}
+	}
+
+	// クリア
+	m_createList.clear();
+}
+
 /// @brief 削除リストの実行
 void GameObjectManager::CleanUp()
 {
-	// 削除時コールバック
-	for (const auto& id : m_destroyList)
-	{
-
-	}
-
 	// クリーンアップ
 	for (const auto& id : m_destroyList)
 	{

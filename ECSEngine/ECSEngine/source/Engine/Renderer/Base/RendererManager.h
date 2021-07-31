@@ -49,6 +49,11 @@ public:
 	/// @param stage シェーダーステージ
 	virtual void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) = 0;
 
+	virtual void setViewport(Viewport viewport) = 0;
+
+public:
+	/// @brief ビューポート取得
+	virtual Viewport getViewport() = 0;
 
 public:
 	virtual ShaderID createShader(ShaderDesc desc) = 0;

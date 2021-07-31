@@ -59,7 +59,7 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	// エンジン取得
 	auto& engine = Engine::get();
 	// ウィンドウの生成
-	WindowsWindow* pWin = engine.createWindow<WindowsWindow>("ECSEngine", 1280, 720);
+	WindowsWindow* pWin = engine.createWindow<WindowsWindow>("ECSEngine", 1920, 1080);
 	// レンダラーの生成
 	D3D11RendererManager* pRenderer = engine.createRenderer<D3D11RendererManager>();
 
@@ -119,8 +119,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		true;
 
 	switch (uMsg) {
-	case WM_CREATE:					//----- ウィンドウが生成された
+	case WM_CREATE:	
+	{//----- ウィンドウが生成された
 		return OnCreate(hWnd, (LPCREATESTRUCT)lParam);
+	}
 	case WM_DESTROY:				//----- ウィンドウ破棄指示がきた
 		PostQuitMessage(0);				// システムにスレッドの終了を要求
 		break;
@@ -135,10 +137,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return MNC_CLOSE << 16;			// [Alt]+[Enter]時のBEEPを抑止
 	case WM_DPICHANGED:
 	{
-		int dpi = HIWORD(wParam);
-		float scale = (float)dpi / USER_DEFAULT_SCREEN_DPI;
-
-		// ここにDPI変更に反応する処理を書く予定
 		return OnCreate(hWnd, (LPCREATESTRUCT)lParam);
 	}
 	break;

@@ -51,6 +51,9 @@ bool WindowsWindow::initialize(HINSTANCE& hInstance, std::string className, int 
 	// ウィンドウクラスの登録
 	RegisterClassEx(&wcex);
 
+	// 高DPI対応
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
 	// クライアント領域サイズからウィンドウ サイズ算出
 	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION
 		| WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX;
@@ -72,9 +75,6 @@ bool WindowsWindow::initialize(HINSTANCE& hInstance, std::string className, int 
 		hInstance,
 		nullptr);
 
-	//
-	//SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
 	// ウインドウの表示(初期化処理の後に呼ばないと駄目)
 	ShowWindow(m_hWnd, nCmdShow);
 	UpdateWindow(m_hWnd);
@@ -95,3 +95,13 @@ void WindowsWindow::finalize()
 	// COM終了処理
 	CoUninitialize();
 }
+
+//void UpdateButtonLayoutForDpi(HWND hWnd)
+//{
+//	int iDpi = GetDpiForWindow(hWnd);
+//	int dpiScaledX = MulDiv(INITIALX_96DPI, iDpi, 96);
+//	int dpiScaledY = MulDiv(INITIALY_96DPI, iDpi, 96);
+//	int dpiScaledWidth = MulDiv(INITIALWIDTH_96DPI, iDpi, 96);
+//	int dpiScaledHeight = MulDiv(INITIALHEIGHT_96DPI, iDpi, 96);
+//	SetWindowPos(hWnd, hWnd, dpiScaledX, dpiScaledY, dpiScaledWidth, dpiScaledHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+//}

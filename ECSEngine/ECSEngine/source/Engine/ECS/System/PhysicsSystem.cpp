@@ -73,8 +73,25 @@ void PhysicsSystem::onDestroy()
 	m_pDynamicsWorld.reset();
 }
 
+/// @brief ゲームオブジェクト生成時コールバック
+void PhysicsSystem::onStartGameObject(const GameObjectID& id)
+{
+	auto* mgr = getGameObjectManager();
+	auto* transform = mgr->getComponentData<Transform>(id);
+	auto* collider = mgr->getComponentData<Collider>(id);
+	auto* rigidbody = mgr->getComponentData<Rigidbody>(id);
+	if (transform && collider && rigidbody)
+	{
+		if (!rigidbody->isCreate)
+		{
+			// 新規作成
+			this->CreatePhysicsData(*transform, *collider, *rigidbody);
+			rigidbody->isCreate = true;
+		}
+	}
+}
+
 /// @brief ゲームオブジェクト削除時コールバック
-/// @param id ゲームオブジェクトID
 void PhysicsSystem::onDestroyGameObject(const GameObjectID& id)
 {
 	// 検索
@@ -192,17 +209,6 @@ void PhysicsSystem::onUpdate()
 	// 親子関係更新
 	auto* mgr = getGameObjectManager();
 	TransformSystem::updateHierarchy(mgr, updateList);
-}
-
-void PhysicsSystem::updateChild(const GameObjectID& parent, const Matrix& globalMatrix)
-{
-	auto* transform = getGameObjectManager()->getComponentData<Transform>(parent);
-	transform->globalMatrix = transform->localMatrix * globalMatrix;
-
-	for (auto child : getGameObjectManager()->GetChilds(parent))
-	{
-		updateChild(child, transform->globalMatrix);
-	}
 }
 
 void PhysicsSystem::CreatePhysicsData(const Transform& transform,

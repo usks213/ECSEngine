@@ -58,8 +58,8 @@ RenderPipeline* World::getRenderPipeline() const
 /// @brief システムの更新
 void World::update()
 {
-	// スタート
-
+	// スタートアップ
+	m_pGameObjectManager->StartUp();
 
 	for (auto&& system : m_SystemList)
 	{

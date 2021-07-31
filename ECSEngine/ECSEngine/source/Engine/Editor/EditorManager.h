@@ -8,6 +8,7 @@
 #pragma once
 
 #include <Engine/Object.h>
+#include <Engine/ECS/Base/World.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
 
@@ -20,7 +21,7 @@ class EditorManager final
 public:
 
 	EditorManager(Engine* pEngine) :
-		m_pEngine(pEngine)
+		m_pEngine(pEngine), m_isRunTime(false)
 	{
 	}
 
@@ -44,8 +45,14 @@ private:
 
 	void updateTransform();
 	void updateView();
+
+	void EditTransform(ecs::World* pWorld, ecs::Camera& camera, ecs::Transform& transform);
+
 private:
 	Engine* m_pEngine;
+	bool m_isRunTime;
+
+	Viewport m_sceneViewport;
 
 	struct ObjectInfo
 	{

@@ -31,8 +31,6 @@ using namespace ecs;
 
 #define CheckType(Type) typeName == TypeToString(Type)
 
-void EditTransform(World* pWorld, Camera& camera, Transform& transform);
-
 
 void EditorManager::initialize()
 {
@@ -48,6 +46,12 @@ void EditorManager::initialize()
 
 	m_editorCamera.transform = transform;
 	m_editorCamera.camera = cameraData;
+
+	m_sceneViewport = m_pEngine->getRendererManager()->getViewport();
+	m_sceneViewport.x = 7;
+	m_sceneViewport.y = 26 * 1.5f;
+	m_sceneViewport.width *= 0.65f;
+	m_sceneViewport.height *= 0.65f;
 }
 
 void EditorManager::finalize()
@@ -57,15 +61,50 @@ void EditorManager::finalize()
 
 void EditorManager::update()
 {
-	// シーンビュー更新
-	updateTransform();
-	updateView();
+	// レンダラーマネージャー
+	auto* renderer = static_cast<D3D11RendererManager*>(m_pEngine->getRendererManager());
+	// レンダーターゲット変更
+	renderer->m_d3dContext->OMSetRenderTargets(1,
+		renderer->m_backBufferRTV.GetAddressOf(), renderer->m_depthStencilView.Get());
+	renderer->m_d3dContext->ClearDepthStencilView(renderer->m_depthStencilView.Get(), 
+		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	// ビューポート変更
+	renderer->setViewport(m_sceneViewport);
+
+	// ランタイム
+	if (m_isRunTime)
+	{
+		// Game
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowBgAlpha(1.0f);
+		ImGui::SetNextWindowSize(ImVec2(m_sceneViewport.width + m_sceneViewport.x * 2, 
+			m_sceneViewport.height + m_sceneViewport.y + + m_sceneViewport.x));
+		ImGui::Begin("Game", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+		ImGui::Image(renderer->m_diffuseSRV.Get(), 
+			ImVec2(m_sceneViewport.width, m_sceneViewport.height));
+		ImGui::End();
+	}
+	// デバッグ
+	else
+	{
+		// シーンビュー
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::SetNextWindowSize(ImVec2(m_sceneViewport.width + m_sceneViewport.x * 2,
+			m_sceneViewport.height + m_sceneViewport.y + m_sceneViewport.x));
+		ImGui::SetNextWindowBgAlpha(0);
+		ImGui::Begin("Scene", 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoScrollbar);
+		ImGui::End();
+
+		updateTransform();
+		updateView();
+		dispWorld();
+	}
 
 	// GUI表示
 	dispHierarchy();
 	dispAsset();
 	dispInspector();
-	dispWorld();
 }
 
 void EditorManager::dispHierarchy()
@@ -156,7 +195,23 @@ void EditorManager::dispHierarchy()
 
 void EditorManager::dispAsset()
 {
+	ImGui::Begin("Test");
 
+	std::string name;
+	if (m_isRunTime)
+	{
+		name = "Stop";
+	}
+	else
+	{
+		name = "Start";
+	}
+	if(ImGui::Button(name.c_str(), ImVec2(100, 30)))
+	{
+		m_isRunTime ^= 1;
+	}
+
+	ImGui::End();
 }
 
 void EditorManager::dispInspector()
@@ -286,10 +341,11 @@ void EditorManager::updateView()
 	float SCREEN_HEIGHT = m_pEngine->getWindowHeight();
 
 	// 向き
-	Vector3 vPos = transform.localMatrix.Translation();
-	Vector3 right = transform.localMatrix.Right();
+	Matrix matR = Matrix::CreateFromQuaternion(transform.rotation);
+	Vector3 vPos = matR.Translation();
+	Vector3 right = matR.Right();
 	Vector3 up = Vector3(0, 1, 0);
-	Vector3 forward = transform.localMatrix.Forward();
+	Vector3 forward = matR.Forward();
 	Vector3 vLook = vPos + forward;
 	float focus = 0.0f;
 
@@ -432,9 +488,8 @@ void EditorManager::DispChilds(const InstanceID parentID)
 	}
 }
 
-void EditTransform(World* pWorld ,Camera& camera, Transform& transform)
+void EditorManager::EditTransform(World* pWorld ,Camera& camera, Transform& transform)
 {
-	bool editTransformDecomposition = true;
 	Matrix oldGlobalMatrix = transform.globalMatrix;
 
 	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
@@ -445,12 +500,9 @@ void EditTransform(World* pWorld ,Camera& camera, Transform& transform)
 	static float boundsSnap[] = { 0.1f, 0.1f, 0.1f };
 	static bool boundSizing = false;
 	static bool boundSizingSnap = false;
-
-	static bool useWindow = false;
-	int gizmoCount = 1;
 	float camDistance = 8.0f;
 
-	if (editTransformDecomposition)
+	if (!m_isRunTime)
 	{
 		//if (ImGui::IsKeyPressed('1'))
 		//	mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -515,91 +567,74 @@ void EditTransform(World* pWorld ,Camera& camera, Transform& transform)
 			ImGui::InputFloat3("Snap", boundsSnap);
 			ImGui::PopID();
 		}
-	}
 
-	ImGuiIO& io = ImGui::GetIO();
-	float viewManipulateRight = io.DisplaySize.x;
-	float viewManipulateTop = 0;
-	if (useWindow)
-	{
-		ImGui::SetNextWindowSize(ImVec2(800, 400));
-		ImGui::SetNextWindowPos(ImVec2(400, 20));
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImVec4)ImColor(0.35f, 0.3f, 0.3f));
-		ImGui::Begin("Gizmo", 0, ImGuiWindowFlags_NoMove);
-		ImGuizmo::SetDrawlist();
-		float windowWidth = (float)ImGui::GetWindowWidth();
-		float windowHeight = (float)ImGui::GetWindowHeight();
-		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-		viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
-		viewManipulateTop = ImGui::GetWindowPos().y;
-	}
-	else
-	{
-		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-	}
+		// ビューポート
+		ImGuizmo::SetRect(m_sceneViewport.x, m_sceneViewport.y, m_sceneViewport.width, m_sceneViewport.height);
 
-	// ギズモ
-	Matrix globalMatrix = transform.globalMatrix;
-	ImGuizmo::Manipulate(&camera.view.m[0][0], &camera.projection.m[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
-		&globalMatrix.m[0][0], NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+		// ギズモ
+		Matrix globalMatrix = transform.globalMatrix;
+		ImGuizmo::Manipulate(&camera.view.m[0][0], &camera.projection.m[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
+			&globalMatrix.m[0][0], NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 
-	// 変更を取得
-	Vector3 newTra, newRot, newSca, oldTra, oldRot, oldSca;
-	ImGuizmo::DecomposeMatrixToComponents(&globalMatrix.m[0][0], (float*)&newTra, (float*)&newRot, (float*)&newSca);
-	ImGuizmo::DecomposeMatrixToComponents(&oldGlobalMatrix.m[0][0], (float*)&oldTra, (float*)&oldRot, (float*)&oldSca);
-	// ローカルマトリックス
-	Matrix local = globalMatrix;
+		// 変更を取得
+		Vector3 newTra, newRot, newSca, oldTra, oldRot, oldSca;
+		ImGuizmo::DecomposeMatrixToComponents(&globalMatrix.m[0][0], (float*)&newTra, (float*)&newRot, (float*)&newSca);
+		ImGuizmo::DecomposeMatrixToComponents(&oldGlobalMatrix.m[0][0], (float*)&oldTra, (float*)&oldRot, (float*)&oldSca);
+		// ローカルマトリックス
+		Matrix local = globalMatrix;
 
-	// 親のがいる場合
-	auto parent = pWorld->getGameObjectManager()->GetParent(transform.id);
-	if (parent != NONE_GAME_OBJECT_ID)
-	{
-		auto parentTrans = pWorld->getGameObjectManager()->getComponentData<Transform>(parent);
-		parentTrans->globalMatrix.Invert(local);
-		local = globalMatrix * local;
-	}
-	Vector3 locTra, locRot, locSca;
-	ImGuizmo::DecomposeMatrixToComponents(&local.m[0][0], (float*)&locTra, (float*)&locRot, (float*)&locSca);
+		// 親のがいる場合
+		auto parent = pWorld->getGameObjectManager()->GetParent(transform.id);
+		if (parent != NONE_GAME_OBJECT_ID)
+		{
+			auto parentTrans = pWorld->getGameObjectManager()->getComponentData<Transform>(parent);
+			parentTrans->globalMatrix.Invert(local);
+			local = globalMatrix * local;
+		}
+		Vector3 locTra, locRot, locSca;
+		ImGuizmo::DecomposeMatrixToComponents(&local.m[0][0], (float*)&locTra, (float*)&locRot, (float*)&locSca);
 
-	// ローカルマトリックス更新
-	transform.localMatrix = local;
+		// ローカルマトリックス更新
+		transform.localMatrix = local;
 
-	if (oldTra != newTra)
-	{
-		// 速度
-		auto physics = pWorld->getGameObjectManager()->getComponentData<Physics>(transform.id);
-		if (physics) physics->velocity = locTra - transform.translation;
-		// 移動
-		transform.translation = locTra;
-	}
-	if (oldRot != newRot)
-	{
-		// 回転
-		Matrix invSca = Matrix::CreateScale(locSca);
-		invSca = invSca.Invert();
-		transform.rotation = Quaternion::CreateFromRotationMatrix(invSca * local);
-	}
-	else if (oldSca != newSca)
-	{
-		//Matrix invSca = Matrix::CreateScale(locSca);
-		//invSca = invSca.Invert();
-		//Quaternion rot = Quaternion::CreateFromRotationMatrix(invSca * local);
-		//// 拡縮
-		//Matrix invRot = Matrix::CreateFromQuaternion(rot);
-		//invRot = invRot.Invert();
-		//Matrix sca = local * invRot;
-		//transform.scale.x = sca.m[0][0];
-		//transform.scale.y = sca.m[1][1];
-		//transform.scale.z = sca.m[2][2];
-		////transform.scale += newSca - oldSca;
-		transform.scale = locSca;
-	}
+		if (oldTra != newTra)
+		{
+			// 速度
+			auto physics = pWorld->getGameObjectManager()->getComponentData<Physics>(transform.id);
+			if (physics) physics->velocity = locTra - transform.translation;
+			// 移動
+			transform.translation = locTra;
+		}
+		if (oldRot != newRot)
+		{
+			// 回転
+			Matrix invSca = Matrix::CreateScale(locSca);
+			invSca = invSca.Invert();
+			transform.rotation = Quaternion::CreateFromRotationMatrix(invSca * local);
+		}
+		else if (oldSca != newSca)
+		{
+			//Matrix invSca = Matrix::CreateScale(locSca);
+			//invSca = invSca.Invert();
+			//Quaternion rot = Quaternion::CreateFromRotationMatrix(invSca * local);
+			//// 拡縮
+			//Matrix invRot = Matrix::CreateFromQuaternion(rot);
+			//invRot = invRot.Invert();
+			//Matrix sca = local * invRot;
+			//transform.scale.x = sca.m[0][0];
+			//transform.scale.y = sca.m[1][1];
+			//transform.scale.z = sca.m[2][2];
+			////transform.scale += newSca - oldSca;
+			transform.scale = locSca;
+		}
 
-	ImGuizmo::ViewManipulate(&camera.view.m[0][0], camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+		// カメラの姿勢
+		ImGuizmo::ViewManipulate(&camera.view.m[0][0], camDistance, 
+			ImVec2(m_sceneViewport.width - 128, m_sceneViewport.y),
+			ImVec2(128, 128), 0x10101010);
 
-	if (useWindow)
-	{
-		ImGui::End();
-		ImGui::PopStyleColor(1);
+		// ビュー行列から姿勢を抽出
+		m_editorCamera.transform.rotation = 
+			Quaternion::CreateFromRotationMatrix(camera.view.Transpose());
 	}
 }

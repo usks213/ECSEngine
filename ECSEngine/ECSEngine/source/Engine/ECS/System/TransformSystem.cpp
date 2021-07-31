@@ -16,21 +16,21 @@ using namespace ecs;
  /// @brief 生成時
 void TransformSystem::onCreate()
 {
-	foreach<Transform>(
-		[](Transform& transform)
-		{
-			updateTransform(transform);
-		});
-
-	// 階層構造更新
-	auto* mgr = getGameObjectManager();
-	updateHierarchy(mgr, m_pWorld->getGameObjectManager()->getRootList());
 }
 
 /// @brief 削除時
 void TransformSystem::onDestroy()
 {
+}
 
+/// @brief ゲームオブジェクト生成時コールバック
+void TransformSystem::onStartGameObject(const GameObjectID& id)
+{
+	auto* transform = getGameObjectManager()->getComponentData<Transform>(id);
+	if (transform)
+	{
+		updateTransform(*transform);
+	}
 }
 
 /// @brief 更新

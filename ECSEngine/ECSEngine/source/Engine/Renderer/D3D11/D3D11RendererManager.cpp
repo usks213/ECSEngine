@@ -175,6 +175,19 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 	ImGui_ImplWin32_Init(hWnd);
 	ImGui_ImplDX11_Init(m_d3dDevice.Get(), m_d3dContext.Get());
 
+	// 日本語フォント
+	ImFontConfig config = {};
+	config.OversampleH = 1;
+	config.OversampleV = 1;
+	config.PixelSnapH = 1;
+	io.Fonts->AddFontDefault();
+	ImFont* pFont = io.Fonts->AddFontFromFileTTF("data/font/msgothic.ttc", 18.0f * 1.5f, &config, io.Fonts->GetGlyphRangesJapanese());
+	IM_ASSERT(pFont != nullptr);
+	ImFont* currentFont = ImGui::GetFont();
+	currentFont = pFont;
+	io.FontDefault = pFont;
+	io.IniFilename = "data/config.ini";
+
 	return S_OK;
 }
 
@@ -205,16 +218,15 @@ void D3D11RendererManager::clear()
 
 	m_d3dContext->OMSetBlendState(nullptr, nullptr, std::numeric_limits<std::uint32_t>::max());
 
-	float ClearColor[4] = { 0.117647f, 0.254902f, 0.352941f, 1.0f };
+	float ClearColor[4] = { 0.2f, 0.22f, 0.22f, 1.0f };
 	m_d3dContext->ClearRenderTargetView(m_backBufferRTV.Get(), ClearColor);
 	m_d3dContext->ClearRenderTargetView(m_diffuseRTV.Get(), ClearColor);
 	m_d3dContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
-	//m_d3dContext->OMSetRenderTargets(1, m_diffuseRTV.GetAddressOf(), m_depthStencilView.Get());
+	//m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
+	m_d3dContext->OMSetRenderTargets(1, m_diffuseRTV.GetAddressOf(), m_depthStencilView.Get());
 
 	m_d3dContext->RSSetViewports(1, &m_vireport);
-
 	m_d3dAnnotation->EndEvent();
 }
 
@@ -222,7 +234,7 @@ void D3D11RendererManager::clear()
 void D3D11RendererManager::present()
 {
 	// バックバッファに戻す
-	//m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
+	m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
 
 	//--- imgui
 	ImGui::Render();
@@ -270,15 +282,6 @@ void D3D11RendererManager::imguiDebug()
 
 	//	ImGui::EndMainMenuBar();
 	//}
-	//ImGui::End();
-
-
-	//// Scene
-	//ImGui::SetNextWindowBgAlpha(0.0f);
-	//ImGui::Begin("Scene",0, ImGuiWindowFlags_::ImGuiWindowFlags_NoMove | 
-	//	ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar);
-	////ImGui::Image(m_diffuseSRV.Get(), ImVec2(m_pEngine->getWindowWidth() * 0.6f, 
-	//	//m_pEngine->getWindowHeight() * 0.6f));
 	//ImGui::End();
 
 
@@ -988,6 +991,10 @@ void D3D11RendererManager::setTexture(std::uint32_t slot, const TextureID& textu
 	setD3D11Texture(slot, textureID, stage);
 }
 
+void D3D11RendererManager::setViewport(Viewport viewport)
+{
+	m_d3dContext->RSSetViewports(1, viewport.Get11());
+}
 
 void D3D11RendererManager::d3dRender(const RenderBufferID& renderBufferID)
 {

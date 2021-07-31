@@ -33,6 +33,8 @@ namespace ecs {
 		/// @brief 更新
 		void onUpdate() override;
 
+		/// @brief ゲームオブジェクト更新前に一度だけ呼ばれるコールバック
+		void onStartGameObject(const GameObjectID& id) override;
 
 		static inline void updateTransform(Transform& transform);
 		static inline void updateHierarchy(GameObjectManager* mgr, std::vector<GameObjectID>& rootList);
