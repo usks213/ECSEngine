@@ -172,7 +172,7 @@ void Chunk::writeBinaryStream(BinaryStream& output)
 		output.write(typeHash);
 		output.write(typeSize);
 		output.write(nameSize);
-		output.write(typeName.data());
+		output.write(typeName.data(), nameSize);
 	}
 
 	// コンポーネントデータの書き出し

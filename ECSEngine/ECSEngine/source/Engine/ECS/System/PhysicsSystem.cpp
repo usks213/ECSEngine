@@ -34,6 +34,7 @@ using namespace ecs;
 void PhysicsSystem::onCreate()
 {
 	m_graviyAcceleration = Vector3(0, -0.8f, 0);
+	m_physicsDatas.clear();
 
 	//--- bullet3初期化
 	m_pConfig = std::make_unique<btDefaultCollisionConfiguration>();
@@ -71,6 +72,8 @@ void PhysicsSystem::onDestroy()
 	// btBroadphaseInterfaceなどワールド作成時に指定したものは
 	// btDiscreteDynamicsWorldクラスのデストラクタで使用するため後で削除
 	m_pDynamicsWorld.reset();
+
+	m_physicsDatas.clear();
 }
 
 /// @brief ゲームオブジェクト生成時コールバック

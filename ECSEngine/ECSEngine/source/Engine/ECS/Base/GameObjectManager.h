@@ -132,6 +132,15 @@ namespace ecs {
 		/// @param childID 子
 		void RemoveChild(const GameObjectID& gameObjectID, const GameObjectID& childID);
 
+	public:
+		/// @brief シリアライズ
+		/// @param path パス
+		void Serialize(std::string path);
+
+		/// @brief デシリアライズ
+		/// @param path パス
+		bool Deserialize(std::string path);
+
 	private:
 		
 		void cleanUpGameObject(const GameObjectID& gameObjectID);

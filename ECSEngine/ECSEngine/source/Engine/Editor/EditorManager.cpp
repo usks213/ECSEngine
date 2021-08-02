@@ -208,7 +208,18 @@ void EditorManager::dispAsset()
 	}
 	if(ImGui::Button(name.c_str(), ImVec2(100, 30)))
 	{
+		auto* pWorld = m_pEngine->getWorldManager()->getCurrentWorld();
+		std::string path("data/");
+
 		m_isRunTime ^= 1;
+		if (m_isRunTime)
+		{
+			pWorld->serializeWorld(path);
+		}
+		else
+		{
+			pWorld->deserializeWorld(path);
+		}
 	}
 
 	ImGui::End();

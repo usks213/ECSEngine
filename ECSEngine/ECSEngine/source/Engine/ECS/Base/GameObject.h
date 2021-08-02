@@ -38,6 +38,10 @@ namespace ecs {
 			Object(id, name), m_parentID(NONE_GAME_OBJECT_ID), m_entity(entity)
 		{
 		}
+		explicit GameObject() :
+			Object(-1, "none"), m_parentID(NONE_GAME_OBJECT_ID), m_entity(-1,-1)
+		{
+		}
 
 		/// @brief デストラクタ
 		~GameObject() = default;
@@ -55,6 +59,18 @@ namespace ecs {
 		/// @param name イベント名
 		/// @param value 値
 		void invokeEvent(std::string_view name, void* value);
+
+		/// @brief シリアライズ化
+		template<class T>
+		void serialize(T& archive)
+		{
+			Object::serialize(archive);
+			archive(
+				CEREAL_NVP(m_entity),
+				CEREAL_NVP(m_parentID),
+				CEREAL_NVP(m_childsID)
+			);
+		}
 
 	protected:
 

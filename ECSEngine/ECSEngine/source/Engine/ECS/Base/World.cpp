@@ -13,6 +13,9 @@
 #include "RenderPipeline.h"
 #include <algorithm>
 
+#include <fstream>
+#include <iostream>
+
 using namespace ecs;
 
 
@@ -128,6 +131,58 @@ void World::readBinaryStream(BinaryStream& input)
 	{
 		m_ChunkList[i] = Chunk::readBinaryStream(input);
 	}
+}
+
+/// @brief ワールドのシリアライズ
+/// @param path パス
+void World::serializeWorld(std::string path)
+{
+	// チャンクの書き出し
+	BinaryStream bs;
+	this->writeBinaryStream(bs);
+
+	std::string chunkPath(path + "chunk.bin");
+	std::ofstream ofs(chunkPath, std::ios::binary);
+	ofs.write(bs.getBuffer(), bs.getSize());
+	ofs.close();
+
+	// ゲームオブジェクトの書き出し
+	m_pGameObjectManager->Serialize(path);
+
+}
+
+/// @brief ワールドのシリアライズ
+/// @param path パス
+bool World::deserializeWorld(std::string path)
+{
+	// チャンクファイルの読み込み
+	std::string chunkPath(path + "chunk.bin");
+	std::ifstream ifs(chunkPath, std::ios::binary);
+	if (!ifs.is_open()) return false;
+
+	ifs.seekg(0, std::ios_base::end);
+	const int fileSize = static_cast<const int>(ifs.tellg());
+	ifs.seekg(0, std::ios_base::beg);
+	const auto fileBuffer = std::make_unique<char[]>(fileSize);
+	ifs.read(fileBuffer.get(), fileSize);
+	BinaryStream bs;
+	bs.write(fileBuffer.get(), fileSize);
+	ifs.close();
+
+	// 両方読み込めた場合のみ
+	if (m_pGameObjectManager->Deserialize(path))
+	{
+		this->readBinaryStream(bs);
+	}
+
+	// システムの初期化
+	for (auto&& system : m_SystemList)
+	{
+		system->onDestroy();
+		system->onCreate();
+	}
+
+	return true;
 }
 
 /// @brief システムの更新順整理

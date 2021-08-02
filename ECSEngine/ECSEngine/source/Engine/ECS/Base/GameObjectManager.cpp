@@ -10,6 +10,9 @@
 #include <Engine/ECS/Base/SystemBase.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 
+#include <fstream>
+#include <iostream>
+
 using namespace ecs;
 
 
@@ -239,6 +242,60 @@ void GameObjectManager::RemoveChild(const GameObjectID& gameObjectID, const Game
 	m_rootList.push_back(childID);
 	sortRootList();
 }
+
+/// @brief シリアライズ
+/// @param path パス
+void GameObjectManager::Serialize(std::string path)
+{
+	std::string goPath(path + "gameobject.bin");
+	std::ofstream of(goPath, std::ios::binary);
+	cereal::BinaryOutputArchive archive(of);
+
+	std::vector<GameObject> data;
+	for (auto& obj : m_game0bjectMap)
+	{
+		data.push_back(*obj.second.get());
+	}
+	archive(cereal::make_nvp("GameObjectList", data));
+
+	of.close();
+}
+
+/// @brief デシリアライズ
+/// @param path パス
+bool GameObjectManager::Deserialize(std::string path)
+{
+	std::string goPath(path + "gameobject.bin");
+	std::ifstream ifs(goPath, std::ios::binary);
+	if (!ifs.is_open()) return false;
+
+	cereal::BinaryInputArchive archive(ifs);
+	std::vector<GameObject> data;
+	archive(cereal::make_nvp("GameObjectList", data));
+
+	m_game0bjectMap.clear();
+	m_rootList.clear();
+	m_createList.clear();
+	m_destroyList.clear();
+
+	for (auto& obj : data)
+	{
+		m_game0bjectMap.emplace(obj.m_instanceID, std::make_unique<GameObject>(obj));
+		
+		if (obj.m_parentID == NONE_GAME_OBJECT_ID)
+		{
+			m_rootList.push_back(obj.m_instanceID);
+			sortRootList();
+		}
+		// 生成リストに格納
+		m_createList.push_back(obj.m_instanceID);
+	}
+
+	ifs.close();
+
+	return true;
+}
+
 
 void GameObjectManager::cleanUpGameObject(const GameObjectID& gameObjectID)
 {

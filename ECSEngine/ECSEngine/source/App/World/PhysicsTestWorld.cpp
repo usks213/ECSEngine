@@ -363,6 +363,8 @@ void PhysicsTestWorld::Start()
 		getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
 		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
 	}
+
+
 }
 
 /// @brief ƒGƒ“ƒh

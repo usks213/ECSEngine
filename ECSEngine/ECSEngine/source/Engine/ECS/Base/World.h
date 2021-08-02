@@ -79,6 +79,14 @@ namespace ecs {
 		/// @param output 読み込み先のストリーム
 		void readBinaryStream(BinaryStream& input);
 
+		/// @brief ワールドのシリアライズ
+		/// @param path パス
+		void serializeWorld(std::string path);
+
+		/// @brief ワールドのデシリアライズ
+		/// @param path パス
+		bool deserializeWorld(std::string path);
+
 	public:
 		/// @brief エンティティマネージャーの取得
 		/// @return エンティティマネージャー

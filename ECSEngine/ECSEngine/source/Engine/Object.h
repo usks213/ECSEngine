@@ -9,6 +9,15 @@
 #pragma once
 
 #include "Utility/TypeUtil.h"
+#include "cereal.hpp"
+#include "archives/json.hpp"
+#include "archives/binary.hpp"
+
+#include "types/string.hpp"
+#include "types/vector.hpp"
+#include "types/list.hpp"
+#include "types/unordered_map.hpp"
+#include "types/base_class.hpp"
 
 
  /// @brief インスタンスID
@@ -52,6 +61,13 @@ public:
 	/// @brief 名前の取得
 	/// @return 名前
 	[[nodiscard]] std::string_view getName() { return m_name; }
+
+	/// @brief シリアライズ化
+	template<class T>
+	void serialize(T& archive)
+	{
+		archive(CEREAL_NVP(m_instanceID), CEREAL_NVP(m_name));
+	}
 
 protected:
 	/// @brief インスタンスID

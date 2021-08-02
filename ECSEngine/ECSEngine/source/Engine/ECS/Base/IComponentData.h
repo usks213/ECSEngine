@@ -8,6 +8,7 @@
 #pragma once
 
 #include "TypeInfo.h"
+#include "cereal.hpp"
 
 /// @brief コンポーネントデータ型情報付加
 #define ECS_DECLARE_COMPONENT_DATA(T)					\
@@ -55,6 +56,13 @@ namespace ecs {
 		Entity(const std::uint32_t chunkIndex, const std::uint32_t index) :
 			m_chunkIndex(chunkIndex), m_index(index)
 		{
+		}
+
+		/// @brief シリアライズ化
+		template<class T>
+		void serialize(T& archive)
+		{
+			archive(CEREAL_NVP(m_chunkIndex), CEREAL_NVP(m_index));
 		}
 
 		/// @brief chunkの番号
