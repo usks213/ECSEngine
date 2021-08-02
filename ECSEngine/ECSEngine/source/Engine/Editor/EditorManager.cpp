@@ -29,7 +29,7 @@
 
 using namespace ecs;
 
-#define CheckType(Type) typeName == TypeToString(Type)
+#define CheckType(Type) typeHash == TypeToHash(Type)
 
 
 void EditorManager::initialize()
@@ -260,8 +260,8 @@ void EditorManager::dispInspector()
 			for (int i = 0; i < archetype.getArchetypeSize(); ++i)
 			{
 				const auto& type = archetype.getTypeInfo(i);
-				std::string_view typeName = type.getName();
-				void* data = chunk.getComponentData(type.getName(), curObject->m_entity.m_index);
+				auto typeHash = type.getHash();
+				void* data = chunk.getComponentData(typeHash, curObject->m_entity.m_index);
 				if (CheckType(Transform))		transform = (Transform*)data;
 			}
 
@@ -275,7 +275,7 @@ void EditorManager::dispInspector()
 			for (int i = 0; i < archetype.getArchetypeSize(); ++i)
 			{
 				const auto& type = archetype.getTypeInfo(i);
-				ImGui::Text(type.getName().data());
+				ImGui::Text(std::to_string(type.getHash()).c_str());
 				//DispGui(type.getName(), chunk.getComponentData(type.getName(), curObject->m_entity.m_index));
 			}
 		}

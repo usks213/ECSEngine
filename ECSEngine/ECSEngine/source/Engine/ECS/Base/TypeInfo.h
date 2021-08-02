@@ -55,17 +55,17 @@ class TypeInfo
 	/// @brief プライベートコンストラクタ
 	/// @param typeHash 型のハッシュ値
 	/// @param size		型のメモリサイズ
-	constexpr explicit TypeInfo(const std::size_t hash, const std::size_t size, std::string_view name)
-		: m_typeHash(hash), m_typeSize(size), m_typeName()
+	constexpr explicit TypeInfo(const std::size_t hash, const std::size_t size)// , std::string_view name)
+		: m_typeHash(hash), m_typeSize(size)//, m_typeName()
 	{
-		for (int i = 0; name.data()[i] != '\0'; ++i) {
+		/*for (int i = 0; name.data()[i] != '\0'; ++i) {
 			m_typeName[i] = name.data()[i];
-		}
+		}*/
 	}
 
 public:
 	/// @brief デフォルトコンストラクタ
-	constexpr TypeInfo() :m_typeHash(-1), m_typeSize(0), m_typeName() {}
+	constexpr TypeInfo() :m_typeHash(-1), m_typeSize(0) {}//, m_typeName() {}
 
 	/// @brief 型一致比較
 	/// @param other 他の型情報
@@ -95,11 +95,11 @@ public:
 		return m_typeSize;
 	}
 
-	/// @brief  型の名前
-	[[nodiscard]] constexpr std::string_view getName() const
-	{
-		return m_typeName;
-	}
+	///// @brief  型の名前
+	//[[nodiscard]] constexpr std::string_view getName() const
+	//{
+	//	return m_typeName;
+	//}
 
 	/// @brief テンプレートで新しい型情報生成
 	/// @tparam T getTypeHash()を保持している型
@@ -107,16 +107,16 @@ public:
 	template<class T, typename = std::enable_if_t<type::has_get_type_hash<T>>>
 	static constexpr TypeInfo create()
 	{
-		return TypeInfo(T::getTypeHash(), sizeof(T), T::getTypeName());
+		return TypeInfo(T::getTypeHash(), sizeof(T));// , T::getTypeName());
 	}
 
 	/// @brief 既存のハッシュ値とサイズから型情報を生成
 	/// @param hash 型のハッシュ値
 	/// @param size 型のメモリサイズ
 	/// @return 型情報
-	static constexpr TypeInfo create(const std::size_t hash, const std::size_t size, std::string_view name)
+	static constexpr TypeInfo create(const std::size_t hash, const std::size_t size)//, std::string_view name)
 	{
-		return TypeInfo(hash, size, name);
+		return TypeInfo(hash, size);// , name);
 	}
 
 private:
@@ -125,5 +125,5 @@ private:
 	/// @brief  型のメモリサイズ
 	std::size_t m_typeSize;
 	/// @brief 型名
-	char m_typeName[MAX_TYPE_NAME];
+	//char m_typeName[MAX_TYPE_NAME];
 };

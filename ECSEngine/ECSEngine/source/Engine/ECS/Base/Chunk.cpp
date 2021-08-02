@@ -167,12 +167,12 @@ void Chunk::writeBinaryStream(BinaryStream& output)
 	{
 		const auto typeHash = m_Archetype.getTypeInfo(i).getHash();
 		const auto typeSize = m_Archetype.getTypeInfo(i).getSize();
-		const auto typeName = m_Archetype.getTypeInfo(i).getName();
-		const auto nameSize = typeName.size();
+		//const auto typeName = m_Archetype.getTypeInfo(i).getName();
+		//const auto nameSize = typeName.size();
 		output.write(typeHash);
 		output.write(typeSize);
-		output.write(nameSize);
-		output.write(typeName.data(), nameSize);
+		//output.write(nameSize);
+		//output.write(typeName.data(), nameSize);
 	}
 
 	// コンポーネントデータの書き出し
@@ -192,14 +192,14 @@ Chunk Chunk::readBinaryStream(BinaryStream& input)
 	input.read(&archetypeSize);
 	for (size_t i = 0; i < archetypeSize; ++i)
 	{
-		std::size_t typeHash, typeSize, nameSize;
+		std::size_t typeHash, typeSize;//, nameSize;
 		input.read(&typeHash);
 		input.read(&typeSize);
-		input.read(&nameSize);
+		/*input.read(&nameSize);
 		char* name = new char[nameSize];
-		input.read(name, nameSize);
-		result.m_Archetype.addType(typeHash, typeSize, name);
-		delete[] name;
+		input.read(name, nameSize);*/
+		result.m_Archetype.addType(typeHash, typeSize);// , name);
+		//delete[] name;
 	}
 
 	// コンポーネントデータの読み込み

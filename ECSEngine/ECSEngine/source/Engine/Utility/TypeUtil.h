@@ -51,6 +51,8 @@ constexpr std::size_t TypeNameToTypeHash(std::string_view typeName)
 /// @brief Œ^‚ð•¶Žš—ñ‚É•ÏŠ·
 #define TypeToString(Type) #Type
 
+/// @brief Œ^‚ðƒnƒbƒVƒ…’l‚É•ÏŠ·
+#define TypeToHash(Type) TypeNameToTypeHash(#Type)
 
 /// @brief Œ^‚ðID‚É•ÏŠ·
 #define TypeToID(Type) TypeNameToTypeHash(#Type)

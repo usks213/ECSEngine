@@ -129,15 +129,15 @@ namespace ecs {
 			return reinterpret_cast<T*>(m_pBegin.get() + offset + m_Archetype.getSize(m_Archetype.getIndex<TType>()) * index);
 		}
 
-		/// @brief 指定した型名のデータを取得
-		/// @param typeName 型名
-		/// @param index インデックス
-		/// @return 汎用ポインタ
-		[[nodiscard]] void* getComponentData(std::string_view typeName, std::uint32_t index)
-		{
-			auto offset = m_Archetype.getOffset(typeName) * m_Capacity;
-			return m_pBegin.get() + offset + m_Archetype.getSize(typeName) * index;
-		}
+		///// @brief 指定した型名のデータを取得
+		///// @param typeName 型名
+		///// @param index インデックス
+		///// @return 汎用ポインタ
+		//[[nodiscard]] void* getComponentData(std::string_view typeName, std::uint32_t index)
+		//{
+		//	auto offset = m_Archetype.getOffset(typeName) * m_Capacity;
+		//	return m_pBegin.get() + offset + m_Archetype.getSize(typeName) * index;
+		//}
 
 		/// @brief 指定したハッシュ値のデータを取得
 		/// @param typeHash ハッシュ値
