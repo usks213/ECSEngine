@@ -64,10 +64,15 @@ public:
 
 	void d3dUnmap(ID3D11Resource* pResource);
 
+	void d3dCopyResource(ID3D11Resource* pDst, ID3D11Resource* pSrc);
+
 public:
 	void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) override;
 
 	void setViewport(Viewport viewport) override;
+
+	void setRenderTarget(const RenderTargetID& rtID, const DepthStencilID& dsID)override;
+	void setRenderTargets(std::uint32_t num, const RenderTargetID* rtIDs, const DepthStencilID& dsID) override;
 
 public:
 	Viewport getViewport() override { return Viewport(m_vireport); }
@@ -78,6 +83,8 @@ public:
 	MeshID createMesh(std::string name) override;
 	RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) override;
 	TextureID createTextureFromFile(std::string filePath) override;
+	RenderTargetID createRenderTarget(std::string name) override;
+	DepthStencilID createDepthStencil(std::string name) override;
 	BatchGroupID creatBatchGroup(MaterialID materialID, MeshID meshID) override;
 
 	SubResource mapTexture(TextureID texID) override;

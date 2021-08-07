@@ -215,6 +215,15 @@
     <ClCompile Include="source\Engine\ECS\Base\RenderPipeline.cpp">
       <Filter>ソース ファイル\Engine\ECS\Base</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\SystemTable.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RenderTarget.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11DepthStencil.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -453,6 +462,24 @@
     </ClInclude>
     <ClInclude Include="source\Engine\ECS\Base\RenderPipeline.h">
       <Filter>ソース ファイル\Engine\ECS\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\SystemTable.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Utility\ConstexprMap.h">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\RenderTarget.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RenderTarget.h">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\DepthStencil.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11DepthStencil.h">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -59,7 +59,7 @@ namespace ecs {
 		{
 			for (const auto& sys : m_SystemList) {
 				// ƒVƒXƒeƒ€ID‚ð”»’è
-				if (sys->getTypeID() == T::getTypeHash()) {
+				if (sys->getHash() == T::getTypeHash()) {
 					return static_cast<T*>(sys.get());
 				}
 			}

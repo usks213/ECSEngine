@@ -18,6 +18,8 @@
 #include "D3D11Material.h"
 #include "D3D11RenderBuffer.h"
 #include "D3D11Texture.h"
+#include "D3D11RenderTarget.h"
+#include "D3D11DepthStencil.h"
 
 //#ifdef _DEBUG
 #include "imgui.h"
@@ -584,7 +586,7 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 	if (m_bUseMSAA) srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 	hr = m_d3dDevice->CreateShaderResourceView(
 		m_diffuseRT.Get(),
-		NULL,
+		&srvDesc,
 		m_diffuseSRV.ReleaseAndGetAddressOf()
 	);
 
@@ -996,6 +998,26 @@ void D3D11RendererManager::setViewport(Viewport viewport)
 	m_d3dContext->RSSetViewports(1, viewport.Get11());
 }
 
+void D3D11RendererManager::setRenderTarget(const RenderTargetID& rtID, const DepthStencilID& dsID)
+{
+	setRenderTargets(1, &rtID, dsID);
+}
+
+void D3D11RendererManager::setRenderTargets(std::uint32_t num, const RenderTargetID* rtIDs, const DepthStencilID& dsID)
+{
+	float ClearColor[4] = { 0.2f, 0.22f, 0.22f, 1.0f };
+	std::vector<ID3D11RenderTargetView*> rts(num);
+	for (auto i = 0u; i < num; ++i)
+	{
+		rts[i] = static_cast<D3D11RenderTarget*>(getRenderTarget(rtIDs[i]))->m_rtv.Get();
+		m_d3dContext->ClearRenderTargetView(rts[i], ClearColor);
+	}
+	auto* ds = static_cast<D3D11DepthStencil*>(getDepthStencil(dsID));
+	m_d3dContext->ClearDepthStencilView(ds->m_dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	m_d3dContext->OMSetRenderTargets(num, rts.data(), ds->m_dsv.Get());
+}
+
 void D3D11RendererManager::d3dRender(const RenderBufferID& renderBufferID)
 {
 	auto* context = m_d3dContext.Get();
@@ -1029,6 +1051,11 @@ void D3D11RendererManager::d3dMap(ID3D11Resource* pResource, D3D11_MAP mapType, 
 void D3D11RendererManager::d3dUnmap(ID3D11Resource* pResource)
 {
 	m_d3dContext->Unmap(pResource, 0);
+}
+
+void D3D11RendererManager::d3dCopyResource(ID3D11Resource* pDst, ID3D11Resource* pSrc)
+{
+	m_d3dContext->CopyResource(pDst, pSrc);
 }
 
 
@@ -1118,6 +1145,54 @@ TextureID D3D11RendererManager::createTextureFromFile(std::string filePath)
 
 	// êVãKê∂ê¨
 	m_texturePool[id] = std::make_unique<D3D11Texture>(m_d3dDevice.Get(), m_d3dContext.Get(), id, filePath);
+
+	return id;
+}
+
+RenderTargetID D3D11RendererManager::createRenderTarget(std::string name)
+{
+	// IDÇÃéÊìæ
+	RenderTargetID id = hash::crc32string(name.c_str());
+
+	// ä˘Ç…ê∂ê¨çœÇ›
+	const auto& itr = m_renderTargetPool.find(id);
+	if (m_renderTargetPool.end() != itr) return id;
+
+	D3D11RenderTargetDesc desc;
+	desc.id = id;
+	desc.name = name;
+	desc.format = m_backBufferFormat;
+	desc.width = m_pEngine->getWindowWidth();
+	desc.height = m_pEngine->getWindowHeight();
+	desc.isMSAA = m_bUseMSAA;
+	desc.sampleDesc = m_dxgiMSAA;
+
+	// êVãKê∂ê¨
+	m_renderTargetPool[id] = std::make_unique<D3D11RenderTarget>(m_d3dDevice.Get(), desc);
+
+	return id;
+}
+
+DepthStencilID D3D11RendererManager::createDepthStencil(std::string name)
+{
+	// IDÇÃéÊìæ
+	DepthStencilID id = hash::crc32string(name.c_str());
+
+	// ä˘Ç…ê∂ê¨çœÇ›
+	const auto& itr = m_depthStencilPool.find(id);
+	if (m_depthStencilPool.end() != itr) return id;
+
+	D3D11DepthStencilDesc desc;
+	desc.id = id;
+	desc.name = name;
+	desc.format = m_depthStencilFormat;
+	desc.width = m_pEngine->getWindowWidth();
+	desc.height = m_pEngine->getWindowHeight();
+	desc.isMSAA = m_bUseMSAA;
+	desc.sampleDesc = m_dxgiMSAA;
+
+	// êVãKê∂ê¨
+	m_depthStencilPool[id] = std::make_unique<D3D11DepthStencil>(m_d3dDevice.Get(), desc);
 
 	return id;
 }

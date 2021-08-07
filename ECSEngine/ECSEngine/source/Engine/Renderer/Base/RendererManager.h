@@ -14,6 +14,8 @@
 #include "RenderBuffer.h"
 #include "BatchGroup.h"
 #include "SubResource.h"
+#include "RenderTarget.h"
+#include "DepthStencil.h"
 
 #include <Engine/Utility/Mathf.h>
 
@@ -51,6 +53,9 @@ public:
 
 	virtual void setViewport(Viewport viewport) = 0;
 
+	virtual void setRenderTarget(const RenderTargetID& rtID, const DepthStencilID& dsID) = 0;
+	virtual void setRenderTargets(std::uint32_t num, const RenderTargetID* rtIDs, const DepthStencilID& dsID) = 0;
+
 public:
 	/// @brief ビューポート取得
 	virtual Viewport getViewport() = 0;
@@ -61,6 +66,8 @@ public:
 	virtual MeshID createMesh(std::string name) = 0;
 	virtual RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) = 0;
 	virtual TextureID createTextureFromFile(std::string filePath) = 0;
+	virtual RenderTargetID createRenderTarget(std::string name) = 0;
+	virtual DepthStencilID createDepthStencil(std::string name) = 0;
 	virtual BatchGroupID creatBatchGroup(MaterialID materialID, MeshID meshID) = 0;
 
 	Shader*	getShader(ShaderID id);
@@ -68,6 +75,8 @@ public:
 	Mesh* getMesh(MeshID id);
 	RenderBuffer* getRenderBuffer(RenderBufferID id);
 	Texture* getTexture(TextureID id);
+	RenderTarget* getRenderTarget(RenderTargetID id);
+	DepthStencil* getDepthStencil(DepthStencilID id);
 	BatchGroup* getBatchGroup(BatchGroupID id);
 
 	virtual SubResource mapTexture(TextureID texID) = 0;
@@ -85,6 +94,8 @@ public:
 	std::unordered_map<MeshID,			std::unique_ptr<Mesh>>			m_meshPool;
 	std::unordered_map<RenderBufferID,	std::unique_ptr<RenderBuffer>>	m_renderBufferPool;
 	std::unordered_map<TextureID,		std::unique_ptr<Texture>>		m_texturePool;
+	std::unordered_map<RenderTargetID,	std::unique_ptr<RenderTarget>>	m_renderTargetPool;
+	std::unordered_map<DepthStencilID,	std::unique_ptr<DepthStencil>>	m_depthStencilPool;
 	std::unordered_map<BatchGroupID,	std::unique_ptr<BatchGroup>>	m_batchGroupPool;
 };
 

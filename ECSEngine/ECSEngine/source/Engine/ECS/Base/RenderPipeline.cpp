@@ -11,6 +11,7 @@
 
 #include <Engine/Engine.h>
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
+#include <Engine/Renderer/D3D11/D3D11RenderTarget.h>
 
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/System/PhysicsSystem.h>
@@ -61,6 +62,9 @@ void RenderPipeline::onUpdate()
 	// 描画
 	renderingPass();
 
+	// バックバッファに反映
+	auto* rt = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(mainCamera->renderTargetID));
+	renderer->d3dCopyResource(renderer->m_diffuseRT.Get(), rt->m_tex.Get());
 }
 
 void RenderPipeline::beginPass()
@@ -73,7 +77,6 @@ void RenderPipeline::systemPass(Camera& camera)
 	// レンダラーマネージャー
 	auto* engine = m_pWorld->getWorldManager()->getEngine();
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
-
 
 	// ディレクショナルライト
 	DirectionalLightData dirLit;
@@ -89,6 +92,21 @@ void RenderPipeline::systemPass(Camera& camera)
 	sysBuffer._viewPos = Vector4(camera.world.Translation());
 	sysBuffer._directionalLit = dirLit;
 	renderer->setD3DSystemBuffer(sysBuffer);
+
+	// ビューポート指定
+	float scale = 1.0f;
+	if (camera.viewportScale > 0.0f)
+		scale = camera.viewportScale;
+	Viewport viewport(
+		camera.viewportOffset.x,
+		camera.viewportOffset.y,
+		camera.width * scale,
+		camera.height * scale
+		);
+	renderer->setViewport(viewport);
+
+	// レンダーターゲット指定
+	renderer->setRenderTarget(camera.renderTargetID, camera.depthStencilID);
 }
 
 void RenderPipeline::cullingPass(Camera& camera)
@@ -145,9 +163,15 @@ void RenderPipeline::renderingPass()
 		});
 }
 
-void RenderPipeline::endPass()
+void RenderPipeline::endPass(Camera& camera)
 {
+	// レンダラーマネージャー
+	auto* engine = m_pWorld->getWorldManager()->getEngine();
+	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
 
+	// バックバッファに反映
+	auto* rt = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(camera.renderTargetID));
+	renderer->d3dCopyResource(renderer->m_backBufferRT.Get(), rt->m_tex.Get());
 }
 
 inline void RenderPipeline::updateCamera(Camera& camera, Transform& transform, float width, float height)
@@ -179,4 +203,5 @@ inline void RenderPipeline::updateCamera(Camera& camera, Transform& transform, f
 		camera.projection = Matrix::CreatePerspectiveFieldOfView(
 			XMConvertToRadians(camera.fovY), camera.aspect, camera.nearZ, camera.farZ);
 	}
+
 }

@@ -11,8 +11,9 @@
 #include "GameObjectManager.h"
 #include "SystemBase.h"
 #include "RenderPipeline.h"
-#include <algorithm>
 
+#include <Engine/ECS/System/SystemTable.h>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -138,17 +139,32 @@ void World::readBinaryStream(BinaryStream& input)
 void World::serializeWorld(std::string path)
 {
 	// チャンクの書き出し
-	BinaryStream bs;
-	this->writeBinaryStream(bs);
+	{
+		BinaryStream bs;
+		this->writeBinaryStream(bs);
 
-	std::string chunkPath(path + "chunk.bin");
-	std::ofstream ofs(chunkPath, std::ios::binary);
-	ofs.write(bs.getBuffer(), bs.getSize());
-	ofs.close();
+		std::string chunkPath(path + "chunk.bin");
+		std::ofstream ofs(chunkPath, std::ios::binary);
+		ofs.write(bs.getBuffer(), bs.getSize());
+		ofs.close();
+	}
+
+	// システムの書き出し
+	{
+		std::vector<std::size_t> systemData;
+		for (auto& system : m_SystemList) {
+			systemData.push_back(system->getHash());
+		}
+
+		std::string systemPath(path + "system.bin");
+		std::ofstream ofs(systemPath, std::ios::binary);
+		ofs.write(reinterpret_cast<const char*>(systemData.data()),
+			systemData.size() * sizeof(std::size_t));
+		ofs.close();
+	}
 
 	// ゲームオブジェクトの書き出し
 	m_pGameObjectManager->Serialize(path);
-
 }
 
 /// @brief ワールドのシリアライズ
@@ -156,31 +172,64 @@ void World::serializeWorld(std::string path)
 bool World::deserializeWorld(std::string path)
 {
 	// チャンクファイルの読み込み
-	std::string chunkPath(path + "chunk.bin");
-	std::ifstream ifs(chunkPath, std::ios::binary);
-	if (!ifs.is_open()) return false;
-
-	ifs.seekg(0, std::ios_base::end);
-	const int fileSize = static_cast<const int>(ifs.tellg());
-	ifs.seekg(0, std::ios_base::beg);
-	const auto fileBuffer = std::make_unique<char[]>(fileSize);
-	ifs.read(fileBuffer.get(), fileSize);
 	BinaryStream bs;
-	bs.write(fileBuffer.get(), fileSize);
-	ifs.close();
-
-	// 両方読み込めた場合のみ
-	if (m_pGameObjectManager->Deserialize(path))
 	{
-		this->readBinaryStream(bs);
+		std::string chunkPath(path + "chunk.bin");
+		std::ifstream ifs(chunkPath, std::ios::binary);
+		if (!ifs.is_open()) return false;
+
+		ifs.seekg(0, std::ios_base::end);
+		const int fileSize = static_cast<const int>(ifs.tellg());
+		ifs.seekg(0, std::ios_base::beg);
+		const auto fileBuffer = std::make_unique<char[]>(fileSize);
+		ifs.read(fileBuffer.get(), fileSize);
+		bs.write(fileBuffer.get(), fileSize);
+		ifs.close();
 	}
 
-	// システムの初期化
+	// システムデータの読み込み
+	std::vector<std::size_t> systemData;
+	{
+		std::string systemPath(path + "system.bin");
+		std::ifstream ifs(systemPath, std::ios::binary);
+		if (!ifs.is_open()) return false;
+
+		ifs.seekg(0, std::ios_base::end);
+		const int fileSize = static_cast<const int>(ifs.tellg());
+		ifs.seekg(0, std::ios_base::beg);
+		const auto fileBuffer = std::make_unique<char[]>(fileSize);
+		ifs.read(fileBuffer.get(), fileSize);
+
+		systemData.resize(fileSize / sizeof(std::size_t));
+		std::memcpy(systemData.data(), fileBuffer.get(), fileSize);
+	}
+
+	// ゲームオブジェクトの読み込み
+	{
+		auto is = m_pGameObjectManager->Deserialize(path);
+		if (!is) return false;
+	}
+
+	// チャンクの生成
+	this->readBinaryStream(bs);
+
+	// システムの終了処理
 	for (auto&& system : m_SystemList)
 	{
 		system->onDestroy();
-		system->onCreate();
 	}
+	m_SystemList.clear();
+
+	// システムの生成
+	for (auto& hash : systemData)
+	{
+		auto system = SystemTable::get().makeSystem(hash, this);
+		if (!system) continue;
+
+		system->onCreate();
+		m_SystemList.push_back(std::move(system));
+	}
+	sortSystem();
 
 	return true;
 }

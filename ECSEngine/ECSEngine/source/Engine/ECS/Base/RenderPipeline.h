@@ -39,8 +39,7 @@ namespace ecs {
 		void systemPass(Camera& camera);
 		void cullingPass(Camera& camera);
 		void renderingPass();
-		void endPass();
-
+		void endPass(Camera& camera);
 
 		static inline void updateCamera(Camera& camera, Transform& transform, float width, float height);
 

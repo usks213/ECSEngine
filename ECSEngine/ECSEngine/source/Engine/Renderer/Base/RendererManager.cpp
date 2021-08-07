@@ -50,6 +50,22 @@ Texture* RendererManager::getTexture(TextureID id)
 	return itr->second.get();
 }
 
+RenderTarget* RendererManager::getRenderTarget(RenderTargetID id)
+{
+	const auto& itr = m_renderTargetPool.find(id);
+	if (m_renderTargetPool.end() == itr) return nullptr;
+
+	return itr->second.get();
+}
+
+DepthStencil* RendererManager::getDepthStencil(DepthStencilID id)
+{
+	const auto& itr = m_depthStencilPool.find(id);
+	if (m_depthStencilPool.end() == itr) return nullptr;
+
+	return itr->second.get();
+}
+
 BatchGroup* RendererManager::getBatchGroup(BatchGroupID id)
 {
 	const auto& itr = m_batchGroupPool.find(id);

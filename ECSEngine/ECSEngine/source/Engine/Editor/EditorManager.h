@@ -52,8 +52,6 @@ private:
 	Engine* m_pEngine;
 	bool m_isRunTime;
 
-	Viewport m_sceneViewport;
-
 	struct ObjectInfo
 	{
 		TypeID typeID = std::numeric_limits<TypeID>::max();

@@ -184,7 +184,7 @@ public:
 void PhysicsTestWorld::Start()
 {
 	// ƒVƒXƒeƒ€‚Ì’Ç‰Á
-	//addSystem<SphereSystem>();
+	addSystem<SphereSystem>();
 	addSystem<TransformSystem>();
 	addSystem<PhysicsSystem>();
 
@@ -309,6 +309,8 @@ void PhysicsTestWorld::Start()
 	cameraData.fovY = 60;
 	cameraData.nearZ = 1.0f;
 	cameraData.farZ = 1000.0f;
+	cameraData.renderTargetID = renderer->createRenderTarget("Camera1");
+	cameraData.depthStencilID = renderer->createDepthStencil("Camera1");
 	pos.x = 0;
 	pos.z = -30;
 	pos.y = 10;

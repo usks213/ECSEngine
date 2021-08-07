@@ -34,6 +34,8 @@ using namespace ecs;
 
 void EditorManager::initialize()
 {
+	auto* renderer = m_pEngine->getRendererManager();
+
 	Transform transform(0);
 	transform.translation = Vector3(0 ,10, -10);
 	transform.scale = Vector3(5, 5, 5);
@@ -43,15 +45,17 @@ void EditorManager::initialize()
 	cameraData.fovY = 60;
 	cameraData.nearZ = 1.0f;
 	cameraData.farZ = 1000.0f;
+	cameraData.width = m_pEngine->getWindowWidth();
+	cameraData.height = m_pEngine->getWindowHeight();
+	cameraData.viewportOffset.x = 7;
+	cameraData.viewportOffset.y = 26 * 1.5f;
+	cameraData.viewportScale = 0.65f;
+	cameraData.renderTargetID = renderer->createRenderTarget("SceneViewRT");
+	cameraData.depthStencilID = renderer->createDepthStencil("SceneViewDS");
 
 	m_editorCamera.transform = transform;
 	m_editorCamera.camera = cameraData;
 
-	m_sceneViewport = m_pEngine->getRendererManager()->getViewport();
-	m_sceneViewport.x = 7;
-	m_sceneViewport.y = 26 * 1.5f;
-	m_sceneViewport.width *= 0.65f;
-	m_sceneViewport.height *= 0.65f;
 }
 
 void EditorManager::finalize()
@@ -63,13 +67,11 @@ void EditorManager::update()
 {
 	// レンダラーマネージャー
 	auto* renderer = static_cast<D3D11RendererManager*>(m_pEngine->getRendererManager());
-	// レンダーターゲット変更
-	renderer->m_d3dContext->OMSetRenderTargets(1,
-		renderer->m_backBufferRTV.GetAddressOf(), renderer->m_depthStencilView.Get());
-	renderer->m_d3dContext->ClearDepthStencilView(renderer->m_depthStencilView.Get(), 
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	// ビューポート変更
-	renderer->setViewport(m_sceneViewport);
+	Camera& camera = m_editorCamera.camera;
+	ImVec2 winSize(
+		camera.width * camera.viewportScale + camera.viewportOffset.x * 2,
+		camera.height * camera.viewportScale + camera.viewportOffset.y  + camera.viewportOffset.x
+	);
 
 	// ランタイム
 	if (m_isRunTime)
@@ -77,11 +79,10 @@ void EditorManager::update()
 		// Game
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		ImGui::SetNextWindowBgAlpha(1.0f);
-		ImGui::SetNextWindowSize(ImVec2(m_sceneViewport.width + m_sceneViewport.x * 2, 
-			m_sceneViewport.height + m_sceneViewport.y + + m_sceneViewport.x));
+		ImGui::SetNextWindowSize(winSize);
 		ImGui::Begin("Game", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 		ImGui::Image(renderer->m_diffuseSRV.Get(), 
-			ImVec2(m_sceneViewport.width, m_sceneViewport.height));
+			ImVec2(camera.width * camera.viewportScale, camera.height * camera.viewportScale));
 		ImGui::End();
 	}
 	// デバッグ
@@ -89,8 +90,7 @@ void EditorManager::update()
 	{
 		// シーンビュー
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::SetNextWindowSize(ImVec2(m_sceneViewport.width + m_sceneViewport.x * 2,
-			m_sceneViewport.height + m_sceneViewport.y + m_sceneViewport.x));
+		ImGui::SetNextWindowSize(winSize);
 		ImGui::SetNextWindowBgAlpha(0);
 		ImGui::Begin("Scene", 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoScrollbar);
@@ -195,6 +195,8 @@ void EditorManager::dispHierarchy()
 
 void EditorManager::dispAsset()
 {
+	auto* pWorld = m_pEngine->getWorldManager()->getCurrentWorld();
+
 	ImGui::Begin("Test");
 
 	std::string name;
@@ -208,8 +210,7 @@ void EditorManager::dispAsset()
 	}
 	if(ImGui::Button(name.c_str(), ImVec2(100, 30)))
 	{
-		auto* pWorld = m_pEngine->getWorldManager()->getCurrentWorld();
-		std::string path("data/");
+		std::string path("data/world/");
 
 		m_isRunTime ^= 1;
 		if (m_isRunTime)
@@ -220,6 +221,16 @@ void EditorManager::dispAsset()
 		{
 			pWorld->deserializeWorld(path);
 		}
+	}
+
+	ImGui::End();
+
+
+	ImGui::Begin("System");
+
+	for (auto&& system : pWorld->getSystemList())
+	{
+		ImGui::Text(system->getName().data());
 	}
 
 	ImGui::End();
@@ -312,6 +323,8 @@ void EditorManager::dispWorld()
 	{
 		physicsSytem->debugDraw();
 	}
+
+	pipeline->endPass(m_editorCamera.camera);
 }
 
 void EditorManager::updateTransform()
@@ -580,7 +593,9 @@ void EditorManager::EditTransform(World* pWorld ,Camera& camera, Transform& tran
 		}
 
 		// ビューポート
-		ImGuizmo::SetRect(m_sceneViewport.x, m_sceneViewport.y, m_sceneViewport.width, m_sceneViewport.height);
+		Camera& camera = m_editorCamera.camera;
+		ImGuizmo::SetRect(camera.viewportOffset.x, camera.viewportOffset.y, 
+			camera.width * camera.viewportScale, camera.height * camera.viewportScale);
 
 		// ギズモ
 		Matrix globalMatrix = transform.globalMatrix;
@@ -641,7 +656,7 @@ void EditorManager::EditTransform(World* pWorld ,Camera& camera, Transform& tran
 
 		// カメラの姿勢
 		ImGuizmo::ViewManipulate(&camera.view.m[0][0], camDistance, 
-			ImVec2(m_sceneViewport.width - 128, m_sceneViewport.y),
+			ImVec2(camera.width * camera.viewportScale - 128, camera.viewportOffset.y),
 			ImVec2(128, 128), 0x10101010);
 
 		// ビュー行列から姿勢を抽出

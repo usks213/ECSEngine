@@ -12,13 +12,18 @@
 
 
  /// @brief システムの型情報付加
-#define ECS_DECLARE_SYSTEM(T)						\
-DECLARE_TYPE_INFO( T );								\
-[[nodiscard]] std::size_t getTypeID() override {	\
-	return getTypeHash();							\
-}													\
+#define ECS_DECLARE_SYSTEM(T)								\
+DECLARE_TYPE_INFO( T );										\
+[[nodiscard]] std::size_t getHash() override {				\
+	return getTypeHash();									\
+}															\
+[[nodiscard]] std::string_view getName() override {			\
+	return getTypeName();									\
+}															\
+static std::unique_ptr<SystemBase> Create(World* pWorld) {	\
+	return std::move(std::make_unique<T>(pWorld));			\
+}															\
 void _dumyFunction2() = delete
-
 
 
 namespace ecs {
@@ -57,7 +62,11 @@ namespace ecs {
 
 		/// @brief システムの型IDを取得
 		/// @return ID
-		[[nodiscard]] virtual std::size_t getTypeID() = 0;
+		[[nodiscard]] virtual std::size_t getHash() = 0;
+
+		/// @brief システムの名前を取得
+		/// @return 名前
+		[[nodiscard]] virtual std::string_view getName() = 0;
 
 	protected:
 
@@ -122,6 +131,7 @@ namespace ecs {
 		World* m_pWorld = nullptr;
 		/// @brief
 		int m_nExecutionOrder = 0;
+
 	};
 
 	/// @brief 指定したコンポーネントデータをフェッチして処理する
