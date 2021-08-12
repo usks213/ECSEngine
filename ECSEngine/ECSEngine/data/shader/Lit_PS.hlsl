@@ -66,7 +66,7 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 		//Color.rgb = PBR(L, N, V, _directionalLit.diffuse.rgb, Color.rgb, metallic, roughness,_SkyTexture, _SkySampler);
 		//Color.rgb = _SkyTexture.Sample(_SkySampler, SkyMapEquirect(reflect(V,N))).rgb;
 		Color.rgb = shade(Color.rgb, _metallic, _roughness, N, V, L, 
-		_directionalLit.diffuse.rgb, _directionalLit.ambient.rgb, _SkyTexture, _SkySampler);
+		_directionalLit.color.rgb, _directionalLit.ambient.rgb, _SkyTexture, _SkySampler);
 	}
 	
 	return Color;

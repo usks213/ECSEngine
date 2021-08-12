@@ -117,13 +117,22 @@ public:
 	ComPtr<ID3D11RenderTargetView>		m_backBufferRTV;		// バックバッファビュー
 	DXGI_FORMAT							m_backBufferFormat;
 
-	ComPtr<ID3D11Texture2D>				m_diffuseRT;			// 拡散反射光RT
-	ComPtr<ID3D11RenderTargetView>		m_diffuseRTV;			// 拡散反射光RTV
-	ComPtr<ID3D11ShaderResourceView>	m_diffuseSRV;			// 拡散反射光SRV
-
 	ComPtr<ID3D11Texture2D>				m_depthStencilTexture;	// Zバッファ
 	ComPtr<ID3D11DepthStencilView>		m_depthStencilView;		// Zバッファビュー
 	DXGI_FORMAT							m_depthStencilFormat;
+
+	struct GBuffer
+	{
+		ComPtr<ID3D11Texture2D>				m_diffuseRT;			// 拡散反射光RT
+		ComPtr<ID3D11RenderTargetView>		m_diffuseRTV;			// 拡散反射光RTV
+		ComPtr<ID3D11ShaderResourceView>	m_diffuseSRV;			// 拡散反射光SRV
+
+		ComPtr<ID3D11Texture2D>				m_normalRT;				// ワールド法線RT
+		ComPtr<ID3D11RenderTargetView>		m_normalRTV;			// ワールド法線RTV
+		ComPtr<ID3D11ShaderResourceView>	m_normalSRV;			// ワールド法線SRV
+	};
+	GBuffer								m_gbuffer;
+	DXGI_FORMAT							m_gbufferFormat;
 
 	std::uint32_t						m_backBufferCount;
 	int									m_nOutputWidth;

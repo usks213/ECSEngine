@@ -38,12 +38,274 @@ struct VectorUint4
 	};
 };
 
-struct AABB {
-	Vector3 center;
-	Vector3 scale;
-	//Vector3 Min() { return center; };
-	//Vector3 Max() { return center; };
+class AABB {
+public:
+	Vector3 min;
+	Vector3 max;
+
+public:
+	Vector3 center() const { return (max + min) * 0.5f; };
+	Vector3 size() const	 { return max - min; };
+
+	static void transformAABB(const Matrix& mWorld, const AABB& sourceAABB, AABB& outAABB) {
+		Vector3 pos[8] = {
+			// 上面
+			{ sourceAABB.max.x, sourceAABB.max.y, sourceAABB.max.z },
+			{ sourceAABB.min.x, sourceAABB.max.y, sourceAABB.max.z },
+			{ sourceAABB.max.x, sourceAABB.max.y, sourceAABB.min.z },
+			{ sourceAABB.min.x, sourceAABB.max.y, sourceAABB.min.z },
+			// 下面
+			{ sourceAABB.max.x, sourceAABB.min.y, sourceAABB.max.z },
+			{ sourceAABB.min.x, sourceAABB.min.y, sourceAABB.max.z },
+			{ sourceAABB.max.x, sourceAABB.min.y, sourceAABB.min.z },
+			{ sourceAABB.min.x, sourceAABB.min.y, sourceAABB.min.z },
+		};
+
+		outAABB.max = Vector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+		outAABB.min = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+
+		for (auto& p : pos) {
+			Vector3 wPos = p.Transform(p, mWorld);
+			outAABB.max = outAABB.max.Max(outAABB.max, wPos);
+			outAABB.min = outAABB.min.Min(outAABB.min, wPos);
+		}
+	}
 };
+
+class Frustum
+{
+public:
+	/// @brief コンストラクタ
+	/// @param worldMatrix ワールドマトリックス
+	/// @param fov FOV
+	/// @param aspect アスペクト比
+	/// @param nearZ ニアクリップ
+	/// @param farZ ファークリップ
+	explicit Frustum(const Matrix& worldMatrix, float fov, float aspect, float nearZ, float farZ)
+	{
+		CreateViewFrustum(fov, aspect, nearZ, farZ);
+		UpdateViewFrustum(worldMatrix);
+	}
+
+	/// @brief コンストラクタ
+	/// @param screenDepth 最大の深さ
+	/// @param viewMatrix ビューマトリックス
+	/// @param projectionMatrix プロジェクションマトリックス
+	explicit Frustum(float screenDepth, Matrix& viewMatrix, Matrix& projectionMatrix)
+	{
+		Matrix projMatrix = projectionMatrix;
+		float zMinimum = -projMatrix._43 / projMatrix._33;
+		float r = screenDepth / (screenDepth - zMinimum);
+		projMatrix._33 = r;
+		projMatrix._43 = -r * zMinimum;
+
+		Matrix matrix = XMMatrixMultiply(viewMatrix, projMatrix);
+		float a, b, c, d;
+
+		// near
+		a = matrix._14 + matrix._13;
+		b = matrix._24 + matrix._23;
+		c = matrix._34 + matrix._33;
+		d = matrix._44 + matrix._43;
+		m_planes[0] = XMVectorSet(a, b, c, d);
+		m_planes[0] = XMPlaneNormalize(m_planes[0]);
+
+		// far
+		a = matrix._14 - matrix._13;
+		b = matrix._24 - matrix._23;
+		c = matrix._34 - matrix._33;
+		d = matrix._44 - matrix._43;
+		m_planes[1] = XMVectorSet(a, b, c, d);
+		m_planes[1] = XMPlaneNormalize(m_planes[1]);
+
+		// left
+		a = matrix._14 + matrix._11;
+		b = matrix._24 + matrix._21;
+		c = matrix._34 + matrix._31;
+		d = matrix._44 + matrix._41;
+		m_planes[2] = XMVectorSet(a, b, c, d);
+		m_planes[2] = XMPlaneNormalize(m_planes[2]);
+
+		// right
+		a = matrix._14 - matrix._11;
+		b = matrix._24 - matrix._21;
+		c = matrix._34 - matrix._31;
+		d = matrix._44 - matrix._41;
+		m_planes[3] = XMVectorSet(a, b, c, d);
+		m_planes[3] = XMPlaneNormalize(m_planes[3]);
+
+		// top
+		a = matrix._14 - matrix._12;
+		b = matrix._24 - matrix._22;
+		c = matrix._34 - matrix._32;
+		d = matrix._44 - matrix._42;
+		m_planes[4] = XMVectorSet(a, b, c, d);
+		m_planes[4] = XMPlaneNormalize(m_planes[4]);
+
+		// bottom
+		a = matrix._14 + matrix._12;
+		b = matrix._24 + matrix._22;
+		c = matrix._34 + matrix._32;
+		d = matrix._44 + matrix._42;
+		m_planes[5] = XMVectorSet(a, b, c, d);
+		m_planes[5] = XMPlaneNormalize(m_planes[5]);
+	}
+
+	~Frustum() = default;
+
+public:
+	bool CheckPoint(float x, float y, float z)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			float ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet(x, y, z, 1.0f)));
+			if (ret < 0.0f)
+				return false;
+		}
+
+		return true;
+	}
+
+	bool CheckCube(const Vector3& center, float size)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			float ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x - size), (center.y - size), (center.z - size), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x + size), (center.y - size), (center.z - size), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x - size), (center.y + size), (center.z - size), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x + size), (center.y + size), (center.z - size), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x - size), (center.y - size), (center.z + size), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x + size), (center.y - size), (center.z + size), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x - size), (center.y + size), (center.z + size), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x + size), (center.y + size), (center.z + size), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckSphere(const Vector3& center, float radius)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			float ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet(center.x, center.y, center.z, 1.0f)));
+			if (ret < -radius)
+				return false;
+		}
+
+		return true;
+	}
+
+	bool CheckRectangle(const Vector3& center,  const Vector3& size)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			float ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x - size.x), (center.y - size.y), (center.z - size.z), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x + size.x), (center.y - size.y), (center.z - size.z), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x - size.x), (center.y + size.y), (center.z - size.z), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x - size.x), (center.y - size.y), (center.z + size.z), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x + size.x), (center.y + size.y), (center.z - size.z), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x + size.x), (center.y - size.y), (center.z + size.z), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x - size.x), (center.y + size.y), (center.z + size.z), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			ret = XMVectorGetX(XMPlaneDotCoord(m_planes[i], XMVectorSet((center.x + size.x), (center.y + size.y), (center.z + size.z), 1.0f)));
+			if (ret >= 0.0f)
+				continue;
+
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckAABB(const AABB& aabb)
+	{
+		return CheckRectangle(aabb.center(), aabb.size());
+	}
+
+private:
+	// プロジェクション変換パラメータから視錐台生成
+	void CreateViewFrustum(float fov, float aspect, float nearZ, float farZ)
+	{
+		// 0:前 1:後ろ 2:左 3:右 4:上 5:下
+		float fTan =
+			tanf(XMConvertToRadians(fov) * 0.5f);
+		float fTan2 = fTan * aspect;
+		m_planes[0] = XMFLOAT4(0.0f, 0.0f, 1.0f, -nearZ);
+		m_planes[1] = XMFLOAT4(0.0f, 0.0f, -1.0f, farZ);
+		m_planes[2] = XMFLOAT4(1.0f, 0.0f, fTan2, 0.0f);
+		m_planes[3] = XMFLOAT4(-1.0f, 0.0f, fTan2, 0.0f);
+		m_planes[4] = XMFLOAT4(0.0f, -1.0f, fTan, 0.0f);
+		m_planes[5] = XMFLOAT4(0.0f, 1.0f, fTan, 0.0f);
+		// 0～3を正規化
+		for (int i = 0; i < 6; ++i) {
+			m_planes[i].Normalize();
+		}
+	}
+
+	// カメラのワールドマトリックスから視錐台を移動
+	void UpdateViewFrustum(const Matrix& worldMatrix)
+	{
+		// CalcWorldMatrixでm_mtxWorldが更新済を前提
+		XMMATRIX mW = XMLoadFloat4x4(&worldMatrix);
+		mW = XMMatrixInverse(nullptr, mW);//逆行列
+		mW = XMMatrixTranspose(mW);//転置行列
+		// ※逆行列の転置行列を求めるのは
+		//   XMPlaneTransformの仕様!!
+		for (int i = 0; i < 6; ++i) {
+			m_planes[i] = XMPlaneTransform(m_planes[i], mW);
+		}
+	}
+
+	private:
+		// 0:前 1:後ろ 2:左 3:右 4:上 5:下
+		Plane m_planes[6];
+};
+
 
 namespace Mathf
 {

@@ -9,7 +9,6 @@
 #include "RenderPipeline.h"
 #include <Engine/ECS/Base/EntityManager.h>
 
-#include <Engine/Engine.h>
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
 #include <Engine/Renderer/D3D11/D3D11RenderTarget.h>
 
@@ -53,26 +52,29 @@ void RenderPipeline::onUpdate()
 	// カメラなし
 	if (mainCamera == nullptr) return;
 
-	// システム更新
-	systemPass(*mainCamera);
+	// ディレクショナルライト
+	
 
 	// カリング
 	cullingPass(*mainCamera);
 
 	// 描画
-	renderingPass();
+	beginPass(*mainCamera);
+	prePass();
+	gbufferPass();
+	shadowPass();
+	opaquePass();
+	skyPass();
+	transparentPass();
+	postPass();
+	//endPass(*mainCamera);
 
 	// バックバッファに反映
 	auto* rt = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(mainCamera->renderTargetID));
-	renderer->d3dCopyResource(renderer->m_diffuseRT.Get(), rt->m_tex.Get());
+	renderer->d3dCopyResource(renderer->m_gbuffer.m_diffuseRT.Get(), rt->m_tex.Get());
 }
 
-void RenderPipeline::beginPass()
-{
-
-}
-
-void RenderPipeline::systemPass(Camera& camera)
+void RenderPipeline::beginPass(Camera& camera)
 {
 	// レンダラーマネージャー
 	auto* engine = m_pWorld->getWorldManager()->getEngine();
@@ -81,8 +83,7 @@ void RenderPipeline::systemPass(Camera& camera)
 	// ディレクショナルライト
 	DirectionalLightData dirLit;
 	dirLit.ambient = Vector4(0.3f, 0.3f, 0.3f, 0.3f);
-	dirLit.diffuse = Vector4(2.0f, 2.0f, 2.0f, 1.0f);
-	dirLit.specular = Vector4(0.1f, 0.1f, 0.1f, 0.2f);
+	dirLit.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	dirLit.direction = Vector4(1.f, -1.5f, -1.f, 0.0f);
 
 	// システムバッファの設定
@@ -102,7 +103,7 @@ void RenderPipeline::systemPass(Camera& camera)
 		camera.viewportOffset.y,
 		camera.width * scale,
 		camera.height * scale
-		);
+	);
 	renderer->setViewport(viewport);
 
 	// レンダーターゲット指定
@@ -111,56 +112,140 @@ void RenderPipeline::systemPass(Camera& camera)
 
 void RenderPipeline::cullingPass(Camera& camera)
 {
+	m_batchList.clear();
+	m_opequeList.clear();
+	m_transparentList.clear();
+	m_pointLights.clear();
+	m_spotLights.clear();
+
+	auto* engine = m_pWorld->getWorldManager()->getEngine();
+	auto* renderer = engine->getRendererManager();
+
+	// カメラフラスタム
+	Frustum cameraFrustum(camera.farZ, camera.view, camera.projection);
+
+
+	// バッチデータ
+	for (const auto& bitchID : renderer->m_batchGroupPool)
+	{
+		auto mesh = renderer->getMesh(bitchID.second->m_meshID);
+		for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
+		{
+			auto transform = chunk->getComponentArray<Transform>();
+			m_batchList[bitchID.first].resize(transform.Count());
+			for (auto i = 0u; i < transform.Count(); ++i)
+			{
+				AABB aabb;
+				AABB::transformAABB(transform[i].globalMatrix, mesh->m_aabb, aabb);
+				// カメラカリング
+				if (cameraFrustum.CheckAABB(aabb))
+				{
+					m_batchList[bitchID.first][i] = transform[i].globalMatrix;
+				}
+				// シャドウカリング
+
+			}
+		}
+	}
+
+	// オブジェクトデータ
+	foreach<RenderData, Transform>(
+		[&](RenderData& rd, Transform& transform)
+		{
+			const auto* mat = renderer->getMaterial(rd.materialID);
+			const auto* mesh = renderer->getMesh(rd.meshID);
+			const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, rd.meshID);
+
+			AABB aabb;
+			AABB::transformAABB(transform.globalMatrix, mesh->m_aabb, aabb);
+			// カメラカリング
+			//if (cameraFrustum.CheckAABB(aabb))
+			{
+				RenderingData data;
+				data.materialID = rd.materialID;
+				data.renderBufferID = rdID;
+				data.worldMatrix = transform.globalMatrix;
+				data.cameraLengthSqr = (camera.world.Translation() - 
+					transform.globalMatrix.Translation()).LengthSquared();
+				if (mat->m_isTransparent)
+				{
+					// 半透明
+					m_transparentList.push_back(data);
+				}
+				else
+				{
+					// 不透明
+					m_opequeList.push_back(data);
+				}
+			}
+			// シャドウカリング
+
+		});
+
 
 }
 
-void RenderPipeline::renderingPass()
+void RenderPipeline::prePass()
+{
+
+}
+
+void RenderPipeline::gbufferPass()
+{
+
+}
+
+void RenderPipeline::shadowPass()
+{
+
+}
+
+void RenderPipeline::opaquePass()
 {
 	// レンダラーマネージャー
 	auto* engine = m_pWorld->getWorldManager()->getEngine();
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
 
-
 	// バッチ描画
-	for (const auto& bitchID : renderer->m_batchGroupPool)
+	for (auto& bitch : m_batchList)
 	{
-		auto* pBitch = renderer->getBatchGroup(bitchID.first);
+		auto* pBitch = renderer->getBatchGroup(bitch.first);
 		const auto* mat = renderer->getMaterial(pBitch->m_materialID);
 		const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, pBitch->m_meshID);
 
 		renderer->setD3D11Material(pBitch->m_materialID);
 		renderer->setD3D11RenderBuffer(rdID);
 
-
-		for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
+		for (auto& matrix : bitch.second)
 		{
-			auto transform = chunk->getComponentArray<Transform>();
-			for (auto i = 0u; i < transform.Count(); ++i)
-			{
-				//Matrix scale = Matrix::CreateScale(transform[i].localScale * transform[i].parentScale);
-				renderer->setD3DTransformBuffer(transform[i].globalMatrix);
-				renderer->d3dRender(rdID);
-			}
+			renderer->setD3DTransformBuffer(matrix);
+			renderer->d3dRender(rdID);
 		}
 	}
 
+	// 不透明描画
+	for (auto& opeque : m_opequeList)
+	{
+		renderer->setD3D11Material(opeque.materialID);
+		renderer->setD3DTransformBuffer(opeque.worldMatrix);
+		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
+		renderer->d3dRender(opeque.renderBufferID);
+	}
+}
 
-	// オブジェクト描画
-	foreach<RenderData, Transform>(
-		[&renderer](RenderData& rd, Transform& transform)
-		{
-			const auto* mat = renderer->getMaterial(rd.materialID);
-			const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, rd.meshID);
+void RenderPipeline::skyPass()
+{
 
-			renderer->setD3D11Material(rd.materialID);
+}
 
-			//Matrix scale = Matrix::CreateScale(transform.localScale * transform.parentScale);
-			renderer->setD3DTransformBuffer(transform.globalMatrix);
+void RenderPipeline::transparentPass()
+{
 
-			renderer->setD3D11RenderBuffer(rdID);
+}
 
-			renderer->d3dRender(rdID);
-		});
+void RenderPipeline::postPass()
+{
+
 }
 
 void RenderPipeline::endPass(Camera& camera)
@@ -173,6 +258,56 @@ void RenderPipeline::endPass(Camera& camera)
 	auto* rt = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(camera.renderTargetID));
 	renderer->d3dCopyResource(renderer->m_backBufferRT.Get(), rt->m_tex.Get());
 }
+
+void renderingPass()
+{
+	//// レンダラーマネージャー
+	//auto* engine = m_pWorld->getWorldManager()->getEngine();
+	//auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+
+
+	//// バッチ描画
+	//for (const auto& bitchID : renderer->m_batchGroupPool)
+	//{
+	//	auto* pBitch = renderer->getBatchGroup(bitchID.first);
+	//	const auto* mat = renderer->getMaterial(pBitch->m_materialID);
+	//	const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, pBitch->m_meshID);
+
+	//	renderer->setD3D11Material(pBitch->m_materialID);
+	//	renderer->setD3D11RenderBuffer(rdID);
+
+
+	//	for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
+	//	{
+	//		auto transform = chunk->getComponentArray<Transform>();
+	//		for (auto i = 0u; i < transform.Count(); ++i)
+	//		{
+	//			//Matrix scale = Matrix::CreateScale(transform[i].localScale * transform[i].parentScale);
+	//			renderer->setD3DTransformBuffer(transform[i].globalMatrix);
+	//			renderer->d3dRender(rdID);
+	//		}
+	//	}
+	//}
+
+
+	//// オブジェクト描画
+	//foreach<RenderData, Transform>(
+	//	[&renderer](RenderData& rd, Transform& transform)
+	//	{
+	//		const auto* mat = renderer->getMaterial(rd.materialID);
+	//		const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, rd.meshID);
+
+	//		renderer->setD3D11Material(rd.materialID);
+
+	//		//Matrix scale = Matrix::CreateScale(transform.localScale * transform.parentScale);
+	//		renderer->setD3DTransformBuffer(transform.globalMatrix);
+
+	//		renderer->setD3D11RenderBuffer(rdID);
+
+	//		renderer->d3dRender(rdID);
+	//	});
+}
+
 
 inline void RenderPipeline::updateCamera(Camera& camera, Transform& transform, float width, float height)
 {

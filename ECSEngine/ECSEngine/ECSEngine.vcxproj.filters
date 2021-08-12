@@ -481,6 +481,9 @@
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11DepthStencil.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\LightComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">

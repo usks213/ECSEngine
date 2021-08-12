@@ -90,6 +90,7 @@ namespace {
 D3D11RendererManager::D3D11RendererManager() :
 	m_backBufferFormat(DXGI_FORMAT_R8G8B8A8_UNORM), 
 	m_depthStencilFormat(DXGI_FORMAT_D32_FLOAT),
+	m_gbufferFormat(DXGI_FORMAT_R8G8B8A8_UNORM),
 	m_backBufferCount(2),
 	m_nOutputWidth(1), 
 	m_nOutputHeight(1),
@@ -222,11 +223,11 @@ void D3D11RendererManager::clear()
 
 	float ClearColor[4] = { 0.2f, 0.22f, 0.22f, 1.0f };
 	m_d3dContext->ClearRenderTargetView(m_backBufferRTV.Get(), ClearColor);
-	m_d3dContext->ClearRenderTargetView(m_diffuseRTV.Get(), ClearColor);
+	m_d3dContext->ClearRenderTargetView(m_gbuffer.m_diffuseRTV.Get(), ClearColor);
 	m_d3dContext->ClearDepthStencilView(m_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	//m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
-	m_d3dContext->OMSetRenderTargets(1, m_diffuseRTV.GetAddressOf(), m_depthStencilView.Get());
+	m_d3dContext->OMSetRenderTargets(1, m_gbuffer.m_diffuseRTV.GetAddressOf(), m_depthStencilView.Get());
 
 	m_d3dContext->RSSetViewports(1, &m_vireport);
 	m_d3dAnnotation->EndEvent();
@@ -564,33 +565,6 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 		return hr;
 	}
 
-	
-	//--- 拡散反射光バッファ
-	// テクスチャ2D
-	D3D11_TEXTURE2D_DESC renderTexture;
-	m_backBufferRT->GetDesc(&renderTexture);
-	renderTexture.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-	hr = m_d3dDevice->CreateTexture2D(
-		&renderTexture,
-		nullptr,
-		m_diffuseRT.ReleaseAndGetAddressOf()
-	);
-	CHECK_FAILED(hr);
-	// レンダラーターゲットビュー
-	hr = m_d3dDevice->CreateRenderTargetView(
-		m_diffuseRT.Get(),
-		&rtvDesc,
-		m_diffuseRTV.ReleaseAndGetAddressOf());
-	// シェーダーリソース
-	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D, m_backBufferFormat);
-	if (m_bUseMSAA) srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
-	hr = m_d3dDevice->CreateShaderResourceView(
-		m_diffuseRT.Get(),
-		&srvDesc,
-		m_diffuseSRV.ReleaseAndGetAddressOf()
-	);
-
-
 	//--- 深度ステンシル ---
 	CD3D11_TEXTURE2D_DESC dsDesc(m_depthStencilFormat, backBufferWidth, backBufferHeight,
 		1, 1, D3D11_BIND_DEPTH_STENCIL);
@@ -606,6 +580,57 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 		&dsvDesc, m_depthStencilView.ReleaseAndGetAddressOf());
 	CHECK_FAILED(hr);
 
+	//----- GBUFFER -----
+	//--- 拡散反射光バッファ
+	// テクスチャ2D
+	D3D11_TEXTURE2D_DESC renderTexture;
+	m_backBufferRT->GetDesc(&renderTexture);
+	renderTexture.Format = m_gbufferFormat;
+	renderTexture.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+	hr = m_d3dDevice->CreateTexture2D(
+		&renderTexture,
+		nullptr,
+		m_gbuffer.m_diffuseRT.ReleaseAndGetAddressOf()
+	);
+	CHECK_FAILED(hr);
+	// レンダラーターゲットビュー
+	rtvDesc.Format = m_gbufferFormat;
+	hr = m_d3dDevice->CreateRenderTargetView(
+		m_gbuffer.m_diffuseRT.Get(),
+		&rtvDesc,
+		m_gbuffer.m_diffuseRTV.ReleaseAndGetAddressOf());
+	CHECK_FAILED(hr);
+	// シェーダーリソース
+	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D, m_gbufferFormat);
+	if (m_bUseMSAA) srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
+	hr = m_d3dDevice->CreateShaderResourceView(
+		m_gbuffer.m_diffuseRT.Get(),
+		&srvDesc,
+		m_gbuffer.m_diffuseSRV.ReleaseAndGetAddressOf()
+	);
+	CHECK_FAILED(hr);
+
+	//--- ワールド法線バッファ
+	// テクスチャ2D
+	hr = m_d3dDevice->CreateTexture2D(
+		&renderTexture,
+		nullptr,
+		m_gbuffer.m_normalRT.ReleaseAndGetAddressOf()
+	);
+	CHECK_FAILED(hr);
+	// レンダラーターゲットビュー
+	hr = m_d3dDevice->CreateRenderTargetView(
+		m_gbuffer.m_normalRT.Get(),
+		&rtvDesc,
+		m_gbuffer.m_normalRTV.ReleaseAndGetAddressOf());
+	CHECK_FAILED(hr);
+	// シェーダーリソース
+	hr = m_d3dDevice->CreateShaderResourceView(
+		m_gbuffer.m_normalRT.Get(),
+		&srvDesc,
+		m_gbuffer.m_normalSRV.ReleaseAndGetAddressOf()
+	);
+	CHECK_FAILED(hr);
 
 	// ビューポート
 	m_vireport = CD3D11_VIEWPORT(0.0f, 0.0f,

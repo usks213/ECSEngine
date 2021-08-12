@@ -73,6 +73,9 @@ void EditorManager::update()
 		camera.height * camera.viewportScale + camera.viewportOffset.y  + camera.viewportOffset.x
 	);
 
+	/*renderer->m_d3dContext->OMSetRenderTargets(1, 
+	renderer->m_backBufferRTV.GetAddressOf(), renderer->m_depthStencilView.Get());*/
+
 	// ランタイム
 	if (m_isRunTime)
 	{
@@ -81,7 +84,7 @@ void EditorManager::update()
 		ImGui::SetNextWindowBgAlpha(1.0f);
 		ImGui::SetNextWindowSize(winSize);
 		ImGui::Begin("Game", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
-		ImGui::Image(renderer->m_diffuseSRV.Get(), 
+		ImGui::Image(renderer->m_gbuffer.m_diffuseSRV.Get(), 
 			ImVec2(camera.width * camera.viewportScale, camera.height * camera.viewportScale));
 		ImGui::End();
 	}
@@ -308,14 +311,14 @@ void EditorManager::dispWorld()
 	// パイプライン取得
 	auto* pipeline = pWorld->getRenderPipeline();
 
-	// システム更新
-	pipeline->systemPass(m_editorCamera.camera);
-
 	// カリング
 	pipeline->cullingPass(m_editorCamera.camera);
 
+	// システム更新
+	pipeline->beginPass(m_editorCamera.camera);
+
 	// 描画
-	pipeline->renderingPass();
+	pipeline->opaquePass();
 
 	// BulletDebugDraw
 	auto* physicsSytem = pWorld->getSystem<PhysicsSystem>();

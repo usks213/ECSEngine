@@ -2,19 +2,14 @@
 
 struct DirectionalLightData
 {
-	float4 ambient; // ŠÂ‹«Œõ
-	float4 diffuse; // ŠgUŒõ
-	float4 specular; // ”½ËŒõ
-	
+	float4 color;		// F
+	float4 ambient;		// ŠÂ‹«Œõ
 	float4 direction;	// •ûŒü
 };
 
 struct PointLightData
 {
-	float4 ambient; // ŠÂ‹«Œõ
-	float4 diffuse; // ŠgUŒõ
-	float4 specular; // ”½ËŒõ
-	
+	float4 color;		// F
 	float3 position;	// ˆÊ’u
 	float range;		// ”ÍˆÍ
 	float4 attenuation; // Œ¸Š
@@ -22,10 +17,7 @@ struct PointLightData
 
 struct SpotLightData
 {
-	float4 ambient; // ŠÂ‹«Œõ
-	float4 diffuse; // ŠgUŒõ
-	float4 specular; // ”½ËŒõ
-	
+	float4 color;		// F
 	float3 position;	// ˆÊ’u
 	float range;		// ”ÍˆÍ
 	float4 attenuation; // Œ¸Š

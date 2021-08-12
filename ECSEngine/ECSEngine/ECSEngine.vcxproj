@@ -257,6 +257,7 @@
     <ClInclude Include="source\Engine\ECS\ComponentData\CameraComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\ColliderComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\ComponentTag.h" />
+    <ClInclude Include="source\Engine\ECS\ComponentData\LightComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\PhysicsComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\RenderingComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\RigidbodyComponentData.h" />
