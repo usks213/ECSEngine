@@ -14,6 +14,9 @@ cbuffer System : register(b5)
 {
 	float4x4 _mView;
 	float4x4 _mProj;
+	float4x4 _mProj2D;
+	float4x4 _mViewInv;
+	float4x4 _mProjInv;
 	float4 _viewPos;
 	DirectionalLightData _directionalLit;
 }
@@ -51,4 +54,20 @@ float2 SkyMapEquirect(float3 reflectionVector)
 	float phi = acos(-reflectionVector.y);
 	float theta = atan2(-1.0f * reflectionVector.x, reflectionVector.z) + PI;
 	return float2(theta / (PI * 2.0f), phi / PI);
+}
+
+// 深度からワールド座標を求める
+float3 DepthToWorldPosition(float depth, float2 texCoord, float4x4 viewMatrixInv, float4x4 projMatrixInv)
+{
+	float z = depth * 2.0 - 1.0;
+
+	float4 clipSpacePosition = float4(texCoord * 2.0 - 1.0, z, 1.0);
+	float4 viewSpacePosition = mul(projMatrixInv, clipSpacePosition);
+
+    // Perspective division
+	viewSpacePosition /= viewSpacePosition.w;
+
+	float4 worldSpacePosition = mul(viewMatrixInv, viewSpacePosition);
+
+	return worldSpacePosition.xyz;
 }

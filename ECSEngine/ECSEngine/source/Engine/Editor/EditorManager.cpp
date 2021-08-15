@@ -12,6 +12,7 @@
 
 #include <Engine/Engine.h>
 #include <Engine/Utility/Input.h>
+#include <Engine/Renderer/D3D11/D3D11RenderTarget.h>
 #include <Engine/ECS/Base/RenderPipeline.h>
 #include <Engine/ECS/System/TransformSystem.h>
 
@@ -73,8 +74,15 @@ void EditorManager::update()
 		camera.height * camera.viewportScale + camera.viewportOffset.y  + camera.viewportOffset.x
 	);
 
-	/*renderer->m_d3dContext->OMSetRenderTargets(1, 
-	renderer->m_backBufferRTV.GetAddressOf(), renderer->m_depthStencilView.Get());*/
+	// ワールドマネージャー取得
+	auto* pWorldManager = m_pEngine->getWorldManager();
+	// 現在のワールド取得
+	auto* pWorld = pWorldManager->getCurrentWorld();
+	// パイプライン取得
+	auto* pipeline = pWorld->getRenderPipeline();
+	// ゲームシーンレンダーターゲット
+	auto* gameRender = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(pipeline->m_renderTarget));
+	
 
 	// ランタイム
 	if (m_isRunTime)
@@ -84,7 +92,7 @@ void EditorManager::update()
 		ImGui::SetNextWindowBgAlpha(1.0f);
 		ImGui::SetNextWindowSize(winSize);
 		ImGui::Begin("Game", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
-		ImGui::Image(renderer->m_gbuffer.m_diffuseSRV.Get(), 
+		ImGui::Image(gameRender->m_srv.Get(),
 			ImVec2(camera.width * camera.viewportScale, camera.height * camera.viewportScale));
 		ImGui::End();
 	}
@@ -314,11 +322,16 @@ void EditorManager::dispWorld()
 	// カリング
 	pipeline->cullingPass(m_editorCamera.camera);
 
-	// システム更新
-	pipeline->beginPass(m_editorCamera.camera);
-
 	// 描画
-	pipeline->opaquePass();
+	pipeline->beginPass(m_editorCamera.camera);
+	pipeline->prePass(m_editorCamera.camera);
+	pipeline->gbufferPass(m_editorCamera.camera);
+	pipeline->shadowPass(m_editorCamera.camera);
+	pipeline->opaquePass(m_editorCamera.camera);
+	pipeline->skyPass(m_editorCamera.camera);
+	pipeline->transparentPass(m_editorCamera.camera);
+	pipeline->postPass(m_editorCamera.camera);
+
 
 	// BulletDebugDraw
 	auto* physicsSytem = pWorld->getSystem<PhysicsSystem>();

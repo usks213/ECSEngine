@@ -16,6 +16,62 @@ struct VERTEX_3D
 	XMFLOAT2 tex;		// テクスチャ座標
 };
 
+void Geometry::Quad(Mesh& out)
+{
+	const float	SIZE_X = (0.5f); // 立方体のサイズ(X方向)
+	const float	SIZE_Y = (0.5f); // 立方体のサイズ(Y方向)
+	const float	SIZE_Z = (0.5f); // 立方体のサイズ(Z方向)
+
+	const std::uint32_t QUAD_VERTEX = (4);
+
+	// プリミティブ設定
+	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
+
+	VERTEX_3D	vertexWk[QUAD_VERTEX];	// 頂点情報格納ワーク
+
+	// 頂点座標の設定
+	// 前
+	vertexWk[0].vtx = XMFLOAT3(-SIZE_X, SIZE_Y, -SIZE_Z);
+	vertexWk[1].vtx = XMFLOAT3(SIZE_X, SIZE_Y, -SIZE_Z);
+	vertexWk[2].vtx = XMFLOAT3(-SIZE_X, -SIZE_Y, -SIZE_Z);
+	vertexWk[3].vtx = XMFLOAT3(SIZE_X, -SIZE_Y, -SIZE_Z);
+	
+	// 法線ベクトルの設定
+	// 前
+	vertexWk[0].nor = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	vertexWk[1].nor = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	vertexWk[2].nor = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	vertexWk[3].nor = XMFLOAT3(0.0f, 0.0f, -1.0f);
+
+	// 拡散反射光の設定
+	for (std::uint32_t i = 0; i < QUAD_VERTEX; i++)
+	{
+		vertexWk[i].diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	// テクスチャ座標の設定
+	for (std::uint32_t i = 0; i < QUAD_VERTEX; i += 4)
+	{
+		vertexWk[0 + i].tex = XMFLOAT2(0.0f, 0.0f);
+		vertexWk[1 + i].tex = XMFLOAT2(1.0f, 0.0f);
+		vertexWk[2 + i].tex = XMFLOAT2(0.0f, 1.0f);
+		vertexWk[3 + i].tex = XMFLOAT2(1.0f, 1.0f);
+	}
+
+	// 頂点生成
+	out.m_vertexCount = QUAD_VERTEX;
+	for (std::uint32_t i = 0; i < out.m_vertexCount; ++i)
+	{
+		out.m_vertexData.positions.push_back(vertexWk[i].vtx);
+		out.m_vertexData.normals.push_back(vertexWk[i].nor);
+		out.m_vertexData.texcoord0s.push_back(vertexWk[i].tex);
+		out.m_vertexData.colors.push_back(vertexWk[i].diffuse);
+	}
+
+	// インデックス
+	out.m_indexCount = 0;
+}
+
 void Geometry::Plane(Mesh& out, int split, float size, float texSize)
 {
 	int nNumBlockX = split;

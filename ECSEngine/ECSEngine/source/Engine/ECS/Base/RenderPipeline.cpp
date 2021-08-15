@@ -9,11 +9,15 @@
 #include "RenderPipeline.h"
 #include <Engine/ECS/Base/EntityManager.h>
 
+#include <Engine/Renderer/Base/Geometry.h>
 #include <Engine/Renderer/D3D11/D3D11RendererManager.h>
 #include <Engine/Renderer/D3D11/D3D11RenderTarget.h>
+#include <Engine/Renderer/D3D11/D3D11DepthStencil.h>
 
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/System/PhysicsSystem.h>
+
+#include "imgui.h"
 
 
 using namespace ecs;
@@ -22,6 +26,25 @@ using namespace ecs;
 /// @brief 生成時
 void RenderPipeline::onCreate()
 {
+	// レンダラーマネージャー
+	auto* engine = m_pWorld->getWorldManager()->getEngine();
+	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+
+	m_renderTarget = renderer->createRenderTarget("RenderPipeline");
+
+	ShaderDesc desc;
+	desc.m_name = "DefferdLit";
+	desc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
+	auto defferdLitShader = renderer->createShader(desc);
+	m_defferdLitMat = renderer->createMaterial("DefferdLit", defferdLitShader);
+	auto mat = renderer->getMaterial(m_defferdLitMat);
+	mat->m_rasterizeState = ERasterizeState::CULL_NONE;
+	mat->m_depthStencilState = EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE;
+
+	auto quadMesh = renderer->createMesh("Quad");
+	auto* pQuad = renderer->getMesh(quadMesh);
+	Geometry::Quad(*pQuad);
+	m_quadRb = renderer->createRenderBuffer(defferdLitShader ,quadMesh);
 
 }
 
@@ -60,18 +83,20 @@ void RenderPipeline::onUpdate()
 
 	// 描画
 	beginPass(*mainCamera);
-	prePass();
-	gbufferPass();
-	shadowPass();
-	opaquePass();
-	skyPass();
-	transparentPass();
-	postPass();
+	prePass(*mainCamera);
+	gbufferPass(*mainCamera);
+	shadowPass(*mainCamera);
+	opaquePass(*mainCamera);
+	skyPass(*mainCamera);
+	transparentPass(*mainCamera);
+	postPass(*mainCamera);
 	//endPass(*mainCamera);
 
-	// バックバッファに反映
-	auto* rt = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(mainCamera->renderTargetID));
-	renderer->d3dCopyResource(renderer->m_gbuffer.m_diffuseRT.Get(), rt->m_tex.Get());
+	renderer->copyRenderTarget(m_renderTarget, mainCamera->renderTargetID);
+
+	//// バックバッファに反映
+	//auto* rt = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(mainCamera->renderTargetID));
+	//renderer->d3dCopyResource(renderer->m_gbuffer.m_diffuseRT.Get(), rt->m_tex.Get());
 }
 
 void RenderPipeline::beginPass(Camera& camera)
@@ -89,25 +114,21 @@ void RenderPipeline::beginPass(Camera& camera)
 	// システムバッファの設定
 	D3D::SystemBuffer sysBuffer;
 	sysBuffer._mView = camera.view.Transpose();
-	sysBuffer._mProj = camera.projection.Transpose();
+	if (camera.isOrthographic)
+		sysBuffer._mProj = camera.projection2d.Transpose();
+	else
+		sysBuffer._mProj = camera.projection.Transpose();
+	sysBuffer._mProj2D = camera.projection2d.Transpose();
+	sysBuffer._mViewInv = camera.view.Invert().Transpose();
+	sysBuffer._mProjInv = camera.projection.Invert().Transpose();
 	sysBuffer._viewPos = Vector4(camera.world.Translation());
 	sysBuffer._directionalLit = dirLit;
 	renderer->setD3DSystemBuffer(sysBuffer);
 
-	// ビューポート指定
-	float scale = 1.0f;
-	if (camera.viewportScale > 0.0f)
-		scale = camera.viewportScale;
-	Viewport viewport(
-		camera.viewportOffset.x,
-		camera.viewportOffset.y,
-		camera.width * scale,
-		camera.height * scale
-	);
-	renderer->setViewport(viewport);
+	// レンダーターゲットクリア
+	renderer->clearRenderTarget(camera.renderTargetID);
+	renderer->clearDepthStencil(camera.depthStencilID);
 
-	// レンダーターゲット指定
-	renderer->setRenderTarget(camera.renderTargetID, camera.depthStencilID);
 }
 
 void RenderPipeline::cullingPass(Camera& camera)
@@ -132,7 +153,7 @@ void RenderPipeline::cullingPass(Camera& camera)
 		for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
 		{
 			auto transform = chunk->getComponentArray<Transform>();
-			m_batchList[bitchID.first].resize(transform.Count());
+			m_batchList[bitchID.first].reserve(transform.Count());
 			for (auto i = 0u; i < transform.Count(); ++i)
 			{
 				AABB aabb;
@@ -140,7 +161,7 @@ void RenderPipeline::cullingPass(Camera& camera)
 				// カメラカリング
 				if (cameraFrustum.CheckAABB(aabb))
 				{
-					m_batchList[bitchID.first][i] = transform[i].globalMatrix;
+					m_batchList[bitchID.first].push_back(transform[i].globalMatrix);
 				}
 				// シャドウカリング
 
@@ -182,29 +203,55 @@ void RenderPipeline::cullingPass(Camera& camera)
 
 		});
 
+	// 不透明のソート カメラから近い順(昇順)
+	std::sort(m_opequeList.begin(), m_opequeList.end(), [](RenderingData& l, RenderingData& r) {
+		return l.cameraLengthSqr < r.cameraLengthSqr;
+		});
 
+	// 半透明のソート カメラから遠い順(降順)
+	std::sort(m_transparentList.begin(), m_transparentList.end(), [](RenderingData& l, RenderingData& r) {
+		return l.cameraLengthSqr > r.cameraLengthSqr;
+		});
+
+	//// debug
+	//ImGui::Begin("a");
+
+	//for (auto& a : m_batchList)
+	//{
+	//	a.second.shrink_to_fit();
+	//	ImGui::Text(std::to_string(a.second.size()).c_str());
+	//}
+	//ImGui::End();
 }
 
-void RenderPipeline::prePass()
+void RenderPipeline::prePass(Camera& camera)
 {
 
 }
 
-void RenderPipeline::gbufferPass()
-{
-
-}
-
-void RenderPipeline::shadowPass()
-{
-
-}
-
-void RenderPipeline::opaquePass()
+void RenderPipeline::gbufferPass(Camera& camera)
 {
 	// レンダラーマネージャー
 	auto* engine = m_pWorld->getWorldManager()->getEngine();
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+
+	// ビューポート指定
+	Viewport viewport(
+		camera.viewportOffset.x,
+		camera.viewportOffset.y,
+		camera.width,
+		camera.height
+	);
+	renderer->setViewport(viewport);
+
+	// MRT指定
+	ID3D11RenderTargetView* rtvs[2] = 
+	{ renderer->m_gbuffer.m_diffuseRTV.Get(), renderer->m_gbuffer.m_normalRTV.Get() };
+	auto* dsv = static_cast<D3D11DepthStencil*>(renderer->getDepthStencil(camera.depthStencilID));
+	renderer->m_d3dContext->OMSetRenderTargets(2, rtvs, dsv->m_dsv.Get());
+	// GBufferクリア
+	renderer->m_d3dContext->ClearRenderTargetView(rtvs[0], DirectX::Colors::Black);
+	renderer->m_d3dContext->ClearRenderTargetView(rtvs[1], DirectX::Colors::Black);
 
 	// バッチ描画
 	for (auto& bitch : m_batchList)
@@ -223,6 +270,84 @@ void RenderPipeline::opaquePass()
 		}
 	}
 
+	//// 不透明描画
+	//for (auto& opeque : m_opequeList)
+	//{
+	//	renderer->setD3D11Material(opeque.materialID);
+	//	renderer->setD3DTransformBuffer(opeque.worldMatrix);
+	//	renderer->setD3D11RenderBuffer(opeque.renderBufferID);
+	//	renderer->d3dRender(opeque.renderBufferID);
+	//}
+}
+
+void RenderPipeline::shadowPass(Camera& camera)
+{
+
+}
+
+void RenderPipeline::opaquePass(Camera& camera)
+{
+	// レンダラーマネージャー
+	auto* engine = m_pWorld->getWorldManager()->getEngine();
+	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+
+	//// ビューポート指定
+	//float scale = 1.0f;
+	//if (camera.viewportScale > 0.0f)
+	//	scale = camera.viewportScale;
+	//Viewport viewport(
+	//	camera.viewportOffset.x,
+	//	camera.viewportOffset.y,
+	//	camera.width * scale,
+	//	camera.height * scale
+	//);
+	//renderer->setViewport(viewport);
+
+
+	//----- デファードレンダリング -----
+	// レンダーターゲット指定
+	renderer->setRenderTarget(camera.renderTargetID, NONE_DEPTH_STENCIL_ID);
+
+	// テクスチャ指定
+	renderer->setD3D11ShaderResourceView(0, renderer->m_gbuffer.m_diffuseSRV.Get(), EShaderStage::PS);
+	renderer->setD3D11ShaderResourceView(1, renderer->m_gbuffer.m_normalSRV.Get(), EShaderStage::PS);
+
+	// マテリアル指定
+	renderer->setD3D11Material(m_defferdLitMat);
+
+	// レンダーバッファ指定
+	renderer->setD3D11RenderBuffer(m_quadRb);
+
+	// トランスフォーム指定
+	Matrix matrix = Matrix::CreateScale(1920 * 1.25f,1080 * 1.25f,1);
+	//matrix *= Matrix::CreateRotationY(XMConvertToDegrees(90));
+	renderer->setD3DTransformBuffer(matrix);
+	
+	// 描画
+	renderer->d3dRender(m_quadRb);
+
+
+	//----- フォワードレンダリング -----
+	// レンダーターゲット指定
+	renderer->setRenderTarget(camera.renderTargetID, camera.depthStencilID);
+
+	//// バッチ描画
+	//for (auto& bitch : m_batchList)
+	//{
+	//	auto* pBitch = renderer->getBatchGroup(bitch.first);
+	//	const auto* mat = renderer->getMaterial(pBitch->m_materialID);
+	//	const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, pBitch->m_meshID);
+
+	//	renderer->setD3D11Material(pBitch->m_materialID);
+	//	renderer->setD3D11RenderBuffer(rdID);
+
+	//	for (auto& matrix : bitch.second)
+	//	{
+	//		renderer->setD3DTransformBuffer(matrix);
+	//		renderer->d3dRender(rdID);
+	//	}
+	//}
+
 	// 不透明描画
 	for (auto& opeque : m_opequeList)
 	{
@@ -231,19 +356,37 @@ void RenderPipeline::opaquePass()
 		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
 		renderer->d3dRender(opeque.renderBufferID);
 	}
+
+	ImGui::Begin("RenderImage");
+
+	ImGui::Image(renderer->m_gbuffer.m_normalSRV.Get(), ImVec2(1920 * 0.25, 1080 * 0.25));
+	ImGui::Image(renderer->m_gbuffer.m_diffuseSRV.Get(), ImVec2(1920 * 0.25, 1080 * 0.25));
+
+	ImGui::End();
 }
 
-void RenderPipeline::skyPass()
+void RenderPipeline::skyPass(Camera& camera)
 {
 
 }
 
-void RenderPipeline::transparentPass()
+void RenderPipeline::transparentPass(Camera& camera)
 {
+	// レンダラーマネージャー
+	auto* engine = m_pWorld->getWorldManager()->getEngine();
+	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
 
+	// 半透明描画
+	for (auto& opeque : m_transparentList)
+	{
+		renderer->setD3D11Material(opeque.materialID);
+		renderer->setD3DTransformBuffer(opeque.worldMatrix);
+		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
+		renderer->d3dRender(opeque.renderBufferID);
+	}
 }
 
-void RenderPipeline::postPass()
+void RenderPipeline::postPass(Camera& camera)
 {
 
 }
@@ -326,17 +469,11 @@ inline void RenderPipeline::updateCamera(Camera& camera, Transform& transform, f
 	camera.aspect = camera.width / camera.height;
 
 	// プロジェクションマトリックス更新
-	if (camera.isOrthographic)
-	{
-		// 並行投影
-		camera.projection = Matrix::CreateOrthographic(
-			camera.width, camera.height, camera.nearZ, camera.farZ);
-	}
-	else
-	{
-		// 透視投影
-		camera.projection = Matrix::CreatePerspectiveFieldOfView(
-			XMConvertToRadians(camera.fovY), camera.aspect, camera.nearZ, camera.farZ);
-	}
+	// 並行投影
+	camera.projection2d = Matrix::CreateOrthographic(
+		camera.width, camera.height, camera.nearZ, camera.farZ);
+	// 透視投影
+	camera.projection = Matrix::CreatePerspectiveFieldOfView(
+		XMConvertToRadians(camera.fovY), camera.aspect, camera.nearZ, camera.farZ);
 
 }

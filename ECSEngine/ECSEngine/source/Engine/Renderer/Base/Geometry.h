@@ -13,6 +13,7 @@
 class Geometry
 {
 public:
+	static void Quad(Mesh& out);
 	static void Plane(Mesh& out, int split = 10, float size = 1.0f, float texSize = 0.1f);
 	static void Cube(Mesh& out);
 	static void Sphere(Mesh& out, int nSplit, float fSize, float fTexSize);

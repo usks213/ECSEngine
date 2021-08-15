@@ -33,5 +33,6 @@ namespace ecs {
 		Matrix world;
 		Matrix view;
 		Matrix projection;
+		Matrix projection2d;
 	};
 }

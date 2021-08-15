@@ -43,6 +43,12 @@ public:
 	Vector3 min;
 	Vector3 max;
 
+	AABB() :
+		min(-0.5f, -0.5f, -0.5f),
+		max(0.5f, 0.5f, 0.5f)
+	{
+	}
+
 public:
 	Vector3 center() const { return (max + min) * 0.5f; };
 	Vector3 size() const	 { return max - min; };

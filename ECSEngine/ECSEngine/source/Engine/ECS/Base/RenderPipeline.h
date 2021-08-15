@@ -24,10 +24,16 @@ namespace ecs {
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド
 		explicit RenderPipeline(World* pWorld) :
-			SystemBase(pWorld)
-		{}
+			SystemBase(pWorld),
+			m_renderTarget(NONE_RENDER_TARGET_ID)
+		{
+			onCreate();
+		}
 		/// デストラクタ
-		~RenderPipeline() = default;
+		~RenderPipeline()
+		{
+			onDestroy();
+		}
 
 		/// @brief 生成時
 		void onCreate() override;
@@ -39,16 +45,19 @@ namespace ecs {
 		
 		void cullingPass(Camera& camera);
 		void beginPass(Camera& camera);
-		void prePass();
-		void gbufferPass();
-		void shadowPass();
-		void opaquePass();
-		void skyPass();
-		void transparentPass();
-		void postPass();
+		void prePass(Camera& camera);
+		void gbufferPass(Camera& camera);
+		void shadowPass(Camera& camera);
+		void opaquePass(Camera& camera);
+		void skyPass(Camera& camera);
+		void transparentPass(Camera& camera);
+		void postPass(Camera& camera);
 		void endPass(Camera& camera);
 
 		static inline void updateCamera(Camera& camera, Transform& transform, float width, float height);
+
+	public:
+		RenderTargetID m_renderTarget;
 
 	private:
 
@@ -68,5 +77,8 @@ namespace ecs {
 		DirectionalLightData		m_directionalLight;
 		std::vector<PointLightData> m_pointLights;
 		std::vector<SpotLightData>	m_spotLights;
+
+		MaterialID			m_defferdLitMat;
+		RenderBufferID		m_quadRb;
 	};
 }

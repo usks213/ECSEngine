@@ -56,6 +56,13 @@ public:
 	virtual void setRenderTarget(const RenderTargetID& rtID, const DepthStencilID& dsID) = 0;
 	virtual void setRenderTargets(std::uint32_t num, const RenderTargetID* rtIDs, const DepthStencilID& dsID) = 0;
 
+	virtual void setRenderTarget(const RenderTargetID& rtID) = 0;
+	virtual void setDepthStencil(const DepthStencilID& dsID) = 0;
+
+	virtual void clearRenderTarget(const RenderTargetID& rtID) = 0;
+	virtual void clearDepthStencil(const DepthStencilID& dsID) = 0;
+
+	virtual void copyRenderTarget(const RenderTargetID& dstID, const RenderTargetID srcID) = 0;
 public:
 	/// @brief ビューポート取得
 	virtual Viewport getViewport() = 0;

@@ -53,6 +53,9 @@ namespace D3D {
 	{
 		Matrix	_mView;
 		Matrix	_mProj;
+		Matrix	_mProj2D;
+		Matrix	_mViewInv;
+		Matrix	_mProjInv;
 		Vector4 _viewPos;
 		DirectionalLightData _directionalLit;
 	};

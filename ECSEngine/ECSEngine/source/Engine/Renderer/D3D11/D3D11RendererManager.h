@@ -53,6 +53,8 @@ public:
 
 	void setD3D11PrimitiveTopology(EPrimitiveTopology topology);
 
+	void setD3D11ShaderResourceView(std::uint32_t slot, ID3D11ShaderResourceView* srv, EShaderStage stage);
+
 public:
 	void setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer);
 
@@ -73,6 +75,14 @@ public:
 
 	void setRenderTarget(const RenderTargetID& rtID, const DepthStencilID& dsID)override;
 	void setRenderTargets(std::uint32_t num, const RenderTargetID* rtIDs, const DepthStencilID& dsID) override;
+
+	void setRenderTarget(const RenderTargetID& rtID) override;
+	void setDepthStencil(const DepthStencilID& dsID) override;
+
+	void clearRenderTarget(const RenderTargetID& rtID) override;
+	void clearDepthStencil(const DepthStencilID& dsID) override;
+
+	void copyRenderTarget(const RenderTargetID& dstID, const RenderTargetID srcID) override;
 
 public:
 	Viewport getViewport() override { return Viewport(m_vireport); }
@@ -123,11 +133,11 @@ public:
 
 	struct GBuffer
 	{
-		ComPtr<ID3D11Texture2D>				m_diffuseRT;			// 拡散反射光RT
+		ComPtr<ID3D11Texture2D>				m_diffuseRT;			// 拡散反射光RT + w:metallic
 		ComPtr<ID3D11RenderTargetView>		m_diffuseRTV;			// 拡散反射光RTV
 		ComPtr<ID3D11ShaderResourceView>	m_diffuseSRV;			// 拡散反射光SRV
 
-		ComPtr<ID3D11Texture2D>				m_normalRT;				// ワールド法線RT
+		ComPtr<ID3D11Texture2D>				m_normalRT;				// ワールド法線RT + w:roughness
 		ComPtr<ID3D11RenderTargetView>		m_normalRTV;			// ワールド法線RTV
 		ComPtr<ID3D11ShaderResourceView>	m_normalSRV;			// ワールド法線SRV
 	};
@@ -161,6 +171,8 @@ private:
 	ESamplerState		m_curSamplerState[static_cast<size_t>(EShaderStage::MAX)][D3D::MAX_SAMPLER_SLOT_COUNT];
 	TextureID			m_curTexture[static_cast<size_t>(EShaderStage::MAX)][D3D::MAX_TEXTURE_SLOT_COUNT];
 
+	ID3D11RenderTargetView* m_curRTV;
+	ID3D11DepthStencilView* m_curDSV;
 
 	ComPtr<ID3D11Buffer> m_systemBuffer;
 	ComPtr<ID3D11Buffer> m_transformBuffer;

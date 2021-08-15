@@ -101,7 +101,9 @@ D3D11RendererManager::D3D11RendererManager() :
 	m_curD3DShader(nullptr),
 	m_curBlendState(EBlendState::NONE),
 	m_curRasterizeState(ERasterizeState::CULL_NONE),
-	m_curDepthStencilState(EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE)
+	m_curDepthStencilState(EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE),
+	m_curRTV(nullptr),
+	m_curDSV(nullptr)
 {
 }
 
@@ -989,6 +991,14 @@ void D3D11RendererManager::setD3D11PrimitiveTopology(EPrimitiveTopology topology
 	m_curPrimitiveTopology = topology;
 }
 
+void D3D11RendererManager::setD3D11ShaderResourceView(std::uint32_t slot, ID3D11ShaderResourceView* srv, EShaderStage stage)
+{
+	auto stageIndex = static_cast<std::size_t>(stage);
+	ID3D11ShaderResourceView* pTex = srv ? srv : nullptr;
+	setShaderResource[stageIndex](m_d3dContext.Get(), slot, 1, &pTex);
+	m_curTexture[stageIndex][slot] = NONE_TEXTURE_ID;
+}
+
 void D3D11RendererManager::setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer)
 {
 	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
@@ -1030,17 +1040,86 @@ void D3D11RendererManager::setRenderTarget(const RenderTargetID& rtID, const Dep
 
 void D3D11RendererManager::setRenderTargets(std::uint32_t num, const RenderTargetID* rtIDs, const DepthStencilID& dsID)
 {
-	float ClearColor[4] = { 0.2f, 0.22f, 0.22f, 1.0f };
 	std::vector<ID3D11RenderTargetView*> rts(num);
 	for (auto i = 0u; i < num; ++i)
 	{
-		rts[i] = static_cast<D3D11RenderTarget*>(getRenderTarget(rtIDs[i]))->m_rtv.Get();
-		m_d3dContext->ClearRenderTargetView(rts[i], ClearColor);
+		auto* rt = static_cast<D3D11RenderTarget*>(getRenderTarget(rtIDs[i]));
+		if (rt)
+			rts[i] = rt->m_rtv.Get();
+		else
+			rts[i] = NULL;
 	}
-	auto* ds = static_cast<D3D11DepthStencil*>(getDepthStencil(dsID));
-	m_d3dContext->ClearDepthStencilView(ds->m_dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	m_d3dContext->OMSetRenderTargets(num, rts.data(), ds->m_dsv.Get());
+	auto* ds = static_cast<D3D11DepthStencil*>(getDepthStencil(dsID));
+	if (ds)
+	{
+		m_d3dContext->OMSetRenderTargets(num, rts.data(), ds->m_dsv.Get());
+		m_curRTV = rts[0];
+		m_curDSV = ds->m_dsv.Get();
+	}
+	else
+	{
+		m_d3dContext->OMSetRenderTargets(num, rts.data(), nullptr);
+		m_curRTV = rts[0];
+		m_curDSV = nullptr;
+	}
+}
+
+void D3D11RendererManager::setRenderTarget(const RenderTargetID& rtID)
+{
+	auto* rt = static_cast<D3D11RenderTarget*>(getRenderTarget(rtID));
+	if (rt)
+	{
+		m_d3dContext->OMSetRenderTargets(1, rt->m_rtv.GetAddressOf(), m_curDSV);
+		m_curRTV = rt->m_rtv.Get();
+	}
+	else
+	{
+		m_d3dContext->OMSetRenderTargets(1, nullptr, m_curDSV);
+		m_curRTV = nullptr;
+	}
+}
+void D3D11RendererManager::setDepthStencil(const DepthStencilID& dsID)
+{
+	auto* ds = static_cast<D3D11DepthStencil*>(getDepthStencil(dsID));
+	if (ds)
+	{
+		m_d3dContext->OMSetRenderTargets(1, &m_curRTV, ds->m_dsv.Get());
+		m_curDSV = ds->m_dsv.Get();
+	}
+	else
+	{
+		m_d3dContext->OMSetRenderTargets(1, &m_curRTV, nullptr);
+		m_curDSV = nullptr;
+	}
+}
+
+void D3D11RendererManager::clearRenderTarget(const RenderTargetID& rtID)
+{
+	float ClearColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	auto* rts = static_cast<D3D11RenderTarget*>(getRenderTarget(rtID));
+	if (rts)
+	{
+		m_d3dContext->ClearRenderTargetView(rts->m_rtv.Get(), ClearColor);
+	}
+}
+void D3D11RendererManager::clearDepthStencil(const DepthStencilID& dsID)
+{
+	auto* ds = static_cast<D3D11DepthStencil*>(getDepthStencil(dsID));
+	if (ds)
+	{
+		m_d3dContext->ClearDepthStencilView(ds->m_dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	}
+}
+
+void D3D11RendererManager::copyRenderTarget(const RenderTargetID& dstID, const RenderTargetID srcID)
+{
+	auto* pDst = static_cast<D3D11RenderTarget*>(getRenderTarget(dstID));
+	auto* pSrc = static_cast<D3D11RenderTarget*>(getRenderTarget(srcID));
+	if (pDst && pSrc)
+	{
+		d3dCopyResource(pDst->m_tex.Get(), pSrc->m_tex.Get());
+	}
 }
 
 void D3D11RendererManager::d3dRender(const RenderBufferID& renderBufferID)

@@ -194,6 +194,7 @@ void PhysicsTestWorld::Start()
 	// シェーダ読み込み
 	ShaderDesc shaderDesc;
 	shaderDesc.m_name = "Lit";
+	shaderDesc.m_name = "GBuffer";
 	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
 	ShaderID shaderLitID = renderer->createShader(shaderDesc);
 
@@ -263,6 +264,7 @@ void PhysicsTestWorld::Start()
 	// バッチデータの作成
 	auto objBitchID = renderer->creatBatchGroup(matLitID, meshID);
 	auto sphereBitchID = renderer->creatBatchGroup(matLitID, sphereID);
+	auto planeBitchID = renderer->creatBatchGroup(matLitID, meshPlane);
 
 
 	// アーキタイプ
@@ -287,7 +289,8 @@ void PhysicsTestWorld::Start()
 	getGameObjectManager()->setComponentData(sky, rdSky);
 
 	// 床
-	archetype = Archetype::create<Transform, RenderData, StaticType, Collider, Rigidbody>();
+	archetype = Archetype::create<Transform, StaticType, Collider, Rigidbody>();
+	archetype.addTag(planeBitchID);
 	scale = Vector3(5, 1, 5);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 	RenderData rdPlane;
@@ -298,7 +301,7 @@ void PhysicsTestWorld::Start()
 	getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
 	getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::TERRAIN, meshPlane));
 	getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
-	getGameObjectManager()->setComponentData(plane, rdPlane);
+	//getGameObjectManager()->setComponentData(plane, rdPlane);
 
 	// カメラ生成
 	Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag, DynamicType>();
