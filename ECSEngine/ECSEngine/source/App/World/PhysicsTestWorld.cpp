@@ -193,7 +193,7 @@ void PhysicsTestWorld::Start()
 
 	// シェーダ読み込み
 	ShaderDesc shaderDesc;
-	shaderDesc.m_name = "Lit";
+	//shaderDesc.m_name = "Lit";
 	shaderDesc.m_name = "GBuffer";
 	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
 	ShaderID shaderLitID = renderer->createShader(shaderDesc);

@@ -140,6 +140,10 @@ public:
 		ComPtr<ID3D11Texture2D>				m_normalRT;				// ワールド法線RT + w:roughness
 		ComPtr<ID3D11RenderTargetView>		m_normalRTV;			// ワールド法線RTV
 		ComPtr<ID3D11ShaderResourceView>	m_normalSRV;			// ワールド法線SRV
+
+		ComPtr<ID3D11Texture2D>				m_positionRT;			// ワールド座標RT
+		ComPtr<ID3D11RenderTargetView>		m_positionRTV;			// ワールド座標RTV
+		ComPtr<ID3D11ShaderResourceView>	m_positionSRV;			// ワールド座標SRV
 	};
 	GBuffer								m_gbuffer;
 	DXGI_FORMAT							m_gbufferFormat;

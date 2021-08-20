@@ -634,6 +634,28 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 	);
 	CHECK_FAILED(hr);
 
+	//--- ワールド座標バッファ
+	// テクスチャ2D
+	hr = m_d3dDevice->CreateTexture2D(
+		&renderTexture,
+		nullptr,
+		m_gbuffer.m_positionRT.ReleaseAndGetAddressOf()
+	);
+	CHECK_FAILED(hr);
+	// レンダラーターゲットビュー
+	hr = m_d3dDevice->CreateRenderTargetView(
+		m_gbuffer.m_positionRT.Get(),
+		&rtvDesc,
+		m_gbuffer.m_positionRTV.ReleaseAndGetAddressOf());
+	CHECK_FAILED(hr);
+	// シェーダーリソース
+	hr = m_d3dDevice->CreateShaderResourceView(
+		m_gbuffer.m_positionRT.Get(),
+		&srvDesc,
+		m_gbuffer.m_positionSRV.ReleaseAndGetAddressOf()
+	);
+	CHECK_FAILED(hr);
+
 	// ビューポート
 	m_vireport = CD3D11_VIEWPORT(0.0f, 0.0f,
 		static_cast<float>(backBufferWidth),

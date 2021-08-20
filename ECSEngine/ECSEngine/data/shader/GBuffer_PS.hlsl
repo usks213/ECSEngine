@@ -15,6 +15,7 @@ struct PS_OUTPUT
 {
 	float4 Out0 : SV_Target0;
 	float4 Out1 : SV_Target1;
+	float4 Out2 : SV_Target2;
 };
 
 // PBRƒpƒ‰ƒ[ƒ^
@@ -39,6 +40,6 @@ PS_OUTPUT PS(VS_OUTPUT input)
 	
 	output.Out0 = float4(Color.rgb, _metallic);
 	output.Out1 = float4(input.Normal, _roughness);
-	
+	output.Out2 = input.Position;
 	return output;
 }

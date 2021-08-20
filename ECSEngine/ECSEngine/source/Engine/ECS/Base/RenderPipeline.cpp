@@ -159,7 +159,7 @@ void RenderPipeline::cullingPass(Camera& camera)
 				AABB aabb;
 				AABB::transformAABB(transform[i].globalMatrix, mesh->m_aabb, aabb);
 				// カメラカリング
-				if (cameraFrustum.CheckAABB(aabb))
+				//if (cameraFrustum.CheckAABB(aabb))
 				{
 					m_batchList[bitchID.first].push_back(transform[i].globalMatrix);
 				}
@@ -237,12 +237,24 @@ void RenderPipeline::gbufferPass(Camera& camera)
 
 	// ビューポート指定
 	Viewport viewport(
-		camera.viewportOffset.x,
-		camera.viewportOffset.y,
+		0,
+		0,
 		camera.width,
 		camera.height
 	);
 	renderer->setViewport(viewport);
+
+	//// ビューポート指定
+	//float scale = 1.0f;
+	//if (camera.viewportScale > 0.0f)
+	//	scale = camera.viewportScale;
+	//Viewport viewport(
+	//	camera.viewportOffset.x,
+	//	camera.viewportOffset.y,
+	//	camera.width * scale,
+	//	camera.height * scale
+	//);
+	//renderer->setViewport(viewport);
 
 	// MRT指定
 	ID3D11RenderTargetView* rtvs[2] = 
@@ -311,6 +323,7 @@ void RenderPipeline::opaquePass(Camera& camera)
 	// テクスチャ指定
 	renderer->setD3D11ShaderResourceView(0, renderer->m_gbuffer.m_diffuseSRV.Get(), EShaderStage::PS);
 	renderer->setD3D11ShaderResourceView(1, renderer->m_gbuffer.m_normalSRV.Get(), EShaderStage::PS);
+	renderer->setD3D11ShaderResourceView(2, renderer->m_gbuffer.m_positionSRV.Get(), EShaderStage::PS);
 
 	// マテリアル指定
 	renderer->setD3D11Material(m_defferdLitMat);

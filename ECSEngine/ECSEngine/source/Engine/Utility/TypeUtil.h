@@ -22,8 +22,8 @@ public:												   \
 	{												   \
 		auto fnvOffsetBasis = 14695981039346656037ULL; \
 		constexpr auto cFnvPrime = 1099511628211ULL;   \
-													   \
-		for (auto idx : #T)							   \
+		std::string_view typeName = #T;				   \
+		for (auto idx : typeName)					   \
 		{											   \
 			fnvOffsetBasis ^= static_cast<size_t>(idx);\
 			fnvOffsetBasis *= cFnvPrime;			   \
