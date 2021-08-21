@@ -12,6 +12,7 @@ struct VS_OUTPUT {
 	float4	Position	: SV_Position;
 	float3	Normal		: NORMAL0;
 	float2 TexCoord		: TEXCOORD0;
+	float3 WorldPos		: POSITION;
 };
 
 VS_OUTPUT VS(VS_INPUT input)
@@ -22,5 +23,6 @@ VS_OUTPUT VS(VS_INPUT input)
 	output.Position = mul(float4(input.Position, 1.0f), mWVP);
 	output.Normal = mul(input.Normal, (float3x3)_mWorld).xyz;
 	output.TexCoord = mul(float4(input.TexCoord, 0.0f, 1.0f), _mTex).xy;
+	output.WorldPos = mul(float4(input.Position, 1.0f), _mWorld).xyz;
 	return output;
 }

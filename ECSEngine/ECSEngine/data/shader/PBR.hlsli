@@ -147,7 +147,7 @@ float3 LitDif, float3 LitAmb, Texture2D AmbiTex, SamplerState AmbiSampler)
 	float D = ndfGGX(NdotH, roughness);
 	float G = gaSchlickGGX(NdotL, NdotV, roughness);
 
-	float3 kd = lerp3(float3(1.0f, 1.0f, 1.0f) - F, float3(0.0f, 0.0f, 0.0f), metalness);
+	float3 kd = lerp3(float3(1.0f, 1.0f, 1.0f) - F, float3(0.0f, 0.0f, 0.0f) + F, metalness);
 
 	float3 diffuseBRDF = kd * albedo / _PI;
 	// CookTorrance

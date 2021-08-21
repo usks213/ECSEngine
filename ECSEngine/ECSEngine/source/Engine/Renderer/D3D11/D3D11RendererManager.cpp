@@ -90,7 +90,7 @@ namespace {
 D3D11RendererManager::D3D11RendererManager() :
 	m_backBufferFormat(DXGI_FORMAT_R8G8B8A8_UNORM), 
 	m_depthStencilFormat(DXGI_FORMAT_D32_FLOAT),
-	m_gbufferFormat(DXGI_FORMAT_R8G8B8A8_UNORM),
+	m_gbufferFormat(DXGI_FORMAT_R16G16B16A16_FLOAT),
 	m_backBufferCount(2),
 	m_nOutputWidth(1), 
 	m_nOutputHeight(1),

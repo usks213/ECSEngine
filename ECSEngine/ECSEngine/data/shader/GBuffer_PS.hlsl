@@ -9,6 +9,7 @@ struct VS_OUTPUT
 	float4 Position : SV_Position;
 	float3	Normal	: NORMAL0;
 	float2 TexCoord : TEXCOORD0;
+	float3 WorldPos	: POSITION;
 };
 
 struct PS_OUTPUT
@@ -40,6 +41,6 @@ PS_OUTPUT PS(VS_OUTPUT input)
 	
 	output.Out0 = float4(Color.rgb, _metallic);
 	output.Out1 = float4(input.Normal, _roughness);
-	output.Out2 = input.Position;
+	output.Out2 = float4(input.WorldPos, 1);
 	return output;
 }

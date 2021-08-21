@@ -38,7 +38,7 @@ void RenderPipeline::onCreate()
 	auto defferdLitShader = renderer->createShader(desc);
 	m_defferdLitMat = renderer->createMaterial("DefferdLit", defferdLitShader);
 	auto mat = renderer->getMaterial(m_defferdLitMat);
-	mat->m_rasterizeState = ERasterizeState::CULL_NONE;
+	//mat->m_rasterizeState = ERasterizeState::CULL_NONE;
 	mat->m_depthStencilState = EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE;
 
 	auto quadMesh = renderer->createMesh("Quad");
@@ -109,7 +109,7 @@ void RenderPipeline::beginPass(Camera& camera)
 	DirectionalLightData dirLit;
 	dirLit.ambient = Vector4(0.3f, 0.3f, 0.3f, 0.3f);
 	dirLit.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	dirLit.direction = Vector4(1.f, -1.5f, -1.f, 0.0f);
+	dirLit.direction = Vector4(1.f, -1.5f, -1.f, 1.0f);
 
 	// システムバッファの設定
 	D3D::SystemBuffer sysBuffer;
@@ -257,13 +257,16 @@ void RenderPipeline::gbufferPass(Camera& camera)
 	//renderer->setViewport(viewport);
 
 	// MRT指定
-	ID3D11RenderTargetView* rtvs[2] = 
-	{ renderer->m_gbuffer.m_diffuseRTV.Get(), renderer->m_gbuffer.m_normalRTV.Get() };
+	ID3D11RenderTargetView* rtvs[3] = { 
+		renderer->m_gbuffer.m_diffuseRTV.Get(), 
+		renderer->m_gbuffer.m_normalRTV.Get(),
+		renderer->m_gbuffer.m_positionRTV.Get()};
 	auto* dsv = static_cast<D3D11DepthStencil*>(renderer->getDepthStencil(camera.depthStencilID));
-	renderer->m_d3dContext->OMSetRenderTargets(2, rtvs, dsv->m_dsv.Get());
+	renderer->m_d3dContext->OMSetRenderTargets(3, rtvs, dsv->m_dsv.Get());
 	// GBufferクリア
 	renderer->m_d3dContext->ClearRenderTargetView(rtvs[0], DirectX::Colors::Black);
 	renderer->m_d3dContext->ClearRenderTargetView(rtvs[1], DirectX::Colors::Black);
+	renderer->m_d3dContext->ClearRenderTargetView(rtvs[2], DirectX::Colors::Black);
 
 	// バッチ描画
 	for (auto& bitch : m_batchList)
@@ -320,13 +323,15 @@ void RenderPipeline::opaquePass(Camera& camera)
 	// レンダーターゲット指定
 	renderer->setRenderTarget(camera.renderTargetID, NONE_DEPTH_STENCIL_ID);
 
+	// マテリアル指定
+	renderer->setD3D11Material(m_defferdLitMat);
+
 	// テクスチャ指定
 	renderer->setD3D11ShaderResourceView(0, renderer->m_gbuffer.m_diffuseSRV.Get(), EShaderStage::PS);
 	renderer->setD3D11ShaderResourceView(1, renderer->m_gbuffer.m_normalSRV.Get(), EShaderStage::PS);
 	renderer->setD3D11ShaderResourceView(2, renderer->m_gbuffer.m_positionSRV.Get(), EShaderStage::PS);
-
-	// マテリアル指定
-	renderer->setD3D11Material(m_defferdLitMat);
+	auto ds = static_cast<D3D11DepthStencil*>(renderer->getDepthStencil(camera.depthStencilID));
+	renderer->setD3D11ShaderResourceView(3, ds->m_srv.Get(), EShaderStage::PS);
 
 	// レンダーバッファ指定
 	renderer->setD3D11RenderBuffer(m_quadRb);
@@ -336,6 +341,10 @@ void RenderPipeline::opaquePass(Camera& camera)
 	//matrix *= Matrix::CreateRotationY(XMConvertToDegrees(90));
 	renderer->setD3DTransformBuffer(matrix);
 	
+	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
+	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, EShaderStage::PS);
+	renderer->setD3D11Sampler(D3D::SHADER_SS_SLOT_SKYBOX, ESamplerState::ANISOTROPIC_WRAP, EShaderStage::PS);
+
 	// 描画
 	renderer->d3dRender(m_quadRb);
 
@@ -374,6 +383,7 @@ void RenderPipeline::opaquePass(Camera& camera)
 
 	ImGui::Image(renderer->m_gbuffer.m_normalSRV.Get(), ImVec2(1920 * 0.25, 1080 * 0.25));
 	ImGui::Image(renderer->m_gbuffer.m_diffuseSRV.Get(), ImVec2(1920 * 0.25, 1080 * 0.25));
+	ImGui::Image(renderer->m_gbuffer.m_positionSRV.Get(), ImVec2(1920 * 0.25, 1080 * 0.25));
 
 	ImGui::End();
 }
