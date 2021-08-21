@@ -1,6 +1,7 @@
 // ピクセルシェーダ
 #include "Common.hlsli"
 #include "PBR.hlsli"
+#include "DeferredCommon.hlsli"
 
 
 // パラメータ
@@ -11,21 +12,6 @@ struct VS_OUTPUT
 	float2 TexCoord : TEXCOORD0;
 	float3 WorldPos	: POSITION;
 };
-
-struct PS_OUTPUT
-{
-	float4 Out0 : SV_Target0;
-	float4 Out1 : SV_Target1;
-	float4 Out2 : SV_Target2;
-};
-
-// PBRパラメータ
-cbuffer PBRParam : register(b0)
-{
-	float _metallic = 1.0f;
-	float _roughness = 1.0f;
-	float2 _Dumey;
-}
 
 
 PS_OUTPUT PS(VS_OUTPUT input)

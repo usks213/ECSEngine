@@ -47,6 +47,8 @@ public:
 	ERasterizeState		m_rasterizeState;
 	/// @brief シェーダID
 	ShaderID			m_shaderID;
+	/// @brief シェーダータイプ
+	ShaderType			m_shaderType;
 
 	/// @brief CBufferデータ
 	struct CBuffer

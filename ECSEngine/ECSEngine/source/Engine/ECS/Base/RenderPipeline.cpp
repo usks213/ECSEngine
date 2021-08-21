@@ -33,10 +33,10 @@ void RenderPipeline::onCreate()
 	m_renderTarget = renderer->createRenderTarget("RenderPipeline");
 
 	ShaderDesc desc;
-	desc.m_name = "DefferdLit";
+	desc.m_name = "DeferredLit";
 	desc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
 	auto defferdLitShader = renderer->createShader(desc);
-	m_defferdLitMat = renderer->createMaterial("DefferdLit", defferdLitShader);
+	m_defferdLitMat = renderer->createMaterial("DeferredLit", defferdLitShader);
 	auto mat = renderer->getMaterial(m_defferdLitMat);
 	//mat->m_rasterizeState = ERasterizeState::CULL_NONE;
 	mat->m_depthStencilState = EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE;
@@ -150,6 +150,7 @@ void RenderPipeline::cullingPass(Camera& camera)
 	for (const auto& bitchID : renderer->m_batchGroupPool)
 	{
 		auto mesh = renderer->getMesh(bitchID.second->m_meshID);
+		auto mat = renderer->getMaterial(bitchID.second->m_materialID);
 		for (auto* chunk : getEntityManager()->getChunkListByTag(bitchID.first))
 		{
 			auto transform = chunk->getComponentArray<Transform>();
@@ -161,7 +162,22 @@ void RenderPipeline::cullingPass(Camera& camera)
 				// カメラカリング
 				//if (cameraFrustum.CheckAABB(aabb))
 				{
-					m_batchList[bitchID.first].push_back(transform[i].globalMatrix);
+					if (mat->m_shaderType == ShaderType::Forward)
+					{
+						RenderingData data;
+						data.materialID = bitchID.second->m_materialID;
+						data.renderBufferID = renderer->createRenderBuffer(mat->m_shaderID, bitchID.second->m_meshID);
+						data.worldMatrix = transform[i].globalMatrix;
+						data.cameraLengthSqr = (camera.world.Translation() -
+							transform[i].globalMatrix.Translation()).LengthSquared();
+						// フォワード
+						m_opequeList.push_back(data);
+					}
+					else if(mat->m_shaderType == ShaderType::Deferred)
+					{
+						// デファード
+						m_batchList[bitchID.first].push_back(transform[i].globalMatrix);
+					}
 				}
 				// シャドウカリング
 
@@ -186,25 +202,39 @@ void RenderPipeline::cullingPass(Camera& camera)
 				data.materialID = rd.materialID;
 				data.renderBufferID = rdID;
 				data.worldMatrix = transform.globalMatrix;
-				data.cameraLengthSqr = (camera.world.Translation() - 
+				data.cameraLengthSqr = (camera.world.Translation() -
 					transform.globalMatrix.Translation()).LengthSquared();
-				if (mat->m_isTransparent)
+
+				if (mat->m_shaderType == ShaderType::Forward)
 				{
-					// 半透明
-					m_transparentList.push_back(data);
+					// フォワード
+					if (mat->m_isTransparent)
+					{
+						// 半透明
+						m_transparentList.push_back(data);
+					}
+					else
+					{
+						// 不透明
+						m_opequeList.push_back(data);
+					}
 				}
-				else
+				else if (mat->m_shaderType == ShaderType::Deferred)
 				{
-					// 不透明
-					m_opequeList.push_back(data);
+					// 不透明(デファード)
+					m_deferredList.push_back(data);
 				}
 			}
 			// シャドウカリング
 
 		});
 
+
 	// 不透明のソート カメラから近い順(昇順)
 	std::sort(m_opequeList.begin(), m_opequeList.end(), [](RenderingData& l, RenderingData& r) {
+		return l.cameraLengthSqr < r.cameraLengthSqr;
+		});
+	std::sort(m_deferredList.begin(), m_deferredList.end(), [](RenderingData& l, RenderingData& r) {
 		return l.cameraLengthSqr < r.cameraLengthSqr;
 		});
 
@@ -213,15 +243,6 @@ void RenderPipeline::cullingPass(Camera& camera)
 		return l.cameraLengthSqr > r.cameraLengthSqr;
 		});
 
-	//// debug
-	//ImGui::Begin("a");
-
-	//for (auto& a : m_batchList)
-	//{
-	//	a.second.shrink_to_fit();
-	//	ImGui::Text(std::to_string(a.second.size()).c_str());
-	//}
-	//ImGui::End();
 }
 
 void RenderPipeline::prePass(Camera& camera)
@@ -285,14 +306,14 @@ void RenderPipeline::gbufferPass(Camera& camera)
 		}
 	}
 
-	//// 不透明描画
-	//for (auto& opeque : m_opequeList)
-	//{
-	//	renderer->setD3D11Material(opeque.materialID);
-	//	renderer->setD3DTransformBuffer(opeque.worldMatrix);
-	//	renderer->setD3D11RenderBuffer(opeque.renderBufferID);
-	//	renderer->d3dRender(opeque.renderBufferID);
-	//}
+	// 不透明描画
+	for (auto& opeque : m_deferredList)
+	{
+		renderer->setD3D11Material(opeque.materialID);
+		renderer->setD3DTransformBuffer(opeque.worldMatrix);
+		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
+		renderer->d3dRender(opeque.renderBufferID);
+	}
 }
 
 void RenderPipeline::shadowPass(Camera& camera)
@@ -352,23 +373,6 @@ void RenderPipeline::opaquePass(Camera& camera)
 	//----- フォワードレンダリング -----
 	// レンダーターゲット指定
 	renderer->setRenderTarget(camera.renderTargetID, camera.depthStencilID);
-
-	//// バッチ描画
-	//for (auto& bitch : m_batchList)
-	//{
-	//	auto* pBitch = renderer->getBatchGroup(bitch.first);
-	//	const auto* mat = renderer->getMaterial(pBitch->m_materialID);
-	//	const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, pBitch->m_meshID);
-
-	//	renderer->setD3D11Material(pBitch->m_materialID);
-	//	renderer->setD3D11RenderBuffer(rdID);
-
-	//	for (auto& matrix : bitch.second)
-	//	{
-	//		renderer->setD3DTransformBuffer(matrix);
-	//		renderer->d3dRender(rdID);
-	//	}
-	//}
 
 	// 不透明描画
 	for (auto& opeque : m_opequeList)

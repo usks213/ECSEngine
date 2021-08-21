@@ -27,7 +27,16 @@ using ShaderID = std::uint32_t;
 /// @brief 存在しないシェーダーID
 constexpr ShaderID NONE_SHADER_ID = std::numeric_limits<ShaderID>::max();
 
+/// @brief シェーダータイプ
+enum class ShaderType : std::uint8_t {
+	Forward,
+	Deferred,
+	Pre,
+	Post,
+	Compute,
+};
 
+/// @brief セマンティック名
 namespace SEMANTIC_NAME
 {
 	constexpr char POSITION[]		= "POSITION";
@@ -106,7 +115,8 @@ public:
 	/// @brief コンストラクタ
 	explicit Shader(ShaderDesc shaderDesc, const ShaderID& id) :
 		m_id(id),
-		m_desc(shaderDesc)
+		m_desc(shaderDesc),
+		m_type(ShaderType::Forward)
 	{
 	}
 
@@ -203,5 +213,7 @@ public:
 	/// @brief シェーダー生成情報
 	ShaderDesc  m_desc;
 	/// @brief マクロのハッシュ値
-	/// 
+	
+	/// @brief シェーダータイプ
+	ShaderType m_type;
 };

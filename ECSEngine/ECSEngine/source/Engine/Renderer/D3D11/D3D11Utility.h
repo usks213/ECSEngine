@@ -15,10 +15,12 @@
 
 namespace D3D {
 
+	constexpr char SHADER_CB_NAME_GBUFFER[]		= "Gbuffer";
 	constexpr char SHADER_CB_NAME_SYSTEM[]		= "System";
 	constexpr char SHADER_CB_NAME_TRANSFORM[]	= "Transform";
 	constexpr char SHADER_CB_NAME_MATERIAL[]	= "Material";
 
+	constexpr std::uint32_t SHADER_CB_SLOT_GBUFFER	 = 4;
 	constexpr std::uint32_t SHADER_CB_SLOT_SYSTEM	 = 5;
 	constexpr std::uint32_t SHADER_CB_SLOT_TRANSFORM = 6;
 	constexpr std::uint32_t SHADER_CB_SLOT_MATERIAL  = 7;

@@ -234,6 +234,12 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 				continue;
 			}
 
+			// Gbufferシェーダーの場合
+			if (cbName == D3D::SHADER_CB_NAME_GBUFFER)
+			{
+				m_type = ShaderType::Deferred;
+			}
+
 			// レイアウト生成
 			CBufferLayout cbLayout(cbIdx - slotOffset, shaderBufferDesc.Name, shaderBufferDesc.Size);
 			cbLayout.variables.resize(shaderBufferDesc.Variables);

@@ -71,6 +71,7 @@ namespace ecs {
 		};
 		std::vector<RenderingData> m_opequeList;
 		std::vector<RenderingData> m_transparentList;
+		std::vector<RenderingData> m_deferredList;
 
 		std::vector<Matrix>		m_shadowList;
 

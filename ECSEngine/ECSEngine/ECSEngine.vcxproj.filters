@@ -532,10 +532,10 @@
     <FxCompile Include="data\shader\GBuffer_VS.hlsl">
       <Filter>リソース ファイル\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="data\shader\DefferdLit_PS.hlsl">
+    <FxCompile Include="data\shader\DeferredLit_VS.hlsl">
       <Filter>リソース ファイル\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="data\shader\DefferdLit_VS.hlsl">
+    <FxCompile Include="data\shader\DeferredLit_PS.hlsl">
       <Filter>リソース ファイル\Shader</Filter>
     </FxCompile>
   </ItemGroup>
@@ -557,6 +557,9 @@
     </None>
     <None Include="lib\DirectXTex\DirectXTex.inl">
       <Filter>ライブラリ\DirectXTex</Filter>
+    </None>
+    <None Include="data\shader\DeferredCommon.hlsli">
+      <Filter>リソース ファイル\Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

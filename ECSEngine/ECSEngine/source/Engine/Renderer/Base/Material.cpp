@@ -17,7 +17,8 @@ Material::Material(const MaterialID& id, const std::string& name, const Shader& 
 	m_blendState(EBlendState::NONE),
 	m_depthStencilState(EDepthStencilState::ENABLE_TEST_AND_ENABLE_WRITE),
 	m_rasterizeState(ERasterizeState::CULL_BACK),
-	m_shaderID(shader.m_id)
+	m_shaderID(shader.m_id),
+	m_shaderType(shader.m_type)
 {
 	// シェーダからマテリアルデータを生成
 	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
