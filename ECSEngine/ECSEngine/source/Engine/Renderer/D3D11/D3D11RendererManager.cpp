@@ -14,6 +14,7 @@
 #include <Engine/Engine.h>
 #include <Engine/Utility/HashUtil.h>
 
+#include "D3D11Buffer.h"
 #include "D3D11Shader.h"
 #include "D3D11Material.h"
 #include "D3D11RenderBuffer.h"
@@ -1170,6 +1171,20 @@ void D3D11RendererManager::d3dCopyResource(ID3D11Resource* pDst, ID3D11Resource*
 	m_d3dContext->CopyResource(pDst, pSrc);
 }
 
+BufferID D3D11RendererManager::createBuffer(BufferDesc desc, BufferData* pData)
+{
+	// ID‚Ìæ“¾
+	BufferID id = hash::crc32string(desc.name.c_str());
+
+	// Šù‚É¶¬Ï‚İ
+	const auto& itr = m_bufferPool.find(id);
+	if (m_bufferPool.end() != itr) return id;
+
+	// V‹K¶¬
+	m_bufferPool[id] = std::make_unique<D3D11Buffer>(m_d3dDevice.Get(), id, desc, pData);
+
+	return id;
+}
 
 ShaderID D3D11RendererManager::createShader(ShaderDesc desc)
 {

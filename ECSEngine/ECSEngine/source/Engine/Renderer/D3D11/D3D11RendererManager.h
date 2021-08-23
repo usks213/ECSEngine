@@ -88,6 +88,7 @@ public:
 	Viewport getViewport() override { return Viewport(m_vireport); }
 
 public:
+	BufferID createBuffer(BufferDesc desc, BufferData* pData = nullptr) override;
 	ShaderID createShader(ShaderDesc desc) override;
 	MaterialID createMaterial(std::string name, ShaderID shaderID) override;
 	MeshID createMesh(std::string name) override;

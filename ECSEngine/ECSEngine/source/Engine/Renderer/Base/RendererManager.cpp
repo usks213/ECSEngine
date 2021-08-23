@@ -8,7 +8,13 @@
 
 #include "RendererManager.h"
 
+Buffer* RendererManager::getBuffer(BufferID id)
+{
+	const auto& itr = m_bufferPool.find(id);
+	if (m_bufferPool.end() == itr) return nullptr;
 
+	return itr->second.get();
+}
 
 Shader* RendererManager::getShader(ShaderID id)
 {

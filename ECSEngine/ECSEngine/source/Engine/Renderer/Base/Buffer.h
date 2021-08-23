@@ -11,6 +11,13 @@
 #include <numeric>
 #include <string>
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 /// @brief バッファID
 using BufferID = std::uint32_t;
 /// @brief 存在しないバッファID
