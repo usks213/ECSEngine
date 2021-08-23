@@ -8,7 +8,10 @@
 #pragma once
 
 #include <Engine/Renderer/Base/Material.h>
-#include "D3D11Utility.h"
+#include <Engine/Renderer/Base/ShaderResource.h>
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+#include <d3d11_1.h>
 
 
 /// @class D3D11Material
@@ -29,10 +32,10 @@ public:
 
 public:
 
-	D3D::MaterialBuffer m_materialBuffer;
+	SHADER::MaterialBuffer m_materialBuffer;
 
 	/// @brief 全ステージ、スロット分のCBufferポインタ
 	std::array<std::unordered_map<std::uint32_t, ComPtr<ID3D11Buffer>>,
-		static_cast<size_t>(EShaderStage::MAX)>	m_d3dCbuffer;
+		static_cast<size_t>(ShaderStage::MAX)>	m_d3dCbuffer;
 };
 

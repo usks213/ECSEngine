@@ -44,7 +44,7 @@
 namespace {
 	// CBuffer
 	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11Buffer* const*)>
-		setCBuffer[static_cast<std::size_t>(EShaderStage::MAX)] = {
+		setCBuffer[static_cast<std::size_t>(ShaderStage::MAX)] = {
 		&ID3D11DeviceContext1::VSSetConstantBuffers,
 		&ID3D11DeviceContext1::GSSetConstantBuffers,
 		&ID3D11DeviceContext1::DSSetConstantBuffers,
@@ -53,7 +53,7 @@ namespace {
 		&ID3D11DeviceContext1::CSSetConstantBuffers, };
 	// SRV
 	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11ShaderResourceView* const*)>
-		setShaderResource[static_cast<std::size_t>(EShaderStage::MAX)] = {
+		setShaderResource[static_cast<std::size_t>(ShaderStage::MAX)] = {
 		&ID3D11DeviceContext1::VSSetShaderResources,
 		&ID3D11DeviceContext1::GSSetShaderResources,
 		&ID3D11DeviceContext1::DSSetShaderResources,
@@ -62,27 +62,13 @@ namespace {
 		&ID3D11DeviceContext1::CSSetShaderResources, };
 	// Sampler
 	static std::function<void(ID3D11DeviceContext1*, UINT, UINT, ID3D11SamplerState* const*)>
-		setSamplers[static_cast<std::size_t>(EShaderStage::MAX)] = {
+		setSamplers[static_cast<std::size_t>(ShaderStage::MAX)] = {
 		&ID3D11DeviceContext1::VSSetSamplers,
 		&ID3D11DeviceContext1::GSSetSamplers,
 		&ID3D11DeviceContext1::DSSetSamplers,
 		&ID3D11DeviceContext1::HSSetSamplers,
 		&ID3D11DeviceContext1::PSSetSamplers,
 		&ID3D11DeviceContext1::CSSetSamplers, };
-
-	D3D11_PRIMITIVE_TOPOLOGY getD3D11PrimitiveTopology(EPrimitiveTopology topology) {
-		static D3D11_PRIMITIVE_TOPOLOGY d3dTopologies[static_cast<size_t>(EPrimitiveTopology::MAX)] = {
-			D3D_PRIMITIVE_TOPOLOGY_UNDEFINED,
-			D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-			D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-			D3D_PRIMITIVE_TOPOLOGY_POINTLIST,
-			D3D_PRIMITIVE_TOPOLOGY_LINELIST,
-			D3D_PRIMITIVE_TOPOLOGY_LINESTRIP,
-			D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST
-		};
-
-		return d3dTopologies[static_cast<size_t>(topology)];
-	}
 }
 
 
@@ -99,9 +85,9 @@ D3D11RendererManager::D3D11RendererManager() :
 	m_hWnd(nullptr),
 	m_bUseMSAA(false),
 	m_curD3DShader(nullptr),
-	m_curBlendState(EBlendState::NONE),
-	m_curRasterizeState(ERasterizeState::CULL_NONE),
-	m_curDepthStencilState(EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE),
+	m_curBlendState(BlendState::NONE),
+	m_curRasterizeState(RasterizeState::CULL_NONE),
+	m_curDepthStencilState(DepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE),
 	m_curRTV(nullptr),
 	m_curDSV(nullptr)
 {
@@ -141,21 +127,21 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 	d3dDesc.MiscFlags = 0;
 
 	// System
-	d3dDesc.ByteWidth = sizeof(D3D::SystemBuffer);
+	d3dDesc.ByteWidth = sizeof(SHADER::SystemBuffer);
 	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_systemBuffer.ReleaseAndGetAddressOf()));
 	// Transform
-	d3dDesc.ByteWidth = sizeof(D3D::TransformBuffer);
+	d3dDesc.ByteWidth = sizeof(SHADER::TransformBuffer);
 	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_transformBuffer.ReleaseAndGetAddressOf()));
 	// Material
-	d3dDesc.ByteWidth = sizeof(D3D::MaterialBuffer);
+	d3dDesc.ByteWidth = sizeof(SHADER::MaterialBuffer);
 	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_materialBuffer.ReleaseAndGetAddressOf()));
 
 	// Sampler
-	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage) 
+	for (auto stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage) 
 	{
-		setD3D11Sampler(D3D::SHADER_SS_SLOT_MAIN,	ESamplerState::LINEAR_WRAP,		 stage);
-		setD3D11Sampler(D3D::SHADER_SS_SLOT_SHADOW, ESamplerState::SHADOW,			 stage);
-		setD3D11Sampler(D3D::SHADER_SS_SLOT_SKYBOX, ESamplerState::ANISOTROPIC_WRAP, stage);
+		setD3D11Sampler(SHADER::SHADER_SS_SLOT_MAIN,	SamplerState::LINEAR_WRAP,		 stage);
+		setD3D11Sampler(SHADER::SHADER_SS_SLOT_SHADOW, SamplerState::SHADOW,			 stage);
+		setD3D11Sampler(SHADER::SHADER_SS_SLOT_SKYBOX, SamplerState::ANISOTROPIC_WRAP, stage);
 	}
 
 
@@ -302,21 +288,21 @@ void D3D11RendererManager::imguiDebug()
 			//--- Flg
 			{
 				// Tex
-				bool temp = d3dMat->m_materialBuffer._Flg & (UINT)D3D::Material_Flg::TEXTURE;
+				bool temp = d3dMat->m_materialBuffer._Flg & (UINT)SHADER::Material_Flg::TEXTURE;
 				if (ImGui::Checkbox("Texture", &temp))
-					d3dMat->m_materialBuffer._Flg ^= (UINT)D3D::Material_Flg::TEXTURE;
+					d3dMat->m_materialBuffer._Flg ^= (UINT)SHADER::Material_Flg::TEXTURE;
 				// Light
-				temp = d3dMat->m_materialBuffer._Flg & (UINT)D3D::Material_Flg::LIGHT;
+				temp = d3dMat->m_materialBuffer._Flg & (UINT)SHADER::Material_Flg::LIGHT;
 				if (ImGui::Checkbox("Lighting", &temp))
-					d3dMat->m_materialBuffer._Flg ^= (UINT)D3D::Material_Flg::LIGHT;
+					d3dMat->m_materialBuffer._Flg ^= (UINT)SHADER::Material_Flg::LIGHT;
 				// Shadow
-				temp = d3dMat->m_materialBuffer._Flg & (UINT)D3D::Material_Flg::SHADOW;
+				temp = d3dMat->m_materialBuffer._Flg & (UINT)SHADER::Material_Flg::SHADOW;
 				if (ImGui::Checkbox("Shadow", &temp))
-					d3dMat->m_materialBuffer._Flg ^= (UINT)D3D::Material_Flg::SHADOW;
+					d3dMat->m_materialBuffer._Flg ^= (UINT)SHADER::Material_Flg::SHADOW;
 				// Fog
-				temp = d3dMat->m_materialBuffer._Flg & (UINT)D3D::Material_Flg::FOG;
+				temp = d3dMat->m_materialBuffer._Flg & (UINT)SHADER::Material_Flg::FOG;
 				if (ImGui::Checkbox("Fog", &temp))
-					d3dMat->m_materialBuffer._Flg ^= (UINT)D3D::Material_Flg::FOG;
+					d3dMat->m_materialBuffer._Flg ^= (UINT)SHADER::Material_Flg::FOG;
 			}
 			//Color
 			ImGui::SliderFloat4("Color", (float*)&d3dMat->m_materialBuffer._Color, 0.0f, 1.0f);
@@ -330,7 +316,7 @@ void D3D11RendererManager::imguiDebug()
 					mat.second->setFloat(var.second.name.c_str(), temp);
 			}
 
-			for(auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+			for(auto stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 			{
 				auto stageIndex = static_cast<size_t>(stage);
 				// テクスチャ
@@ -676,33 +662,33 @@ HRESULT D3D11RendererManager::createCommonState()
 		rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 		rasterizerDesc.CullMode = D3D11_CULL_NONE;
 		CHECK_FAILED(m_d3dDevice->CreateRasterizerState(&rasterizerDesc,
-			m_rasterizeStates[(size_t)ERasterizeState::CULL_NONE].GetAddressOf()));
+			m_rasterizeStates[(size_t)RasterizeState::CULL_NONE].GetAddressOf()));
 
 		// 表面カリング 塗りつぶし
 		rasterizerDesc.CullMode = D3D11_CULL_FRONT;
 		CHECK_FAILED(m_d3dDevice->CreateRasterizerState(&rasterizerDesc,
-			m_rasterizeStates[(size_t)ERasterizeState::CULL_FRONT].GetAddressOf()));
+			m_rasterizeStates[(size_t)RasterizeState::CULL_FRONT].GetAddressOf()));
 
 		// 裏面カリング 塗りつぶし
 		rasterizerDesc.CullMode = D3D11_CULL_BACK;
 		CHECK_FAILED(m_d3dDevice->CreateRasterizerState(&rasterizerDesc,
-			m_rasterizeStates[(size_t)ERasterizeState::CULL_BACK].GetAddressOf()));
+			m_rasterizeStates[(size_t)RasterizeState::CULL_BACK].GetAddressOf()));
 
 		// カリングなし ワイヤーフレーム
 		rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
 		rasterizerDesc.CullMode = D3D11_CULL_NONE;
 		CHECK_FAILED(m_d3dDevice->CreateRasterizerState(&rasterizerDesc,
-			m_rasterizeStates[(size_t)ERasterizeState::CULL_NONE_WIREFRAME].GetAddressOf()));
+			m_rasterizeStates[(size_t)RasterizeState::CULL_NONE_WIREFRAME].GetAddressOf()));
 
 		// 表面カリング ワイヤーフレーム
 		rasterizerDesc.CullMode = D3D11_CULL_FRONT;
 		CHECK_FAILED(m_d3dDevice->CreateRasterizerState(&rasterizerDesc,
-			m_rasterizeStates[(size_t)ERasterizeState::CULL_FRONT_WIREFRAME].GetAddressOf()));
+			m_rasterizeStates[(size_t)RasterizeState::CULL_FRONT_WIREFRAME].GetAddressOf()));
 
 		// 裏面カリング ワイヤーフレーム
 		rasterizerDesc.CullMode = D3D11_CULL_BACK;
 		CHECK_FAILED(m_d3dDevice->CreateRasterizerState(&rasterizerDesc,
-			m_rasterizeStates[(size_t)ERasterizeState::CULL_BACK_WIREFRAME].GetAddressOf()));
+			m_rasterizeStates[(size_t)RasterizeState::CULL_BACK_WIREFRAME].GetAddressOf()));
 
 		// シャドウ用
 		rasterizerDesc.FillMode					= D3D11_FILL_SOLID;
@@ -713,7 +699,7 @@ HRESULT D3D11RendererManager::createCommonState()
 		rasterizerDesc.DepthBiasClamp			= 0.0f;
 		rasterizerDesc.SlopeScaledDepthBias		= 2.0f;
 		CHECK_FAILED(m_d3dDevice->CreateRasterizerState(&rasterizerDesc,
-			m_rasterizeStates[(size_t)ERasterizeState::SHADOW].GetAddressOf()));
+			m_rasterizeStates[(size_t)RasterizeState::SHADOW].GetAddressOf()));
 	}
 
 	// サンプラステート作成
@@ -736,30 +722,30 @@ HRESULT D3D11RendererManager::createCommonState()
 		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
 		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(ESamplerState::LINEAR_CLAMP)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(SamplerState::LINEAR_CLAMP)].GetAddressOf()));
 
 		// ポイントクランプ
 		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(ESamplerState::POINT_CLAMP)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(SamplerState::POINT_CLAMP)].GetAddressOf()));
 
 		// 異方性クランプ
 		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(ESamplerState::ANISOTROPIC_CLAMP)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(SamplerState::ANISOTROPIC_CLAMP)].GetAddressOf()));
 
 		// リニアラップ
 		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(ESamplerState::LINEAR_WRAP)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(SamplerState::LINEAR_WRAP)].GetAddressOf()));
 
 		// ポイントラップ
 		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(ESamplerState::POINT_WRAP)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(SamplerState::POINT_WRAP)].GetAddressOf()));
 
 		// 異方性ラップ
 		samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(ESamplerState::ANISOTROPIC_WRAP)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(SamplerState::ANISOTROPIC_WRAP)].GetAddressOf()));
 
 		// シャドウ
 		samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
@@ -773,7 +759,7 @@ HRESULT D3D11RendererManager::createCommonState()
 		samplerDesc.BorderColor[3] = 1.0f;
 		samplerDesc.MinLOD = 0;
 		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(ESamplerState::SHADOW)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateSamplerState(&samplerDesc, m_samplerStates[static_cast<size_t>(SamplerState::SHADOW)].GetAddressOf()));
 	}
 
 	// ブレンドステート作成
@@ -792,31 +778,31 @@ HRESULT D3D11RendererManager::createCommonState()
 		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
 		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(EBlendState::ALPHA)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(BlendState::ALPHA)].GetAddressOf()));
 
 		// 加算合成
 		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(EBlendState::ADD)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(BlendState::ADD)].GetAddressOf()));
 
 		// 減算合成
 		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
-		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(EBlendState::SUB)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(BlendState::SUB)].GetAddressOf()));
 
 		// 乗算合成
 		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
 		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ZERO;
 		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_SRC_COLOR;
-		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(EBlendState::MUL)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(BlendState::MUL)].GetAddressOf()));
 
 		// 反転合成
 		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_INV_DEST_COLOR;
 		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(EBlendState::INV)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateBlendState(&blendDesc, m_blendStates[static_cast<size_t>(BlendState::INV)].GetAddressOf()));
 	}
 
 	// 深度ステンシルステート作成
 	{
-		m_depthStencilStates[static_cast<size_t>(EDepthStencilState::UNKNOWN)] = nullptr;
+		m_depthStencilStates[static_cast<size_t>(DepthStencilState::UNKNOWN)] = nullptr;
 
 		D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 
@@ -824,21 +810,21 @@ HRESULT D3D11RendererManager::createCommonState()
 		depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 
-		CHECK_FAILED(m_d3dDevice->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[static_cast<size_t>(EDepthStencilState::ENABLE_TEST_AND_ENABLE_WRITE)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[static_cast<size_t>(DepthStencilState::ENABLE_TEST_AND_ENABLE_WRITE)].GetAddressOf()));
 
 		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 
-		CHECK_FAILED(m_d3dDevice->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[static_cast<size_t>(EDepthStencilState::ENABLE_TEST_AND_DISABLE_WRITE)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[static_cast<size_t>(DepthStencilState::ENABLE_TEST_AND_DISABLE_WRITE)].GetAddressOf()));
 
 		depthStencilDesc.DepthEnable = false;
 		depthStencilDesc.DepthFunc = D3D11_COMPARISON_NEVER;
 		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 
-		CHECK_FAILED(m_d3dDevice->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[static_cast<size_t>(EDepthStencilState::DISABLE_TEST_AND_ENABLE_WRITE)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[static_cast<size_t>(DepthStencilState::DISABLE_TEST_AND_ENABLE_WRITE)].GetAddressOf()));
 
 		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 
-		CHECK_FAILED(m_d3dDevice->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[static_cast<size_t>(EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE)].GetAddressOf()));
+		CHECK_FAILED(m_d3dDevice->CreateDepthStencilState(&depthStencilDesc, m_depthStencilStates[static_cast<size_t>(DepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE)].GetAddressOf()));
 	}
 
 	return S_OK;
@@ -891,8 +877,8 @@ void D3D11RendererManager::setD3D11Material(const MaterialID& materialID)
 		if (d3dMat->m_isTransparent)
 		{
 			m_d3dContext->OMSetDepthStencilState(m_depthStencilStates[
-				static_cast<std::size_t>(EDepthStencilState::ENABLE_TEST_AND_DISABLE_WRITE)].Get(), 0);
-			m_curDepthStencilState = EDepthStencilState::ENABLE_TEST_AND_DISABLE_WRITE;
+				static_cast<std::size_t>(DepthStencilState::ENABLE_TEST_AND_DISABLE_WRITE)].Get(), 0);
+			m_curDepthStencilState = DepthStencilState::ENABLE_TEST_AND_DISABLE_WRITE;
 		}
 		else
 		{
@@ -914,14 +900,14 @@ void D3D11RendererManager::setD3D11MaterialResource(const D3D11Material& d3dMate
 	auto& d3dMat = const_cast<D3D11Material&>(d3dMaterial);
 
 	// ステージごと
-	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (auto stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		if (!hasStaderStage(d3dShader.m_desc.m_stages, stage)) continue;
 
 		auto stageIndex = static_cast<std::size_t>(stage);
 
 		// マテリアルバッファ更新
-		setCBuffer[stageIndex](m_d3dContext.Get(), D3D::SHADER_CB_SLOT_MATERIAL, 1, m_materialBuffer.GetAddressOf());
+		setCBuffer[stageIndex](m_d3dContext.Get(), SHADER::SHADER_CB_SLOT_MATERIAL, 1, m_materialBuffer.GetAddressOf());
 		m_d3dContext->UpdateSubresource(m_materialBuffer.Get(), 0, nullptr, &d3dMat.m_materialBuffer, 0, 0);
 
 		// コンスタントバッファ
@@ -973,7 +959,7 @@ void D3D11RendererManager::setD3D11RenderBuffer(const RenderBufferID& renderBuff
 	setD3D11PrimitiveTopology(renderBuffer->m_topology);
 }
 
-void D3D11RendererManager::setD3D11Texture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage)
+void D3D11RendererManager::setD3D11Texture(std::uint32_t slot, const TextureID& textureID, ShaderStage stage)
 {
 	auto stageIndex = static_cast<std::size_t>(stage);
 	if (m_curTexture[stageIndex][slot] == textureID) return;
@@ -994,7 +980,7 @@ void D3D11RendererManager::setD3D11Texture(std::uint32_t slot, const TextureID& 
 	}
 }
 
-void D3D11RendererManager::setD3D11Sampler(std::uint32_t slot, ESamplerState state, EShaderStage stage)
+void D3D11RendererManager::setD3D11Sampler(std::uint32_t slot, SamplerState state, ShaderStage stage)
 {
 	auto stageIndex = static_cast<size_t>(stage);
 	if (m_curSamplerState[stageIndex][slot] == state) {
@@ -1005,7 +991,7 @@ void D3D11RendererManager::setD3D11Sampler(std::uint32_t slot, ESamplerState sta
 	m_curSamplerState[stageIndex][slot] = state;
 }
 
-void D3D11RendererManager::setD3D11PrimitiveTopology(EPrimitiveTopology topology)
+void D3D11RendererManager::setD3D11PrimitiveTopology(PrimitiveTopology topology)
 {
 	if (m_curPrimitiveTopology == topology) return;
 
@@ -1013,7 +999,7 @@ void D3D11RendererManager::setD3D11PrimitiveTopology(EPrimitiveTopology topology
 	m_curPrimitiveTopology = topology;
 }
 
-void D3D11RendererManager::setD3D11ShaderResourceView(std::uint32_t slot, ID3D11ShaderResourceView* srv, EShaderStage stage)
+void D3D11RendererManager::setD3D11ShaderResourceView(std::uint32_t slot, ID3D11ShaderResourceView* srv, ShaderStage stage)
 {
 	auto stageIndex = static_cast<std::size_t>(stage);
 	ID3D11ShaderResourceView* pTex = srv ? srv : nullptr;
@@ -1021,31 +1007,31 @@ void D3D11RendererManager::setD3D11ShaderResourceView(std::uint32_t slot, ID3D11
 	m_curTexture[stageIndex][slot] = NONE_TEXTURE_ID;
 }
 
-void D3D11RendererManager::setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer)
+void D3D11RendererManager::setD3DSystemBuffer(const SHADER::SystemBuffer& systemBuffer)
 {
-	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (auto stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<std::size_t>(stage);
-		setCBuffer[stageIndex](m_d3dContext.Get(), D3D::SHADER_CB_SLOT_SYSTEM, 1, m_systemBuffer.GetAddressOf());
+		setCBuffer[stageIndex](m_d3dContext.Get(), SHADER::SHADER_CB_SLOT_SYSTEM, 1, m_systemBuffer.GetAddressOf());
 		m_d3dContext->UpdateSubresource(m_systemBuffer.Get(), 0, nullptr, &systemBuffer, 0, 0);
 	}
 }
 
 void D3D11RendererManager::setD3DTransformBuffer(const Matrix& mtxWorld)
 {
-	D3D::TransformBuffer transform;
+	SHADER::TransformBuffer transform;
 	transform._mWorld = mtxWorld.Transpose();
 
-	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (auto stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<std::size_t>(stage);
-		setCBuffer[stageIndex](m_d3dContext.Get(), D3D::SHADER_CB_SLOT_TRANSFORM, 1, m_transformBuffer.GetAddressOf());
+		setCBuffer[stageIndex](m_d3dContext.Get(), SHADER::SHADER_CB_SLOT_TRANSFORM, 1, m_transformBuffer.GetAddressOf());
 		m_d3dContext->UpdateSubresource(m_transformBuffer.Get(), 0, nullptr, &transform, 0, 0);
 	}
 }
 
 
-void D3D11RendererManager::setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage)
+void D3D11RendererManager::setTexture(std::uint32_t slot, const TextureID& textureID, ShaderStage stage)
 {
 	setD3D11Texture(slot, textureID, stage);
 }

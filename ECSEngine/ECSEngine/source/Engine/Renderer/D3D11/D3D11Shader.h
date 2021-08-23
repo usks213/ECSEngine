@@ -8,7 +8,9 @@
 #pragma once
 
 #include <Engine/Renderer/Base/Shader.h>
-#include "D3D11Utility.h"
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+#include <d3d11_1.h>
 #include <d3d11shader.h>
 
 
@@ -35,7 +37,7 @@ public:
 			ID3D11PixelShader*		ps;
 			ID3D11ComputeShader*	cs;
 		};
-		ID3D11DeviceChild* shaders[static_cast<size_t>(EShaderStage::MAX)];
+		ID3D11DeviceChild* shaders[static_cast<size_t>(ShaderStage::MAX)];
 	};
 	/// @brief 入力レイアウト
 	ComPtr<ID3D11InputLayout>				m_inputLayout;
@@ -49,7 +51,7 @@ private:
 	/// @param device デバイス
 	/// @param stage シェーダステージ
 	/// @param blob コンパイルデータ
-	void createShaderObjct(ID3D11Device1* device, const EShaderStage& stage, ComPtr<ID3DBlob>& blob);
+	void createShaderObjct(ID3D11Device1* device, const ShaderStage& stage, ComPtr<ID3DBlob>& blob);
 
 };
 

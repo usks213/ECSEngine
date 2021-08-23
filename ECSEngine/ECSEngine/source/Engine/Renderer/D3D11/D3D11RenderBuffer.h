@@ -8,7 +8,9 @@
 #pragma once
 
 #include <Engine/Renderer/Base/RenderBuffer.h>
-#include <Engine/Renderer/D3D11/D3D11Utility.h>
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+#include <d3d11_1.h>
 
 class D3D11RenderBuffer : public RenderBuffer
 {

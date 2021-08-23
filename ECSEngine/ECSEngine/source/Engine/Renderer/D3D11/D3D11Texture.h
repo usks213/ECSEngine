@@ -8,7 +8,9 @@
 #pragma once
 
 #include <Engine/Renderer/Base/Texture.h>
-#include "D3D11Utility.h"
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+#include <d3d11_1.h>
 #include <DirectXTex.h>
 
 

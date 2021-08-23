@@ -8,7 +8,9 @@
 #pragma once
 
 #include <Engine/Renderer/Base/DepthStencil.h>
-#include "D3D11Utility.h"
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+#include <d3d11_1.h>
 
 
  /// @brief DreictX11深度ステンシルDesc

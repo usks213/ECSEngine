@@ -47,16 +47,16 @@ public:
 
 	void setD3D11RenderBuffer(const RenderBufferID& renderBufferID);
 
-	void setD3D11Texture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage);
+	void setD3D11Texture(std::uint32_t slot, const TextureID& textureID, ShaderStage stage);
 
-	void setD3D11Sampler(std::uint32_t slot, ESamplerState state, EShaderStage stage);
+	void setD3D11Sampler(std::uint32_t slot, SamplerState state, ShaderStage stage);
 
-	void setD3D11PrimitiveTopology(EPrimitiveTopology topology);
+	void setD3D11PrimitiveTopology(PrimitiveTopology topology);
 
-	void setD3D11ShaderResourceView(std::uint32_t slot, ID3D11ShaderResourceView* srv, EShaderStage stage);
+	void setD3D11ShaderResourceView(std::uint32_t slot, ID3D11ShaderResourceView* srv, ShaderStage stage);
 
 public:
-	void setD3DSystemBuffer(const D3D::SystemBuffer& systemBuffer);
+	void setD3DSystemBuffer(const SHADER::SystemBuffer& systemBuffer);
 
 	void setD3DTransformBuffer(const Matrix& mtxWorld);
 
@@ -69,7 +69,7 @@ public:
 	void d3dCopyResource(ID3D11Resource* pDst, ID3D11Resource* pSrc);
 
 public:
-	void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) override;
+	void setTexture(std::uint32_t slot, const TextureID& textureID, ShaderStage stage) override;
 
 	void setViewport(Viewport viewport) override;
 
@@ -159,21 +159,21 @@ public:
 
 	bool								m_bUseMSAA;
 
-	ComPtr<ID3D11RasterizerState>		m_rasterizeStates[(size_t)ERasterizeState::MAX];		// ラスタライザステート
-	ComPtr<ID3D11SamplerState>			m_samplerStates[(size_t)ESamplerState::MAX];			// サンプラステート
-	ComPtr<ID3D11BlendState>			m_blendStates[(size_t)EBlendState::MAX];				// ブレンドステート
-	ComPtr<ID3D11DepthStencilState>		m_depthStencilStates[(size_t)EDepthStencilState::MAX];	// 深度ステンシルステート
+	ComPtr<ID3D11RasterizerState>		m_rasterizeStates[(size_t)RasterizeState::MAX];		// ラスタライザステート
+	ComPtr<ID3D11SamplerState>			m_samplerStates[(size_t)SamplerState::MAX];			// サンプラステート
+	ComPtr<ID3D11BlendState>			m_blendStates[(size_t)BlendState::MAX];				// ブレンドステート
+	ComPtr<ID3D11DepthStencilState>		m_depthStencilStates[(size_t)DepthStencilState::MAX];	// 深度ステンシルステート
 
 private:
-	EBlendState			m_curBlendState;
-	ERasterizeState		m_curRasterizeState;
-	EDepthStencilState	m_curDepthStencilState;
-	EPrimitiveTopology	m_curPrimitiveTopology;
+	BlendState			m_curBlendState;
+	RasterizeState		m_curRasterizeState;
+	DepthStencilState	m_curDepthStencilState;
+	PrimitiveTopology	m_curPrimitiveTopology;
 
 	D3D11Shader*		m_curD3DShader;
 	MaterialID			m_curMaterial;
-	ESamplerState		m_curSamplerState[static_cast<size_t>(EShaderStage::MAX)][D3D::MAX_SAMPLER_SLOT_COUNT];
-	TextureID			m_curTexture[static_cast<size_t>(EShaderStage::MAX)][D3D::MAX_TEXTURE_SLOT_COUNT];
+	SamplerState		m_curSamplerState[static_cast<size_t>(ShaderStage::MAX)][SHADER::MAX_SAMPLER_SLOT_COUNT];
+	TextureID			m_curTexture[static_cast<size_t>(ShaderStage::MAX)][SHADER::MAX_TEXTURE_SLOT_COUNT];
 
 	ID3D11RenderTargetView* m_curRTV;
 	ID3D11DepthStencilView* m_curDSV;

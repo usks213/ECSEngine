@@ -34,12 +34,12 @@ void RenderPipeline::onCreate()
 
 	ShaderDesc desc;
 	desc.m_name = "DeferredLit";
-	desc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
+	desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 	auto defferdLitShader = renderer->createShader(desc);
 	m_defferdLitMat = renderer->createMaterial("DeferredLit", defferdLitShader);
 	auto mat = renderer->getMaterial(m_defferdLitMat);
-	//mat->m_rasterizeState = ERasterizeState::CULL_NONE;
-	mat->m_depthStencilState = EDepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE;
+	//mat->m_rasterizeState = RasterizeState::CULL_NONE;
+	mat->m_depthStencilState = DepthStencilState::DISABLE_TEST_AND_DISABLE_WRITE;
 
 	auto quadMesh = renderer->createMesh("Quad");
 	auto* pQuad = renderer->getMesh(quadMesh);
@@ -348,11 +348,11 @@ void RenderPipeline::opaquePass(Camera& camera)
 	renderer->setD3D11Material(m_defferdLitMat);
 
 	// テクスチャ指定
-	renderer->setD3D11ShaderResourceView(0, renderer->m_gbuffer.m_diffuseSRV.Get(), EShaderStage::PS);
-	renderer->setD3D11ShaderResourceView(1, renderer->m_gbuffer.m_normalSRV.Get(), EShaderStage::PS);
-	renderer->setD3D11ShaderResourceView(2, renderer->m_gbuffer.m_positionSRV.Get(), EShaderStage::PS);
+	renderer->setD3D11ShaderResourceView(0, renderer->m_gbuffer.m_diffuseSRV.Get(), ShaderStage::PS);
+	renderer->setD3D11ShaderResourceView(1, renderer->m_gbuffer.m_normalSRV.Get(), ShaderStage::PS);
+	renderer->setD3D11ShaderResourceView(2, renderer->m_gbuffer.m_positionSRV.Get(), ShaderStage::PS);
 	auto ds = static_cast<D3D11DepthStencil*>(renderer->getDepthStencil(camera.depthStencilID));
-	renderer->setD3D11ShaderResourceView(3, ds->m_srv.Get(), EShaderStage::PS);
+	renderer->setD3D11ShaderResourceView(3, ds->m_srv.Get(), ShaderStage::PS);
 
 	// レンダーバッファ指定
 	renderer->setD3D11RenderBuffer(m_quadRb);
@@ -363,8 +363,8 @@ void RenderPipeline::opaquePass(Camera& camera)
 	renderer->setD3DTransformBuffer(matrix);
 	
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, EShaderStage::PS);
-	renderer->setD3D11Sampler(D3D::SHADER_SS_SLOT_SKYBOX, ESamplerState::ANISOTROPIC_WRAP, EShaderStage::PS);
+	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, ShaderStage::PS);
+	renderer->setD3D11Sampler(D3D::SHADER_SS_SLOT_SKYBOX, SamplerState::ANISOTROPIC_WRAP, ShaderStage::PS);
 
 	// 描画
 	renderer->d3dRender(m_quadRb);

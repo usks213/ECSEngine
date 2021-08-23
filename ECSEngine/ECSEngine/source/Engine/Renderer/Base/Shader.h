@@ -50,9 +50,9 @@ namespace SEMANTIC_NAME
 }
 
 
-/// @enum EShaderStage
+/// @enum ShaderStage
 /// @brief シェーダーステージ
-enum class EShaderStage : std::uint32_t
+enum class ShaderStage : std::uint32_t
 {
 	VS,		// 頂点シェーダー
 	GS,		// ジオメトリシェーダー
@@ -63,9 +63,9 @@ enum class EShaderStage : std::uint32_t
 	MAX,	// シェーダーステージ数
 };
 
-/// @enum EShaderStageFlags
+/// @enum ShaderStageFlags
 /// @brief シェーダーステージフラグ
-enum class EShaderStageFlags : std::uint32_t
+enum class ShaderStageFlags : std::uint32_t
 {
 	NONE = 0,
 	VS = 1 << 1,
@@ -79,24 +79,24 @@ enum class EShaderStageFlags : std::uint32_t
 };
 
 /// @brief ループ用インクリメント
-EShaderStage operator++(EShaderStage& value); 
+ShaderStage operator++(ShaderStage& value); 
 /// @brief ループ用インクリメント
-EShaderStage operator++(EShaderStage& value, int); 
+ShaderStage operator++(ShaderStage& value, int); 
 /// @brief シェーダーステージフラグ用論理和
-std::uint32_t operator|(const EShaderStageFlags& l, const EShaderStageFlags& r);
+std::uint32_t operator|(const ShaderStageFlags& l, const ShaderStageFlags& r);
 /// @brief シェーダーステージフラグ用論理和
-std::uint32_t operator|(const std::uint32_t& l, const EShaderStageFlags& r);
+std::uint32_t operator|(const std::uint32_t& l, const ShaderStageFlags& r);
 
 /// @brief 
 /// @param shaderStage 
 /// @return 
-constexpr EShaderStageFlags ConvertShaderStage2Flags(const EShaderStage& shaderStage); 
+constexpr ShaderStageFlags ConvertShaderStage2Flags(const ShaderStage& shaderStage); 
 /// @brief シェーダーステージがフラグに含まれているか
 /// @details FlagsとANDを取る
 /// @param shaderStageFlags シェーダーステージフラグ
 /// @param shaderStage シェーダーステージ
 /// @return 含まれているならTRUE
-bool hasStaderStage(const std::uint32_t& shaderStageFlags, const EShaderStage& shaderStage);
+bool hasStaderStage(const std::uint32_t& shaderStageFlags, const ShaderStage& shaderStage);
 
 
 /// @brief シェーダー生成用構造体
@@ -181,7 +181,7 @@ public:
 	};
 	/// @brief 全ステージのCBufferレイアウト
 	std::array<std::unordered_map<std::uint32_t, CBufferLayout>,
-		static_cast<size_t>(EShaderStage::MAX)> m_cbufferLayouts;
+		static_cast<size_t>(ShaderStage::MAX)> m_cbufferLayouts;
 	/// @brief CBuffer変数のデフォルト値(初期化子付き値)
 	std::unordered_map<std::string, std::unique_ptr<std::byte[]>> m_cbufferDefaults;
 
@@ -189,23 +189,23 @@ public:
 	struct TextureBindData
 	{
 		std::string name;
-		EShaderStage stage;
+		ShaderStage stage;
 		std::uint32_t slot;
 	};
 	/// @brief サンプラリソースバインド情報
 	struct SamplerBindData
 	{
 		std::string name;
-		EShaderStage stage;
+		ShaderStage stage;
 		std::uint32_t slot;
 	};
 
 	/// @brief 全ステージのテクスチャリソース情報
 	std::array<std::unordered_map<std::uint32_t, TextureBindData>,
-		static_cast<size_t>(EShaderStage::MAX)> m_textureBindDatas;
+		static_cast<size_t>(ShaderStage::MAX)> m_textureBindDatas;
 	/// @brief 全ステージのサンプラリソース情報
 	std::array<std::unordered_map<std::uint32_t, SamplerBindData>,
-		static_cast<size_t>(EShaderStage::MAX)> m_samplerBindDatas;
+		static_cast<size_t>(ShaderStage::MAX)> m_samplerBindDatas;
 
 public:
 	/// @brief シェーダID
