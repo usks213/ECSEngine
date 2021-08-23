@@ -7,6 +7,7 @@
  *********************************************************************/
 
 #include "D3D11Texture.h"
+#include "D3D11Utility.h"
 #pragma comment(lib, "DirectXTex")
 
 #include <DDSTextureLoader11.h>

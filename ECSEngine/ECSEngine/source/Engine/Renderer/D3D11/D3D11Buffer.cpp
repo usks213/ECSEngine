@@ -14,7 +14,7 @@
  /// @param id バッファID
  /// @param desc バッファDesc
  /// @param data 初期化データ
-D3D11Buffer::D3D11Buffer(ID3D11Device1* device, const BufferID& id, const BufferDesc& desc, const BufferData* data = nullptr) :
+D3D11Buffer::D3D11Buffer(ID3D11Device1* device, const BufferID& id, const BufferDesc& desc, const BufferData* data) :
 	Buffer(id, desc)
 {
 	

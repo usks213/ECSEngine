@@ -995,7 +995,7 @@ void D3D11RendererManager::setD3D11PrimitiveTopology(PrimitiveTopology topology)
 {
 	if (m_curPrimitiveTopology == topology) return;
 
-	m_d3dContext->IASetPrimitiveTopology(getD3D11PrimitiveTopology(topology));
+	m_d3dContext->IASetPrimitiveTopology(D3D11Util::getD3D11PrimitiveTopology(topology));
 	m_curPrimitiveTopology = topology;
 }
 

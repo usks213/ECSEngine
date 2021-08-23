@@ -7,7 +7,7 @@
  *********************************************************************/
 
 #include "D3D11DepthStencil.h"
-
+#include "D3D11Utility.h"
 
  /// @brief コンストラクタ
  /// @param device デバイス

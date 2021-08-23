@@ -7,6 +7,7 @@
  *********************************************************************/
 
 #include "D3D11RenderBuffer.h"
+#include "D3D11Utility.h"
 
 
 D3D11RenderBuffer::D3D11RenderBuffer(ID3D11Device1* device, const RenderBufferID id, 

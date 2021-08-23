@@ -7,6 +7,8 @@
  *********************************************************************/
 
 #include "D3D11Shader.h"
+#include "D3D11Utility.h"
+#include <Engine/Renderer/Base/ShaderResource.h>
 #include <d3dcompiler.h>
 #include <fstream>
 #include <iostream>
