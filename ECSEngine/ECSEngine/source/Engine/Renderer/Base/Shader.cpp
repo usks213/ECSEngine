@@ -9,50 +9,50 @@
 #include "Shader.h"
 
  /// @brief ループ用インクリメント
-EShaderStage operator++(EShaderStage& value) {
+ShaderStage operator++(ShaderStage& value) {
 	int result = static_cast<int>(value) + 1;
-	if (result > static_cast<int>(EShaderStage::MAX)) {
-		value = EShaderStage::VS;
-		return EShaderStage::VS;
+	if (result > static_cast<int>(ShaderStage::MAX)) {
+		value = ShaderStage::VS;
+		return ShaderStage::VS;
 	}
 	else {
-		value = static_cast<EShaderStage>(result);
+		value = static_cast<ShaderStage>(result);
 		return value;
 	}
 }
 /// @brief ループ用インクリメント
-EShaderStage operator++(EShaderStage& value, int) {
+ShaderStage operator++(ShaderStage& value, int) {
 	int result = static_cast<int>(value) + 1;
-	if (result > static_cast<int>(EShaderStage::MAX)) {
-		value = EShaderStage::VS;
-		return EShaderStage::VS;
+	if (result > static_cast<int>(ShaderStage::MAX)) {
+		value = ShaderStage::VS;
+		return ShaderStage::VS;
 	}
 	else {
-		value = static_cast<EShaderStage>(result);
-		return static_cast<EShaderStage>(result);
+		value = static_cast<ShaderStage>(result);
+		return static_cast<ShaderStage>(result);
 	}
 }
 /// @brief シェーダーステージフラグ用論理和
-std::uint32_t operator|(const EShaderStageFlags& l, const EShaderStageFlags& r) {
+std::uint32_t operator|(const ShaderStageFlags& l, const ShaderStageFlags& r) {
 	return static_cast<std::uint32_t>(l) | static_cast<std::uint32_t>(r);
 }
 /// @brief シェーダーステージフラグ用論理和
-std::uint32_t operator|(const std::uint32_t& l, const EShaderStageFlags& r) {
+std::uint32_t operator|(const std::uint32_t& l, const ShaderStageFlags& r) {
 	return l | static_cast<std::uint32_t>(r);
 }
 
 /// @brief 
 /// @param shaderStage 
 /// @return 
-constexpr EShaderStageFlags ConvertShaderStage2Flags(const EShaderStage& shaderStage) {
+constexpr ShaderStageFlags ConvertShaderStage2Flags(const ShaderStage& shaderStage) {
 	switch (shaderStage) {
-	case EShaderStage::VS: return EShaderStageFlags::VS;
-	case EShaderStage::GS: return EShaderStageFlags::GS;
-	case EShaderStage::DS: return EShaderStageFlags::DS;
-	case EShaderStage::HS: return EShaderStageFlags::HS;
-	case EShaderStage::PS: return EShaderStageFlags::PS;
-	case EShaderStage::CS: return EShaderStageFlags::CS;
-	default:			   return EShaderStageFlags::NONE;
+	case ShaderStage::VS: return ShaderStageFlags::VS;
+	case ShaderStage::GS: return ShaderStageFlags::GS;
+	case ShaderStage::DS: return ShaderStageFlags::DS;
+	case ShaderStage::HS: return ShaderStageFlags::HS;
+	case ShaderStage::PS: return ShaderStageFlags::PS;
+	case ShaderStage::CS: return ShaderStageFlags::CS;
+	default:			   return ShaderStageFlags::NONE;
 	}
 }
 /// @brief シェーダーステージがフラグに含まれているか
@@ -60,6 +60,6 @@ constexpr EShaderStageFlags ConvertShaderStage2Flags(const EShaderStage& shaderS
 /// @param shaderStageFlags シェーダーステージフラグ
 /// @param shaderStage シェーダーステージ
 /// @return 含まれているならTRUE
-bool hasStaderStage(const std::uint32_t& shaderStageFlags, const EShaderStage& shaderStage) {
+bool hasStaderStage(const std::uint32_t& shaderStageFlags, const ShaderStage& shaderStage) {
 	return shaderStageFlags & static_cast<std::uint32_t>(ConvertShaderStage2Flags(shaderStage));
 }

@@ -87,5 +87,5 @@ public:
 
 	VertexData			m_vertexData;
 	IndexData			m_indexData;
-	EPrimitiveTopology	m_topology;
+	PrimitiveTopology	m_topology;
 };

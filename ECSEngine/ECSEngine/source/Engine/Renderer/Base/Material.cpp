@@ -14,14 +14,14 @@ Material::Material(const MaterialID& id, const std::string& name, const Shader& 
 	m_id(id),
 	m_name(name),
 	m_isTransparent(false),
-	m_blendState(EBlendState::NONE),
-	m_depthStencilState(EDepthStencilState::ENABLE_TEST_AND_ENABLE_WRITE),
-	m_rasterizeState(ERasterizeState::CULL_BACK),
+	m_blendState(BlendState::NONE),
+	m_depthStencilState(DepthStencilState::ENABLE_TEST_AND_ENABLE_WRITE),
+	m_rasterizeState(RasterizeState::CULL_BACK),
 	m_shaderID(shader.m_id),
 	m_shaderType(shader.m_type)
 {
 	// シェーダからマテリアルデータを生成
-	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (ShaderStage stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		//--- CBuffer確保
 		auto stageIndex = static_cast<size_t>(stage);
@@ -68,7 +68,7 @@ Material::Material(const MaterialID& id, const std::string& name, const Shader& 
 		for (const auto& smp : shader.m_samplerBindDatas[stageIndex])
 		{
 			m_samplerData[stageIndex][smp.second.slot].name = smp.second.name;
-			m_samplerData[stageIndex][smp.second.slot].state = ESamplerState::NONE;
+			m_samplerData[stageIndex][smp.second.slot].state = SamplerState::NONE;
 		}
 	}
 }
@@ -88,7 +88,7 @@ void Material::setData(const char* name, const void* data)
 	}
 
 	//// 検索
-	//for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	//for (ShaderStage stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	//{
 	//	auto stageIndex = static_cast<size_t>(stage);
 	//	for (const auto& cbLayout : m_pShader->m_cbufferLayouts[stageIndex])
@@ -126,7 +126,7 @@ void* Material::getData(const char* name)
 	return nullptr;
 
 	//// 検索
-	//for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	//for (ShaderStage stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	//{
 	//	auto stageIndex = static_cast<size_t>(stage);
 	//	for (const auto& cbLayout : m_pShader->m_cbufferLayouts[stageIndex])
@@ -151,7 +151,7 @@ void* Material::getData(const char* name)
 void Material::setTexture(const char* name, const TextureID textureID)
 {
 	// 検索
-	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (ShaderStage stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<size_t>(stage);
 		for (auto& texData : m_textureData[stageIndex])
@@ -169,7 +169,7 @@ void Material::setTexture(const char* name, const TextureID textureID)
 TextureID Material::getTexture(const char* name)
 {
 	// 検索
-	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (ShaderStage stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<size_t>(stage);
 		for (const auto& texData : m_textureData[stageIndex])
@@ -183,10 +183,10 @@ TextureID Material::getTexture(const char* name)
 }
 
 /// @brief サンプラ設定
-void Material::setSampler(const char* name, const ESamplerState sampler)
+void Material::setSampler(const char* name, const SamplerState sampler)
 {
 	// 検索
-	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (ShaderStage stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<size_t>(stage);
 		for (auto& samData : m_samplerData[stageIndex])
@@ -201,10 +201,10 @@ void Material::setSampler(const char* name, const ESamplerState sampler)
 }
 
 /// @brief サンプラ取得
-ESamplerState Material::getSampler(const char* name)
+SamplerState Material::getSampler(const char* name)
 {
 	// 検索
-	for (EShaderStage stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (ShaderStage stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<size_t>(stage);
 		for (auto& samData : m_samplerData[stageIndex])

@@ -378,7 +378,7 @@ void IBulletDebugDrawDX11::Setup(D3D11RendererManager* renderer)
 	// シェーダー
 	ShaderDesc shaderDesc;
 	shaderDesc.m_name = "BtLine";
-	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
+	shaderDesc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 	auto shaderID = renderer->createShader(shaderDesc);
 	m_pShader = static_cast<D3D11Shader*>(renderer->getShader(shaderID));
 
@@ -431,7 +431,7 @@ void IBulletDebugDrawDX11::FlushLine()
 	m_pContext->IASetVertexBuffers(0, 1, vb, &stride, &offset);
 
 	// プリミティブ形状
-	m_renderer->setD3D11PrimitiveTopology(EPrimitiveTopology::LINE_LIST);
+	m_renderer->setD3D11PrimitiveTopology(PrimitiveTopology::LINE_LIST);
 
 	//ポリゴン描画
 	m_pContext->Draw(aLine.size() * 2, 0);

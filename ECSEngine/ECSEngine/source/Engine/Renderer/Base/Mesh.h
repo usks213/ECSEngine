@@ -27,7 +27,7 @@ public:
 		m_id(id),
 		m_vertexCount(0),
 		m_indexCount(0),
-		m_topology(EPrimitiveTopology::TRIANGLE_STRIP)
+		m_topology(PrimitiveTopology::TRIANGLE_STRIP)
 	{}
 
 public:
@@ -55,5 +55,5 @@ public:
 	std::vector<float>			m_heightData;
 
 	AABB						m_aabb;
-	EPrimitiveTopology			m_topology;
+	PrimitiveTopology			m_topology;
 };

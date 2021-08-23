@@ -112,7 +112,7 @@ void RenderPipeline::beginPass(Camera& camera)
 	dirLit.direction = Vector4(1.f, -1.5f, -1.f, 1.0f);
 
 	// システムバッファの設定
-	D3D::SystemBuffer sysBuffer;
+	SHADER::SystemBuffer sysBuffer;
 	sysBuffer._mView = camera.view.Transpose();
 	if (camera.isOrthographic)
 		sysBuffer._mProj = camera.projection2d.Transpose();
@@ -363,8 +363,8 @@ void RenderPipeline::opaquePass(Camera& camera)
 	renderer->setD3DTransformBuffer(matrix);
 	
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, ShaderStage::PS);
-	renderer->setD3D11Sampler(D3D::SHADER_SS_SLOT_SKYBOX, SamplerState::ANISOTROPIC_WRAP, ShaderStage::PS);
+	renderer->setTexture(SHADER::SHADER_TEX_SLOT_SKYBOX, skytexID, ShaderStage::PS);
+	renderer->setD3D11Sampler(SHADER::SHADER_SS_SLOT_SKYBOX, SamplerState::ANISOTROPIC_WRAP, ShaderStage::PS);
 
 	// 描画
 	renderer->d3dRender(m_quadRb);

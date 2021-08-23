@@ -25,7 +25,7 @@ void Geometry::Quad(Mesh& out)
 	const std::uint32_t QUAD_VERTEX = (4);
 
 	// プリミティブ設定
-	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
+	out.m_topology = PrimitiveTopology::TRIANGLE_STRIP;
 
 	VERTEX_3D	vertexWk[QUAD_VERTEX];	// 頂点情報格納ワーク
 
@@ -82,7 +82,7 @@ void Geometry::Plane(Mesh& out, int split, float size, float texSize)
 	float fTexSizeZ = texSize;
 
 	// プリミティブ種別設定
-	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
+	out.m_topology = PrimitiveTopology::TRIANGLE_STRIP;
 	// 頂点数の設定
 	out.m_vertexCount = (nNumBlockX + 1) * (nNumBlockZ + 1);
 	// インデックス数の設定(縮退ポリゴン用を考慮する)
@@ -159,7 +159,7 @@ void Geometry::Cube(Mesh& out)
 	const std::uint32_t CUBE_INDEX = (36);
 
 	// プリミティブ設定
-	out.m_topology = EPrimitiveTopology::TRIANGLE_LIST;
+	out.m_topology = PrimitiveTopology::TRIANGLE_LIST;
 
 	VERTEX_3D	vertexWk[CUBE_VERTEX];	// 頂点情報格納ワーク
 	std::uint32_t			indexWk[CUBE_INDEX];	// インデックス格納ワーク
@@ -280,7 +280,7 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 	float nNumBlockY = nSplit;
 
 	// プリミティブ種別設定
-	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
+	out.m_topology = PrimitiveTopology::TRIANGLE_STRIP;
 	// 頂点数の設定
 	std::uint32_t nNumVertex = (nNumBlockX + 1) * (nNumBlockY + 1);
 	// インデックス数の設定(縮退ポリゴン用を考慮する)
@@ -372,7 +372,7 @@ void Geometry::Sphere(Mesh& out, int nSplit, float fSize, float fTexSize)
 void Geometry::SkyDome(Mesh& out, int nSegment, float fTexSplit)
 {
 	// プリミティブ種別設定
-	out.m_topology = EPrimitiveTopology::TRIANGLE_LIST;
+	out.m_topology = PrimitiveTopology::TRIANGLE_LIST;
 	float fScale = 0.5f;
 
 	//頂点バッファ作成
@@ -465,7 +465,7 @@ void Geometry::Terrain(Mesh& out, int split, float height, float texSize)
 	float fTexSizeZ = 1.0f / split * texSize;
 
 	// プリミティブ種別設定
-	out.m_topology = EPrimitiveTopology::TRIANGLE_STRIP;
+	out.m_topology = PrimitiveTopology::TRIANGLE_STRIP;
 	// 頂点数の設定
 	out.m_vertexCount = (nNumBlockX + 1) * (nNumBlockZ + 1);
 	out.m_heightWidth = nNumBlockX + 1;

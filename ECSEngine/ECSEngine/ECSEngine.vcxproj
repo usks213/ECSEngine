@@ -208,6 +208,7 @@
     <ClCompile Include="source\Engine\Renderer\Base\Material.cpp" />
     <ClCompile Include="source\Engine\Renderer\Base\RendererManager.cpp" />
     <ClCompile Include="source\Engine\Renderer\Base\Shader.cpp" />
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Buffer.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11DepthStencil.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Material.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RenderBuffer.cpp" />
@@ -215,6 +216,7 @@
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11RenderTarget.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Shader.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Texture.cpp" />
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Utility.cpp" />
     <ClCompile Include="source\Engine\Utility\Input.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -276,8 +278,8 @@
     <ClInclude Include="source\Engine\OS\Base\WindowManager.h" />
     <ClInclude Include="source\Engine\OS\Win\WindowsWindow.h" />
     <ClInclude Include="source\Engine\Renderer\Base\BatchGroup.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\Buffer.h" />
     <ClInclude Include="source\Engine\Renderer\Base\CommonState.h" />
-    <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h" />
     <ClInclude Include="source\Engine\Renderer\Base\DepthStencil.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Geometry.h" />
     <ClInclude Include="source\Engine\Renderer\Base\LightData.h" />
@@ -287,9 +289,11 @@
     <ClInclude Include="source\Engine\Renderer\Base\RendererManager.h" />
     <ClInclude Include="source\Engine\Renderer\Base\RenderTarget.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Shader.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\ShaderResource.h" />
     <ClInclude Include="source\Engine\Renderer\Base\SubResource.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Texture.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Vertex.h" />
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Buffer.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11DepthStencil.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Material.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RenderBuffer.h" />

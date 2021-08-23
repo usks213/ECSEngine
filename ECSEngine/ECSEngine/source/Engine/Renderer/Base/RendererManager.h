@@ -49,7 +49,7 @@ public:
 	/// @param slot スロット
 	/// @param textureID テクスチャID
 	/// @param stage シェーダーステージ
-	virtual void setTexture(std::uint32_t slot, const TextureID& textureID, EShaderStage stage) = 0;
+	virtual void setTexture(std::uint32_t slot, const TextureID& textureID, ShaderStage stage) = 0;
 
 	virtual void setViewport(Viewport viewport) = 0;
 

@@ -195,7 +195,7 @@ void PhysicsTestWorld::Start()
 	ShaderDesc shaderDesc;
 	//shaderDesc.m_name = "Lit";
 	shaderDesc.m_name = "GBuffer";
-	shaderDesc.m_stages = EShaderStageFlags::VS | EShaderStageFlags::PS;
+	shaderDesc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 	ShaderID shaderLitID = renderer->createShader(shaderDesc);
 
 	shaderDesc.m_name = "Unlit";
@@ -207,11 +207,11 @@ void PhysicsTestWorld::Start()
 	// マテリアルの作成
 	auto matLitID = renderer->createMaterial("Lit", shaderLitID);
 	Material* mat = renderer->getMaterial(matLitID);
-	//mat->m_rasterizeState = ERasterizeState::CULL_FRONT;
+	//mat->m_rasterizeState = RasterizeState::CULL_FRONT;
 
 	auto matUnlitID = renderer->createMaterial("Unlit", shaderUnlitID);
 	Material* unlit = renderer->getMaterial(matUnlitID);
-	//unlit->m_rasterizeState = ERasterizeState::CULL_FRONT;
+	//unlit->m_rasterizeState = RasterizeState::CULL_FRONT;
 
 	auto matSkyID = renderer->createMaterial("SkyDome", shaderSkyID);
 	Material* skyMat = renderer->getMaterial(matSkyID);
@@ -231,12 +231,12 @@ void PhysicsTestWorld::Start()
 	// テクスチャの読み込み
 	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
 	//auto texID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(D3D::SHADER_TEX_SLOT_MAIN, texID, EShaderStage::PS);
+	renderer->setTexture(SHADER::SHADER_TEX_SLOT_MAIN, texID, ShaderStage::PS);
 	mat->setTexture("_MainTexture", texID);
 	unlit->setTexture("_MainTexture", texID);
 
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(D3D::SHADER_TEX_SLOT_SKYBOX, skytexID, EShaderStage::PS);
+	renderer->setTexture(SHADER::SHADER_TEX_SLOT_SKYBOX, skytexID, ShaderStage::PS);
 	skyMat->setTexture("_SkyTexture", skytexID);
 
 	// メッシュの生成

@@ -38,7 +38,7 @@ namespace {
 /// @param desc シェーダ情報
 D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID& id) :
 	Shader(desc, id),
-	m_comShaders(static_cast<size_t>(EShaderStage::MAX)),
+	m_comShaders(static_cast<size_t>(ShaderStage::MAX)),
 	m_inputLayout(),
 	vs(nullptr),
 	gs(nullptr),
@@ -53,15 +53,15 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 	}
 
 	// コンパイルしたシェーダデータ
-	std::vector<ComPtr<ID3DBlob>>				blobs(static_cast<size_t>(EShaderStage::MAX));
+	std::vector<ComPtr<ID3DBlob>>				blobs(static_cast<size_t>(ShaderStage::MAX));
 	// シェーダリフレクション
-	std::vector<ComPtr<ID3D11ShaderReflection>>	reflections(static_cast<size_t>(EShaderStage::MAX));
+	std::vector<ComPtr<ID3D11ShaderReflection>>	reflections(static_cast<size_t>(ShaderStage::MAX));
 	// シェーダ情報一時格納用
 	D3D11_SHADER_DESC							shaderDesc = {};
 
 
 	// シェーダステージ数だけコンパイルを試す
-	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (auto stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		// ステージがない場合はスキップ
 		if (!hasStaderStage(desc.m_stages, stage)) continue;
@@ -114,10 +114,10 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 	}
 
 	// 頂点シェーダがある場合はインプットレイアウトを作成
-	auto& vsReflection = reflections[static_cast<size_t>(EShaderStage::VS)];
+	auto& vsReflection = reflections[static_cast<size_t>(ShaderStage::VS)];
 	if (vsReflection)
 	{
-		auto& vsBlob = blobs[static_cast<size_t>(EShaderStage::VS)];
+		auto& vsBlob = blobs[static_cast<size_t>(ShaderStage::VS)];
 		vsReflection->GetDesc(&shaderDesc);
 		std::vector<D3D11_INPUT_ELEMENT_DESC> inputLayouts(shaderDesc.InputParameters);
 
@@ -208,7 +208,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 
 	// コンスタント・テクスチャ・サンプラの作成
 	D3D11_SHADER_BUFFER_DESC shaderBufferDesc = {};
-	for (auto stage = EShaderStage::VS; stage < EShaderStage::MAX; ++stage)
+	for (auto stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		const auto& stageIndex = static_cast<size_t>(stage);
 		const auto& reflection = reflections[stageIndex];
@@ -226,16 +226,16 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 
 			// 共通の定数バッファは飛ばす??
 			std::string cbName = shaderBufferDesc.Name;
-			if (cbName == D3D::SHADER_CB_NAME_SYSTEM ||
-				cbName == D3D::SHADER_CB_NAME_TRANSFORM ||
-				cbName == D3D::SHADER_CB_NAME_MATERIAL)
+			if (cbName == SHADER::SHADER_CB_NAME_SYSTEM ||
+				cbName == SHADER::SHADER_CB_NAME_TRANSFORM ||
+				cbName == SHADER::SHADER_CB_NAME_MATERIAL)
 			{
 				++slotOffset;
 				continue;
 			}
 
 			// Gbufferシェーダーの場合
-			if (cbName == D3D::SHADER_CB_NAME_GBUFFER)
+			if (cbName == SHADER::SHADER_CB_NAME_GBUFFER)
 			{
 				m_type = ShaderType::Deferred;
 			}
@@ -284,9 +284,9 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 			{
 			case D3D_SIT_TEXTURE:
 				// 共通リソースはスキップ
-				if (//shaderInputBindDesc.BindPoint == D3D::SHADER_TEX_SLOT_MAIN		||
-					shaderInputBindDesc.BindPoint == D3D::SHADER_TEX_SLOT_SHADOW ||
-					shaderInputBindDesc.BindPoint == D3D::SHADER_TEX_SLOT_SKYBOX) continue;
+				if (//shaderInputBindDesc.BindPoint == SHADER::SHADER_TEX_SLOT_MAIN		||
+					shaderInputBindDesc.BindPoint == SHADER::SHADER_TEX_SLOT_SHADOW ||
+					shaderInputBindDesc.BindPoint == SHADER::SHADER_TEX_SLOT_SKYBOX) continue;
 				m_textureBindDatas[stageIndex][shaderInputBindDesc.BindPoint].name = shaderInputBindDesc.Name;
 				m_textureBindDatas[stageIndex][shaderInputBindDesc.BindPoint].slot = shaderInputBindDesc.BindPoint;
 				m_textureBindDatas[stageIndex][shaderInputBindDesc.BindPoint].stage = stage;
@@ -294,9 +294,9 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 
 			case D3D_SIT_SAMPLER:
 				// 共通リソースはスキップ
-				if (shaderInputBindDesc.BindPoint == D3D::SHADER_SS_SLOT_MAIN		||
-					shaderInputBindDesc.BindPoint == D3D::SHADER_SS_SLOT_SHADOW ||
-					shaderInputBindDesc.BindPoint == D3D::SHADER_SS_SLOT_SKYBOX) continue;
+				if (shaderInputBindDesc.BindPoint == SHADER::SHADER_SS_SLOT_MAIN		||
+					shaderInputBindDesc.BindPoint == SHADER::SHADER_SS_SLOT_SHADOW ||
+					shaderInputBindDesc.BindPoint == SHADER::SHADER_SS_SLOT_SKYBOX) continue;
 				m_samplerBindDatas[stageIndex][shaderInputBindDesc.BindPoint].name = shaderInputBindDesc.Name;
 				m_samplerBindDatas[stageIndex][shaderInputBindDesc.BindPoint].slot = shaderInputBindDesc.BindPoint;
 				m_samplerBindDatas[stageIndex][shaderInputBindDesc.BindPoint].stage = stage;
@@ -324,7 +324,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 /// @param device デバイス
 /// @param stage シェーダステージ
 /// @param blob コンパイルデータ
-void D3D11Shader::createShaderObjct(ID3D11Device1* device, const EShaderStage& stage, ComPtr<ID3DBlob>& blob)
+void D3D11Shader::createShaderObjct(ID3D11Device1* device, const ShaderStage& stage, ComPtr<ID3DBlob>& blob)
 {
 	// com参照
 	auto& shader = m_comShaders[static_cast<size_t>(stage)];
@@ -332,7 +332,7 @@ void D3D11Shader::createShaderObjct(ID3D11Device1* device, const EShaderStage& s
 	// シェーダ種別生成
 	switch (stage)
 	{
-	case EShaderStage::VS:
+	case ShaderStage::VS:
 	{
 		ID3D11VertexShader* d3d11Shader;
 		CHECK_FAILED(device->CreateVertexShader(blob->GetBufferPointer(), 
@@ -345,7 +345,7 @@ void D3D11Shader::createShaderObjct(ID3D11Device1* device, const EShaderStage& s
 		vs = d3d11Shader;
 	}
 		break;
-	case EShaderStage::GS:
+	case ShaderStage::GS:
 	{
 		ID3D11GeometryShader* d3d11Shader;
 		CHECK_FAILED(device->CreateGeometryShader(blob->GetBufferPointer(),
@@ -358,7 +358,7 @@ void D3D11Shader::createShaderObjct(ID3D11Device1* device, const EShaderStage& s
 		gs = d3d11Shader;
 	}
 		break;
-	case EShaderStage::DS:
+	case ShaderStage::DS:
 	{
 		ID3D11DomainShader* d3d11Shader;
 		CHECK_FAILED(device->CreateDomainShader(blob->GetBufferPointer(),
@@ -371,7 +371,7 @@ void D3D11Shader::createShaderObjct(ID3D11Device1* device, const EShaderStage& s
 		ds = d3d11Shader;
 	}
 		break;
-	case EShaderStage::HS:
+	case ShaderStage::HS:
 	{
 		ID3D11HullShader* d3d11Shader;
 		CHECK_FAILED(device->CreateHullShader(blob->GetBufferPointer(),
@@ -384,7 +384,7 @@ void D3D11Shader::createShaderObjct(ID3D11Device1* device, const EShaderStage& s
 		hs = d3d11Shader;
 	}
 		break;
-	case EShaderStage::PS:
+	case ShaderStage::PS:
 	{
 		ID3D11PixelShader* d3d11Shader;
 		CHECK_FAILED(device->CreatePixelShader(blob->GetBufferPointer(),
@@ -397,7 +397,7 @@ void D3D11Shader::createShaderObjct(ID3D11Device1* device, const EShaderStage& s
 		ps = d3d11Shader;
 	}
 		break;
-	case EShaderStage::CS:
+	case ShaderStage::CS:
 	{
 		ID3D11ComputeShader* d3d11Shader;
 		CHECK_FAILED(device->CreateComputeShader(blob->GetBufferPointer(),

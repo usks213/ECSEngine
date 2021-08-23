@@ -224,6 +224,12 @@
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11DepthStencil.cpp">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Buffer.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Utility.cpp">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -243,9 +249,6 @@
     </ClInclude>
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11RendererManager.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Engine\Renderer\Base\D3DUtility.h">
-      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClInclude>
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Shader.h">
       <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
@@ -483,6 +486,15 @@
     </ClInclude>
     <ClInclude Include="source\Engine\ECS\ComponentData\LightComponentData.h">
       <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\Buffer.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Buffer.h">
+      <Filter>ソース ファイル\Engine\Renderer\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\ShaderResource.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

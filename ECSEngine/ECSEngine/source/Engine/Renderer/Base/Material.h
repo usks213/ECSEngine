@@ -40,11 +40,11 @@ public:
 	/// @brief 半透明フラグ
 	bool				m_isTransparent;
 	/// @brief ブレンドステート(半透明のみ)
-	EBlendState			m_blendState;
+	BlendState			m_blendState;
 	/// @brief 深度ステンシルステート
-	EDepthStencilState	m_depthStencilState;
+	DepthStencilState	m_depthStencilState;
 	/// @brief ラスタライザステート
-	ERasterizeState		m_rasterizeState;
+	RasterizeState		m_rasterizeState;
 	/// @brief シェーダID
 	ShaderID			m_shaderID;
 	/// @brief シェーダータイプ
@@ -69,18 +69,18 @@ public:
 	struct SamplerData
 	{
 		std::string		name;
-		ESamplerState	state;
+		SamplerState	state;
 	};
 
 	/// @brief 全ステージ、スロット分のCBufferデータ
 	std::array<std::unordered_map<std::uint32_t, CBuffer>,
-		static_cast<size_t>(EShaderStage::MAX)>	m_cbufferData;
+		static_cast<size_t>(ShaderStage::MAX)>	m_cbufferData;
 	/// @brief 全ステージ、スロットのバインドするテクスチャ
 	std::array<std::unordered_map<std::uint32_t, TextureData>,
-		static_cast<size_t>(EShaderStage::MAX)>	m_textureData;
+		static_cast<size_t>(ShaderStage::MAX)>	m_textureData;
 	/// @brief 全ステージ、スロット分のサンプラステート
 	std::array<std::unordered_map<std::uint32_t, SamplerData>,
-		static_cast<size_t>(EShaderStage::MAX)>	m_samplerData;
+		static_cast<size_t>(ShaderStage::MAX)>	m_samplerData;
 
 	/// @brief CBuffer変数データ
 	std::unordered_map<std::string, Shader::CBufferVariable> m_cbufferVariable;
@@ -111,10 +111,10 @@ public:
     TextureID getTexture(const char* name);
 
     /// @brief サンプラ設定
-    void setSampler(const char* name, const ESamplerState sampler);
+    void setSampler(const char* name, const SamplerState sampler);
 
     /// @brief サンプラ取得
-    ESamplerState getSampler(const char* name);
+    SamplerState getSampler(const char* name);
 
 	/// @brief データ取得
 	void* getData(const char* name);
