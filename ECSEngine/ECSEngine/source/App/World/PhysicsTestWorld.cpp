@@ -33,6 +33,7 @@
 #include <Engine/Renderer/Base/Geometry.h>
 #include <Engine/Renderer/D3D11/D3D11Utility.h>
 
+#include "../Model.h"
 
 
 using namespace ecs;
@@ -193,8 +194,8 @@ void PhysicsTestWorld::Start()
 
 	// シェーダ読み込み
 	ShaderDesc shaderDesc;
-	//shaderDesc.m_name = "Lit";
-	shaderDesc.m_name = "GBuffer";
+	shaderDesc.m_name = "Lit";
+	//shaderDesc.m_name = "GBuffer";
 	shaderDesc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 	ShaderID shaderLitID = renderer->createShader(shaderDesc);
 
@@ -257,13 +258,17 @@ void PhysicsTestWorld::Start()
 	auto* pPlaneMesh = renderer->getMesh(meshPlane);
 	Geometry::Terrain(*pPlaneMesh, 20, 5, 5);
 
+	// FBX読み込み
+	Model::FBXModelData fbxData;
+	Model::LoadFBXModel("data/model/cat.fbx", fbxData);
+
 	// レンダーバッファの生成
 	auto rdID = renderer->createRenderBuffer(shaderLitID, meshID);
 	auto rdskyID = renderer->createRenderBuffer(shaderSkyID, meshSky);
 
 	// バッチデータの作成
-	auto objBitchID = renderer->creatBatchGroup(matLitID, meshID);
-	auto sphereBitchID = renderer->creatBatchGroup(matLitID, sphereID);
+	auto objBitchID = renderer->creatBatchGroup(matLitID, fbxData.meshID);
+	auto sphereBitchID = renderer->creatBatchGroup(matLitID, fbxData.meshID);
 	auto planeBitchID = renderer->creatBatchGroup(matLitID, meshPlane);
 
 
@@ -336,6 +341,10 @@ void PhysicsTestWorld::Start()
 	getGameObjectManager()->setComponentData<Transform>(Stage, Transform(Stage, pos, rot, scale));
 	getGameObjectManager()->setComponentData(Stage, Collider(Collider::ColliderType::BOX));
 	getGameObjectManager()->setComponentData(Stage, Rigidbody(0.0f));
+	/*RenderData fbxRD;
+	fbxRD.meshID = fbxData.meshID;
+	fbxRD.materialID = matLitID;
+	getGameObjectManager()->setComponentData(Stage, fbxRD);*/
 
 
 	//// 杭

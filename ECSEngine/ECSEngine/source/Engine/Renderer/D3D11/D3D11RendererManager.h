@@ -147,7 +147,8 @@ public:
 		ComPtr<ID3D11ShaderResourceView>	m_positionSRV;			// ÉèÅ[ÉãÉhç¿ïWSRV
 	};
 	GBuffer								m_gbuffer;
-	DXGI_FORMAT							m_gbufferFormat;
+	DXGI_FORMAT							m_diffuseFormat;
+	DXGI_FORMAT							m_normalFormat;
 
 	std::uint32_t						m_backBufferCount;
 	int									m_nOutputWidth;

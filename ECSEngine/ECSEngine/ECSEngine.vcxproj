@@ -181,6 +181,7 @@
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="lib\WICTextureLoader\WICTextureLoader11.cpp" />
     <ClCompile Include="source\App\main.cpp" />
+    <ClCompile Include="source\App\Model.cpp" />
     <ClCompile Include="source\App\World\DevelopWorld.cpp" />
     <ClCompile Include="source\App\World\PhysicsTestWorld.cpp" />
     <ClCompile Include="source\Engine\Asset\AssetManager.cpp" />
@@ -217,6 +218,7 @@
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Shader.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Texture.cpp" />
     <ClCompile Include="source\Engine\Renderer\D3D11\D3D11Utility.cpp" />
+    <ClCompile Include="source\Engine\Utility\FBXParser.cpp" />
     <ClCompile Include="source\Engine\Utility\Input.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -238,6 +240,7 @@
     <ClInclude Include="lib\imgui\imstb_truetype.h" />
     <ClInclude Include="lib\WICTextureLoader\WICTextureLoader11.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="source\App\Model.h" />
     <ClInclude Include="source\App\World\DevelopWorld.h" />
     <ClInclude Include="source\App\World\PhysicsTestWorld.h" />
     <ClInclude Include="source\Engine\Asset\Asset.h" />
@@ -303,6 +306,7 @@
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Texture.h" />
     <ClInclude Include="source\Engine\Renderer\D3D11\D3D11Utility.h" />
     <ClInclude Include="source\Engine\Utility\ConstexprMap.h" />
+    <ClInclude Include="source\Engine\Utility\FBXParser.h" />
     <ClInclude Include="source\Engine\Utility\HashUtil.h" />
     <ClInclude Include="source\Engine\Utility\Input.h" />
     <ClInclude Include="source\Engine\Utility\Mathf.h" />

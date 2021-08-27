@@ -77,7 +77,8 @@ namespace {
 D3D11RendererManager::D3D11RendererManager() :
 	m_backBufferFormat(DXGI_FORMAT_R8G8B8A8_UNORM), 
 	m_depthStencilFormat(DXGI_FORMAT_D32_FLOAT),
-	m_gbufferFormat(DXGI_FORMAT_R16G16B16A16_FLOAT),
+	m_diffuseFormat(DXGI_FORMAT_R8G8B8A8_UNORM),
+	m_normalFormat(DXGI_FORMAT_R16G16B16A16_FLOAT),
 	m_backBufferCount(2),
 	m_nOutputWidth(1), 
 	m_nOutputHeight(1),
@@ -574,7 +575,7 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 	// テクスチャ2D
 	D3D11_TEXTURE2D_DESC renderTexture;
 	m_backBufferRT->GetDesc(&renderTexture);
-	renderTexture.Format = m_gbufferFormat;
+	renderTexture.Format = m_diffuseFormat;
 	renderTexture.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 	hr = m_d3dDevice->CreateTexture2D(
 		&renderTexture,
@@ -583,14 +584,14 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 	);
 	CHECK_FAILED(hr);
 	// レンダラーターゲットビュー
-	rtvDesc.Format = m_gbufferFormat;
+	rtvDesc.Format = m_diffuseFormat;
 	hr = m_d3dDevice->CreateRenderTargetView(
 		m_gbuffer.m_diffuseRT.Get(),
 		&rtvDesc,
 		m_gbuffer.m_diffuseRTV.ReleaseAndGetAddressOf());
 	CHECK_FAILED(hr);
 	// シェーダーリソース
-	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D, m_gbufferFormat);
+	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D, m_diffuseFormat);
 	if (m_bUseMSAA) srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 	hr = m_d3dDevice->CreateShaderResourceView(
 		m_gbuffer.m_diffuseRT.Get(),
@@ -601,6 +602,7 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 
 	//--- ワールド法線バッファ
 	// テクスチャ2D
+	renderTexture.Format = m_normalFormat;
 	hr = m_d3dDevice->CreateTexture2D(
 		&renderTexture,
 		nullptr,
@@ -608,12 +610,14 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 	);
 	CHECK_FAILED(hr);
 	// レンダラーターゲットビュー
+	rtvDesc.Format = m_normalFormat;
 	hr = m_d3dDevice->CreateRenderTargetView(
 		m_gbuffer.m_normalRT.Get(),
 		&rtvDesc,
 		m_gbuffer.m_normalRTV.ReleaseAndGetAddressOf());
 	CHECK_FAILED(hr);
 	// シェーダーリソース
+	srvDesc.Format = m_normalFormat;
 	hr = m_d3dDevice->CreateShaderResourceView(
 		m_gbuffer.m_normalRT.Get(),
 		&srvDesc,
