@@ -312,21 +312,24 @@ bool FBXParser::Load(const char* filename)
 	}
 
 	// ƒeƒNƒXƒ`ƒƒ‚Ì“Ç‚İ‚İ
-	ptr = FindKeyword(ptr, "Texture:");
 	if (ptr != nullptr)
 	{
-		char* pTex = ptr;
-		pTex = FindKeyword(pTex, "FileName: \"");
-		// ‰½•¶š‚ ‚é‚©ŒvZ
-		char* pEnd = FindKeyword(pTex, "\"") - 1;
-		int textLen = pEnd - pTex;
-		// ƒƒ‚ƒŠŠm•Û
-		std::unique_ptr<char[]> pData = std::make_unique<char[]>(textLen + 1);
-		memcpy(pData.get(), pTex, textLen);
-		pData[textLen] = '\0';
-		// Ši”[
-		m_texList.push_back(pData.get());
+		ptr = FindKeyword(ptr, "Texture:");
+		if (ptr != nullptr)
+		{
+			char* pTex = ptr;
+			pTex = FindKeyword(pTex, "FileName: \"");
+			// ‰½•¶š‚ ‚é‚©ŒvZ
+			char* pEnd = FindKeyword(pTex, "\"") - 1;
+			int textLen = pEnd - pTex;
+			// ƒƒ‚ƒŠŠm•Û
+			std::unique_ptr<char[]> pData = std::make_unique<char[]>(textLen + 1);
+			memcpy(pData.get(), pTex, textLen);
+			pData[textLen] = '\0';
+			// Ši”[
+			m_texList.push_back(pData.get());
 
+		}
 	}
 
 

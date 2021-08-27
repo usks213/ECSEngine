@@ -46,26 +46,35 @@ bool Model::LoadFBXModel(const char* fileName, FBXModelData& out)
 	{
 		// 座標
 		int idx = pIdx[i] * 3;
-		Vector3 pos;
-		pos.x = pPos[idx + 0];
-		pos.y = pPos[idx + 1];
-		pos.z = pPos[idx + 2];
-		pMesh->m_vertexData.positions[nVtxNum - 1 - i] = pos;
+		if (pPos)
+		{
+			Vector3 pos;
+			pos.x = pPos[idx + 0];
+			pos.y = pPos[idx + 1];
+			pos.z = pPos[idx + 2];
+			pMesh->m_vertexData.positions[nVtxNum - 1 - i] = pos;
+		}
 		// 法線
-		Vector3 nrm;
-		nrm.x = pNrm[idx + 0];
-		nrm.y = pNrm[idx + 1];
-		nrm.z = pNrm[idx + 2];
-		pMesh->m_vertexData.normals[nVtxNum - 1 - i] = nrm;
+		if (pNrm)
+		{
+			Vector3 nrm;
+			nrm.x = pNrm[idx + 0];
+			nrm.y = pNrm[idx + 1];
+			nrm.z = pNrm[idx + 2];
+			pMesh->m_vertexData.normals[nVtxNum - 1 - i] = nrm;
+		}
 		// カラー
 		Vector4 col(1,1,1,1);
 		pMesh->m_vertexData.colors[nVtxNum - 1 - i] = col;
 		// UV
-		idx = pUVIdx[i] * 2;
-		Vector2 uv;
-		uv.x = pUV[idx + 0];
-		uv.y = 1.0f -  pUV[idx + 1];
-		pMesh->m_vertexData.texcoord0s[nVtxNum - 1 - i] = uv;
+		if (pUV && pUVIdx)
+		{
+			idx = pUVIdx[i] * 2;
+			Vector2 uv;
+			uv.x = pUV[idx + 0];
+			uv.y = 1.0f - pUV[idx + 1];
+			pMesh->m_vertexData.texcoord0s[nVtxNum - 1 - i] = uv;
+		}
 	}
 
 	// インデックスなし

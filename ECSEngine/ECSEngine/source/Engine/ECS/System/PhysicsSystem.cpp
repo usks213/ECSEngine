@@ -281,21 +281,43 @@ void PhysicsSystem::CreatePhysicsData(const Transform& transform,
 		}
 
 		std::unique_ptr<btTriangleMesh> triangles = std::make_unique<btTriangleMesh>();
-		for (std::uint32_t i = 0; i < pMesh->m_indexCount - pMesh->m_indexCount % 3; i += 3) {
-			btVector3 v0, v1, v2;
-			v0 = btVector3(
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].x,
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].y,
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].z);
-			v1 = btVector3(
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].x,
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].y,
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].z);
-			v2 = btVector3(
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].x,
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].y,
-				pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].z);
-			triangles->addTriangle(v0, v1, v2);
+		if (pMesh->m_indexCount > 0)
+		{
+			for (std::uint32_t i = 0; i < pMesh->m_indexCount - pMesh->m_indexCount % 3; i += 3) {
+				btVector3 v0, v1, v2;
+				v0 = btVector3(
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].x,
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].y,
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 0]].z);
+				v1 = btVector3(
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].x,
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].y,
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 1]].z);
+				v2 = btVector3(
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].x,
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].y,
+					pMesh->m_vertexData.positions[pMesh->m_indexData[i + 2]].z);
+				triangles->addTriangle(v0, v1, v2);
+			}
+		}
+		else
+		{
+			for (std::uint32_t i = 0; i < pMesh->m_vertexCount - 2; ++i) {
+				btVector3 v0, v1, v2;
+				v0 = btVector3(
+					pMesh->m_vertexData.positions[i + 0].x,
+					pMesh->m_vertexData.positions[i + 0].y,
+					pMesh->m_vertexData.positions[i + 0].z);
+				v1 = btVector3(
+					pMesh->m_vertexData.positions[i + 1].x,
+					pMesh->m_vertexData.positions[i + 1].y,
+					pMesh->m_vertexData.positions[i + 1].z);
+				v2 = btVector3(
+					pMesh->m_vertexData.positions[i + 2].x,
+					pMesh->m_vertexData.positions[i + 2].y,
+					pMesh->m_vertexData.positions[i + 2].z);
+				triangles->addTriangle(v0, v1, v2);
+			}
 		}
 		std::unique_ptr<btConvexShape> convex = std::make_unique<btConvexTriangleMeshShape>(triangles.get());
 		std::unique_ptr<btShapeHull>   hull = std::make_unique<btShapeHull>(convex.get());
