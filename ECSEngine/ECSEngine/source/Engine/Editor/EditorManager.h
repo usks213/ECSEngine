@@ -48,6 +48,7 @@ private:
 
 	void EditTransform(ecs::World* pWorld, ecs::Camera& camera, ecs::Transform& transform);
 
+	void CreateFBX();
 private:
 	Engine* m_pEngine;
 	bool m_isRunTime;

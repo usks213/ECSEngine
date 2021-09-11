@@ -60,6 +60,8 @@ public:
 
 	void setD3DTransformBuffer(const Matrix& mtxWorld);
 
+	void setD3DLightBuffer(std::vector<PointLightData>& pointLights, std::vector<SpotLightData>& spotLights);
+
 	void d3dRender(const RenderBufferID& renderBufferID);
 
 	void d3dMap(ID3D11Resource* pResource, D3D11_MAP mapType, bool mapWait, SubResource& out);
@@ -174,8 +176,8 @@ private:
 
 	D3D11Shader*		m_curD3DShader;
 	MaterialID			m_curMaterial;
-	SamplerState		m_curSamplerState[static_cast<size_t>(ShaderStage::MAX)][SHADER::MAX_SAMPLER_SLOT_COUNT];
-	TextureID			m_curTexture[static_cast<size_t>(ShaderStage::MAX)][SHADER::MAX_TEXTURE_SLOT_COUNT];
+	SamplerState		m_curSamplerState[static_cast<size_t>(ShaderStage::MAX)][SHADER::MAX_SS_SLOT_COUNT];
+	TextureID			m_curTexture[static_cast<size_t>(ShaderStage::MAX)][SHADER::MAX_SRV_SLOT_COUNT];
 
 	ID3D11RenderTargetView* m_curRTV;
 	ID3D11DepthStencilView* m_curDSV;
@@ -183,5 +185,10 @@ private:
 	ComPtr<ID3D11Buffer> m_systemBuffer;
 	ComPtr<ID3D11Buffer> m_transformBuffer;
 	ComPtr<ID3D11Buffer> m_materialBuffer;
+
+	ComPtr<ID3D11Buffer> m_pointLightBuffer;
+	ComPtr<ID3D11Buffer> m_spotLightBuffer;
+	ComPtr<ID3D11ShaderResourceView> m_pointLightSRV;
+	ComPtr<ID3D11ShaderResourceView> m_spotLightSRV;
 
 };

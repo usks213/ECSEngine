@@ -182,6 +182,7 @@
     <ClCompile Include="lib\WICTextureLoader\WICTextureLoader11.cpp" />
     <ClCompile Include="source\App\main.cpp" />
     <ClCompile Include="source\App\Model.cpp" />
+    <ClCompile Include="source\App\System\DevelopSystem.cpp" />
     <ClCompile Include="source\App\World\DevelopWorld.cpp" />
     <ClCompile Include="source\App\World\PhysicsTestWorld.cpp" />
     <ClCompile Include="source\Engine\Asset\AssetManager.cpp" />
@@ -241,6 +242,7 @@
     <ClInclude Include="lib\WICTextureLoader\WICTextureLoader11.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="source\App\Model.h" />
+    <ClInclude Include="source\App\System\DevelopSystem.h" />
     <ClInclude Include="source\App\World\DevelopWorld.h" />
     <ClInclude Include="source\App\World\PhysicsTestWorld.h" />
     <ClInclude Include="source\Engine\Asset\Asset.h" />

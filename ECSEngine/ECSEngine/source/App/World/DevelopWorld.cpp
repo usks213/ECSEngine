@@ -223,12 +223,12 @@ void DevelopWorld::Start()
 	// テクスチャの読み込み
 	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
 	//auto texID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(SHADER::SHADER_TEX_SLOT_MAIN, texID, ShaderStage::PS);
+	renderer->setTexture(SHADER::SHADER_SRV_SLOT_MAINTEX, texID, ShaderStage::PS);
 	mat->setTexture("_MainTexture", texID);
 	unlit->setTexture("_MainTexture", texID);
 
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(SHADER::SHADER_TEX_SLOT_SKYBOX, skytexID, ShaderStage::PS);
+	renderer->setTexture(SHADER::SHADER_SRV_SLOT_SKYDOOM, skytexID, ShaderStage::PS);
 	skyMat->setTexture("_SkyTexture", skytexID);
 
 	// メッシュの生成

@@ -15,6 +15,7 @@ class Model
 public:
 	struct FBXModelData
 	{
+		std::string fileName;
 		MeshID meshID = NONE_MESH_ID;
 		TextureID textureID = NONE_TEXTURE_ID;
 	};

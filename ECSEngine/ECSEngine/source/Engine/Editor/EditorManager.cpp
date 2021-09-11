@@ -27,18 +27,20 @@
 
 #include <Engine/ECS/System/PhysicsSystem.h>
 
+#include <App/Model.h>
 
 using namespace ecs;
 
+// 定数定義
 #define CheckType(Type) typeHash == TypeToHash(Type)
-
 
 void EditorManager::initialize()
 {
 	auto* renderer = m_pEngine->getRendererManager();
 
 	Transform transform(0);
-	transform.translation = Vector3(0 ,10, -10);
+	transform.translation = Vector3(0 ,10, -20);
+	transform.rotation = Quaternion::CreateFromYawPitchRoll(XMConvertToRadians(180), 0, 0);
 	transform.scale = Vector3(5, 5, 5);
 
 	Camera cameraData;
@@ -106,6 +108,8 @@ void EditorManager::update()
 		ImGui::Begin("Scene", 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoScrollbar);
 		ImGui::End();
+
+		CreateFBX();
 
 		updateTransform();
 		updateView();
@@ -219,7 +223,7 @@ void EditorManager::dispAsset()
 	{
 		name = "Start";
 	}
-	if(ImGui::Button(name.c_str(), ImVec2(100, 30)))
+	/*if(ImGui::Button(name.c_str(), ImVec2(100, 30)))
 	{
 		std::string path("data/world/");
 
@@ -232,7 +236,7 @@ void EditorManager::dispAsset()
 		{
 			pWorld->deserializeWorld(path);
 		}
-	}
+	}*/
 
 	ImGui::End();
 
@@ -610,8 +614,9 @@ void EditorManager::EditTransform(World* pWorld ,Camera& camera, Transform& tran
 
 		// ビューポート
 		Camera& camera = m_editorCamera.camera;
-		ImGuizmo::SetRect(camera.viewportOffset.x, camera.viewportOffset.y, 
-			camera.width * camera.viewportScale, camera.height * camera.viewportScale);
+		//ImGuizmo::SetRect(camera.viewportOffset.x, camera.viewportOffset.y, 
+		//	camera.width * camera.viewportScale, camera.height * camera.viewportScale);
+		ImGuizmo::SetRect(0, 0, camera.width, camera.height);
 
 		// ギズモ
 		Matrix globalMatrix = transform.globalMatrix;
@@ -679,4 +684,73 @@ void EditorManager::EditTransform(World* pWorld ,Camera& camera, Transform& tran
 		m_editorCamera.transform.rotation = 
 			Quaternion::CreateFromRotationMatrix(camera.view.Transpose());
 	}
+}
+
+//--- OpenFileDialogを利用した
+void OpenFBXFile(Model::FBXModelData& out)
+{
+	// ファイルの指定、読み込み
+	char filename[MAX_PATH] = "";
+	OPENFILENAME ofn;
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = GetActiveWindow();
+	// ファイル名の格納先
+	ofn.lpstrFile = filename;
+	ofn.nMaxFile = sizeof(filename);
+	// フィルター
+	ofn.lpstrFilter =
+		"All Files\0*.*\0.fbx\0*.fbx\0";
+	ofn.nFilterIndex = 2;
+	// フラグ
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	/* ダイアログの表示
+	* ダイアログを閉じるまでは処理が
+	* 返らない。「開く」を押すと戻り値で
+	* TRUEが返る。それ以外はFALSE
+	*/
+	if (TRUE == GetOpenFileName(&ofn))
+	{
+		// FBXファイルの読み込み
+		Model::LoadFBXModel(ofn.lpstrFile, out);
+	}
+}
+
+void EditorManager::CreateFBX()
+{
+	ImGui::Begin("Test");
+
+	if (ImGui::Button("Load FBX"))
+	{
+		// モデルロード
+		Model::FBXModelData fbx;
+		OpenFBXFile(fbx);
+		if (fbx.meshID == NONE_MESH_ID) return ImGui::End();
+
+		auto* renderer = Engine::get().getRendererManager();
+
+		ShaderDesc desc;
+		desc.m_name = "Lit";
+		desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
+		ShaderID shaderID = renderer->createShader(desc);
+		MaterialID matID = renderer->createMaterial(fbx.fileName, shaderID);
+		auto* pMat = renderer->getMaterial(matID);
+		pMat->setTexture("_MainTexture", fbx.textureID);
+
+		RenderData rd;
+		rd.materialID = matID;
+		rd.meshID = fbx.meshID;
+
+		// オブジェクト生成
+		auto* goMgr = m_pEngine->getWorldManager()->getCurrentWorld()->getGameObjectManager();
+		Archetype archetype = Archetype::create<DynamicType, Transform, RenderData>();
+		auto goID = goMgr->createGameObject(fbx.fileName, archetype);
+
+		goMgr->setComponentData(goID, Transform(goID, Vector3(0, 10, 0)));
+		goMgr->setComponentData(goID, rd);
+	}
+
+
+	ImGui::End();
 }

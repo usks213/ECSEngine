@@ -18,6 +18,28 @@ bool Model::LoadFBXModel(const char* fileName, FBXModelData& out)
 	result = fbx.Load(fileName);
 	if (!result) return result;
 
+	// ファイル名
+	std::string name(fileName);
+	size_t start = 0;
+	size_t end = 0;
+	for (int i = name.size() - 1; i >= 0; --i)
+	{
+		if (name.data()[i] == '\\' || name.data()[i] == '/')
+		{
+			start = i + 1;
+			break;
+		}
+		if (name.data()[i] == '.')
+		{
+			end = i;
+		}
+	}
+	char szName[256];
+	std::memcpy(szName, &name.data()[start], end - start);
+	szName[end - start] = '\0';
+	out.fileName = szName;
+
+
 	// メッシュの作成
 	auto* renderer = Engine::get().getRendererManager();
 	auto meshID = renderer->createMesh(fileName);

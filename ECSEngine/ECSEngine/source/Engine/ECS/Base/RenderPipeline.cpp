@@ -99,38 +99,6 @@ void RenderPipeline::onUpdate()
 	//renderer->d3dCopyResource(renderer->m_gbuffer.m_diffuseRT.Get(), rt->m_tex.Get());
 }
 
-void RenderPipeline::beginPass(Camera& camera)
-{
-	// レンダラーマネージャー
-	auto* engine = m_pWorld->getWorldManager()->getEngine();
-	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
-
-	// ディレクショナルライト
-	DirectionalLightData dirLit;
-	dirLit.ambient = Vector4(0.3f, 0.3f, 0.3f, 0.3f);
-	dirLit.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	dirLit.direction = Vector4(1.f, -1.5f, -1.f, 1.0f);
-
-	// システムバッファの設定
-	SHADER::SystemBuffer sysBuffer;
-	sysBuffer._mView = camera.view.Transpose();
-	if (camera.isOrthographic)
-		sysBuffer._mProj = camera.projection2d.Transpose();
-	else
-		sysBuffer._mProj = camera.projection.Transpose();
-	sysBuffer._mProj2D = camera.projection2d.Transpose();
-	sysBuffer._mViewInv = camera.view.Invert().Transpose();
-	sysBuffer._mProjInv = camera.projection.Invert().Transpose();
-	sysBuffer._viewPos = Vector4(camera.world.Translation());
-	sysBuffer._directionalLit = dirLit;
-	renderer->setD3DSystemBuffer(sysBuffer);
-
-	// レンダーターゲットクリア
-	renderer->clearRenderTarget(camera.renderTargetID);
-	renderer->clearDepthStencil(camera.depthStencilID);
-
-}
-
 void RenderPipeline::cullingPass(Camera& camera)
 {
 	m_batchList.clear();
@@ -242,6 +210,75 @@ void RenderPipeline::cullingPass(Camera& camera)
 	std::sort(m_transparentList.begin(), m_transparentList.end(), [](RenderingData& l, RenderingData& r) {
 		return l.cameraLengthSqr > r.cameraLengthSqr;
 		});
+
+
+	//----- ライトカリング
+
+	// ポイントライト
+	foreach<PointLight, Transform>(
+		[&](PointLight& point, Transform& transform)
+		{
+			// 座標データ
+			point.data.position = transform.globalMatrix.Translation();
+
+			// カメラカリング
+			//if (cameraFrustum.CheckSphere(aabb))
+			{
+				m_pointLights.push_back(point.data);
+			}
+		});
+
+	// スポットライト
+	foreach<SpotLight, Transform>(
+		[&](SpotLight& spot, Transform& transform)
+		{
+			// 座標・向き
+			spot.data.position = transform.globalMatrix.Translation();
+			spot.data.direction = transform.globalMatrix.Forward();
+
+			// カメラカリング
+			//if (cameraFrustum.Check(aabb))
+			{
+				m_spotLights.push_back(spot.data);
+			}
+		});
+
+}
+
+void RenderPipeline::beginPass(Camera& camera)
+{
+	// レンダラーマネージャー
+	auto* engine = m_pWorld->getWorldManager()->getEngine();
+	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+
+	// ディレクショナルライト
+	DirectionalLightData dirLit;
+	dirLit.ambient = Vector4(0.3f, 0.3f, 0.3f, 0.3f);
+	dirLit.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	dirLit.direction = Vector4(1.f, -1.5f, -1.f, 1.0f);
+
+	// ライトバッファの設定
+	renderer->setD3DLightBuffer(m_pointLights, m_spotLights);
+
+	// システムバッファの設定
+	SHADER::SystemBuffer sysBuffer;
+	sysBuffer._mView = camera.view.Transpose();
+	if (camera.isOrthographic)
+		sysBuffer._mProj = camera.projection2d.Transpose();
+	else
+		sysBuffer._mProj = camera.projection.Transpose();
+	sysBuffer._mProj2D = camera.projection2d.Transpose();
+	sysBuffer._mViewInv = camera.view.Invert().Transpose();
+	sysBuffer._mProjInv = camera.projection.Invert().Transpose();
+	sysBuffer._viewPos = Vector4(camera.world.Translation());
+	sysBuffer._directionalLit = dirLit;
+	sysBuffer._pointLightNum = m_pointLights.size();
+	sysBuffer._spotLightNum = m_spotLights.size();
+	renderer->setD3DSystemBuffer(sysBuffer);
+
+	// レンダーターゲットクリア
+	renderer->clearRenderTarget(camera.renderTargetID);
+	renderer->clearDepthStencil(camera.depthStencilID);
 
 }
 
@@ -363,7 +400,7 @@ void RenderPipeline::opaquePass(Camera& camera)
 	renderer->setD3DTransformBuffer(matrix);
 	
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(SHADER::SHADER_TEX_SLOT_SKYBOX, skytexID, ShaderStage::PS);
+	renderer->setTexture(SHADER::SHADER_SRV_SLOT_SKYDOOM, skytexID, ShaderStage::PS);
 	renderer->setD3D11Sampler(SHADER::SHADER_SS_SLOT_SKYBOX, SamplerState::ANISOTROPIC_WRAP, ShaderStage::PS);
 
 	// 描画
@@ -383,13 +420,13 @@ void RenderPipeline::opaquePass(Camera& camera)
 		renderer->d3dRender(opeque.renderBufferID);
 	}
 
-	ImGui::Begin("RenderImage");
+	/*ImGui::Begin("RenderImage");
 
 	ImGui::Image(renderer->m_gbuffer.m_normalSRV.Get(), ImVec2(1920 * 0.25, 1080 * 0.25));
 	ImGui::Image(renderer->m_gbuffer.m_diffuseSRV.Get(), ImVec2(1920 * 0.25, 1080 * 0.25));
 	ImGui::Image(renderer->m_gbuffer.m_positionSRV.Get(), ImVec2(1920 * 0.25, 1080 * 0.25));
 
-	ImGui::End();
+	ImGui::End();*/
 }
 
 void RenderPipeline::skyPass(Camera& camera)

@@ -44,6 +44,7 @@ namespace ecs {
 
 		
 		void cullingPass(Camera& camera);
+
 		void beginPass(Camera& camera);
 		void prePass(Camera& camera);
 		void gbufferPass(Camera& camera);

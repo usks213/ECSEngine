@@ -286,9 +286,9 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 			{
 			case D3D_SIT_TEXTURE:
 				// 共通リソースはスキップ
-				if (//shaderInputBindDesc.BindPoint == SHADER::SHADER_TEX_SLOT_MAIN		||
-					shaderInputBindDesc.BindPoint == SHADER::SHADER_TEX_SLOT_SHADOW ||
-					shaderInputBindDesc.BindPoint == SHADER::SHADER_TEX_SLOT_SKYBOX) continue;
+				if (//shaderInputBindDesc.BindPoint == SHADER::SHADER_SRV_SLOT_MAINTEX		||
+					shaderInputBindDesc.BindPoint == SHADER::SHADER_SRV_SLOT_SHADOWMAP ||
+					shaderInputBindDesc.BindPoint == SHADER::SHADER_SRV_SLOT_SKYDOOM) continue;
 				m_textureBindDatas[stageIndex][shaderInputBindDesc.BindPoint].name = shaderInputBindDesc.Name;
 				m_textureBindDatas[stageIndex][shaderInputBindDesc.BindPoint].slot = shaderInputBindDesc.BindPoint;
 				m_textureBindDatas[stageIndex][shaderInputBindDesc.BindPoint].stage = stage;

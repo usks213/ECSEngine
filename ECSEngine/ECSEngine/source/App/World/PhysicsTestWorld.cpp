@@ -34,7 +34,7 @@
 #include <Engine/Renderer/D3D11/D3D11Utility.h>
 
 #include "../Model.h"
-
+#include "../System/DevelopSystem.h"
 
 using namespace ecs;
 
@@ -185,6 +185,7 @@ public:
 void PhysicsTestWorld::Start()
 {
 	// システムの追加
+	addSystem<DevelopSystem>();
 	addSystem<SphereSystem>();
 	addSystem<TransformSystem>();
 	addSystem<PhysicsSystem>();
@@ -232,12 +233,12 @@ void PhysicsTestWorld::Start()
 	// テクスチャの読み込み
 	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
 	//auto texID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(SHADER::SHADER_TEX_SLOT_MAIN, texID, ShaderStage::PS);
+	renderer->setTexture(SHADER::SHADER_SRV_SLOT_MAINTEX, texID, ShaderStage::PS);
 	mat->setTexture("_MainTexture", texID);
 	unlit->setTexture("_MainTexture", texID);
 
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
-	renderer->setTexture(SHADER::SHADER_TEX_SLOT_SKYBOX, skytexID, ShaderStage::PS);
+	renderer->setTexture(SHADER::SHADER_SRV_SLOT_SKYDOOM, skytexID, ShaderStage::PS);
 	skyMat->setTexture("_SkyTexture", skytexID);
 
 	// メッシュの生成
@@ -269,7 +270,7 @@ void PhysicsTestWorld::Start()
 	// バッチデータの作成
 	auto objBitchID = renderer->creatBatchGroup(matLitID, meshID);
 	auto sphereBitchID = renderer->creatBatchGroup(matLitID, sphereID);
-	auto planeBitchID = renderer->creatBatchGroup(matLitID, fbxData.meshID);
+	auto planeBitchID = renderer->creatBatchGroup(matLitID, meshPlane);
 
 
 	// アーキタイプ
@@ -296,13 +297,13 @@ void PhysicsTestWorld::Start()
 	// 床
 	archetype = Archetype::create<Transform, StaticType, Collider, Rigidbody>();
 	archetype.addTag(planeBitchID);
-	pos = Vector3(0, -5, 0);
-	scale = Vector3(0.4f, 0.4f, 0.4f);
+	pos = Vector3(0, 0, 0);
+	scale = Vector3(1.4f, 1.0f, 1.4f);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 
 	auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
 	getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
-	getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::POLYGON, fbxData.meshID));
+	getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::TERRAIN, meshPlane));
 	getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
 
 	// カメラ生成
@@ -364,7 +365,7 @@ void PhysicsTestWorld::Start()
 	Archetype sphereArch = Archetype::create<Transform, DynamicType, Collider, Rigidbody, ObjectTag>();
 	sphereArch.addTag(sphereBitchID);
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		auto Ball = getGameObjectManager()->createGameObject("Ball", sphereArch);
 		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);
@@ -383,4 +384,3 @@ void PhysicsTestWorld::End()
 {
 
 }
-

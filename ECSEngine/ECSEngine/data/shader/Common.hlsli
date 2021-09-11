@@ -1,4 +1,10 @@
 // 共通シェーダー
+/*
+DX11では、リソースをバインドできる一定量のスロットが与えられます。
+最大15個の定数バッファー、16個のサンプラー、最大128個のテクスチャ、
+8個のレンダーターゲット/ UAVをバインドできます。
+Vulkan / DX12では、この決定は開発者に任されています。
+*/
 
 #include "Light.hlsli"
 
@@ -19,6 +25,9 @@ cbuffer System : register(b5)
 	float4x4 _mProjInv;
 	float4 _viewPos;
 	DirectionalLightData _directionalLit;
+	uint _pointLightNum;
+	uint _spotLightNum;
+	float2 _padding2;
 }
 
 // トランスフォーム定数バッファ
@@ -33,7 +42,7 @@ cbuffer Material : register(b7)
 	float4		_Color;
 	float4x4	_mTex;
 	uint		_Flg;
-	float3		_Dummy;
+	float3		_padding3;
 }
 
 
@@ -41,6 +50,9 @@ cbuffer Material : register(b7)
 Texture2D		_MainTexture	: register(t4); // メインテクスチャ
 Texture2D		_ShadowTexture	: register(t5); // シャドウマップ
 Texture2D		_SkyTexture		: register(t6);	// スカイボックス
+
+StructuredBuffer<PointLightData> _PointLights : register(t8);	// ポイントライト
+StructuredBuffer<PointLightData> _SpotLights  : register(t9);	// スポットライト
 
 SamplerState	_MainSampler	: register(s4); // メインサンプラ
 SamplerState	_ShadowSampler	: register(s5); // シャドウマップ

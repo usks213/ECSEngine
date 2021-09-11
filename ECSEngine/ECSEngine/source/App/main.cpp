@@ -59,7 +59,7 @@ int WINAPI WinMain(	_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	// エンジン取得
 	auto& engine = Engine::get();
 	// ウィンドウの生成
-	WindowsWindow* pWin = engine.createWindow<WindowsWindow>("ECSEngine", 1920 * 1.25f, 1080 * 1.25f);
+	WindowsWindow* pWin = engine.createWindow<WindowsWindow>("ECSEngine", 1920, 1080);
 	// レンダラーの生成
 	D3D11RendererManager* pRenderer = engine.createRenderer<D3D11RendererManager>();
 

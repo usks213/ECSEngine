@@ -72,6 +72,9 @@
     <Filter Include="ソース ファイル\Engine\Editor">
       <UniqueIdentifier>{733d00d0-bf51-4f7e-81ff-6ee479ea4d81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\App\System">
+      <UniqueIdentifier>{b0efb697-c65c-4b0d-9039-a4925c9b0ceb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\App\main.cpp">
@@ -235,6 +238,9 @@
     </ClCompile>
     <ClCompile Include="source\App\Model.cpp">
       <Filter>ソース ファイル\App</Filter>
+    </ClCompile>
+    <ClCompile Include="source\App\System\DevelopSystem.cpp">
+      <Filter>ソース ファイル\App\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -507,6 +513,9 @@
     </ClInclude>
     <ClInclude Include="source\App\Model.h">
       <Filter>ソース ファイル\App</Filter>
+    </ClInclude>
+    <ClInclude Include="source\App\System\DevelopSystem.h">
+      <Filter>ソース ファイル\App\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

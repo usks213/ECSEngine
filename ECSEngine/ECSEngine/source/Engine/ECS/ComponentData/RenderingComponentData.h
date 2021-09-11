@@ -18,6 +18,10 @@ namespace ecs {
 		ECS_DECLARE_COMPONENT_DATA(RenderData);
 		MaterialID	materialID;
 		MeshID		meshID;
+		RenderData():materialID(NONE_MATERIAL_ID), meshID(NONE_MESH_ID){}
+		RenderData(const MaterialID& matID, const MeshID& meshID):
+			materialID(matID), meshID(meshID)
+		{}
 	};
 
 }

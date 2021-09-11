@@ -11,29 +11,38 @@
 
 
 namespace SHADER {
-
+	// CBuffer Name
 	constexpr char SHADER_CB_NAME_GBUFFER[] = "Gbuffer";
 	constexpr char SHADER_CB_NAME_SYSTEM[] = "System";
 	constexpr char SHADER_CB_NAME_TRANSFORM[] = "Transform";
 	constexpr char SHADER_CB_NAME_MATERIAL[] = "Material";
-
+	// CBuffer Slot
 	constexpr std::uint32_t SHADER_CB_SLOT_GBUFFER = 4;
 	constexpr std::uint32_t SHADER_CB_SLOT_SYSTEM = 5;
 	constexpr std::uint32_t SHADER_CB_SLOT_TRANSFORM = 6;
 	constexpr std::uint32_t SHADER_CB_SLOT_MATERIAL = 7;
-
-	constexpr std::uint32_t SHADER_TEX_SLOT_MAIN = 4;
-	constexpr std::uint32_t SHADER_TEX_SLOT_SHADOW = 5;
-	constexpr std::uint32_t SHADER_TEX_SLOT_SKYBOX = 6;
-
+	// Texture Slot
+	constexpr std::uint32_t SHADER_SRV_SLOT_MAINTEX = 4;
+	constexpr std::uint32_t SHADER_SRV_SLOT_SHADOWMAP = 5;
+	constexpr std::uint32_t SHADER_SRV_SLOT_SKYDOOM = 6;
+	// StructuredBuffer Slot
+	constexpr std::uint32_t SHADER_SRV_SLOT_POINTLIGHT = 8;
+	constexpr std::uint32_t SHADER_SRV_SLOT_SPOTLIGHT = 9;
+	// Samplear Slot
 	constexpr std::uint32_t SHADER_SS_SLOT_MAIN = 4;
 	constexpr std::uint32_t SHADER_SS_SLOT_SHADOW = 5;
 	constexpr std::uint32_t SHADER_SS_SLOT_SKYBOX = 6;
+	// UAV Slot
 
-	constexpr std::uint32_t MAX_CBUFFER_SLOT_COUNT = 8;
-	constexpr std::uint32_t MAX_SAMPLER_SLOT_COUNT = 8;
-	constexpr std::uint32_t MAX_TEXTURE_SLOT_COUNT = 8;
+	// max register
+	constexpr std::uint32_t MAX_CB_SLOT_COUNT = 15;
+	constexpr std::uint32_t MAX_SS_SLOT_COUNT = 16;
+	constexpr std::uint32_t MAX_SRV_SLOT_COUNT = 16;
+	constexpr std::uint32_t MAX_UAV_SLOT_COUNT = 16;
 
+	// Light
+	constexpr std::uint32_t MAX_POINT_LIGHT_COUNT = 64;
+	constexpr std::uint32_t MAX_SPOT_LIGHT_COUNT = 64;
 
 	// マテリアルフラグ
 	enum class Material_Flg : UINT
@@ -57,6 +66,10 @@ namespace SHADER {
 		Matrix	_mProjInv;
 		Vector4 _viewPos;
 		DirectionalLightData _directionalLit;
+		std::uint32_t _pointLightNum;
+		std::uint32_t _spotLightNum;
+
+		Vector2 _padding2;
 	};
 
 	// トランスフォーム定数バッファ
@@ -71,6 +84,6 @@ namespace SHADER {
 		Vector4		_Color = Vector4(1, 1, 1, 1);
 		Matrix		_mTex;
 		UINT		_Flg = (UINT)Material_Flg::ALL;
-		Vector3		_Dummy;
+		Vector3		_padding3;
 	};
 }
