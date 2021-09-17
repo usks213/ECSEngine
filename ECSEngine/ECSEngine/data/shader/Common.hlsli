@@ -52,7 +52,7 @@ Texture2D		_ShadowTexture	: register(t5); // シャドウマップ
 Texture2D		_SkyTexture		: register(t6);	// スカイボックス
 
 StructuredBuffer<PointLightData> _PointLights : register(t8);	// ポイントライト
-StructuredBuffer<PointLightData> _SpotLights  : register(t9);	// スポットライト
+StructuredBuffer<SpotLightData>  _SpotLights  : register(t9);	// スポットライト
 
 SamplerState	_MainSampler	: register(s4); // メインサンプラ
 SamplerState	_ShadowSampler	: register(s5); // シャドウマップ

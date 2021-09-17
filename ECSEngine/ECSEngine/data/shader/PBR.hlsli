@@ -2,121 +2,7 @@
 
 #define _PI (3.14159265358979323846f)
 
-
-float3 lerp3(float3 x, float3 y, float s)
-{
-	return x + (y - x) * s;
-}
-
-float3 fresnelSchlick(float3 F0, float cosTheta)
-{
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-}
-
-float ndfGGX(float NdotH, float roughness)
-{
-	float alpha = roughness * roughness;
-	float alphaSq = alpha * alpha;
-
-	float denom = (NdotH * NdotH) * (alphaSq - 1.0) + 1.0;
-	return alphaSq / (_PI * denom * denom);
-}
-
-float gaSchlickG1(float cosTheta, float k)
-{
-	return cosTheta / (cosTheta * (1.0 - k) + k);
-}
-
-float gaSchlickGGX(float NdotL, float NdotV, float roughness)
-{
-	float r = roughness + 1.0;
-	float k = (r * r) / 8.0; // Epic suggests using this roughness remapping for analytic lights.
-	return gaSchlickG1(NdotL, k) * gaSchlickG1(NdotV, k);
-}
-
-float BechmannDistribution(float NdotH, float m)
-{
-	float d2 = NdotH * NdotH;
-	float m2 = m * m;
-	return exp((d2 - 1.0) / (d2 * m2)) / (m2 * d2 * d2);
-}
-
-uint querySpecularTextureLevels()
-{
-	uint width, height, levels;
-	//specularTexture.GetDimensions(0, width, height, levels);
-	return levels;
-}
-
-// 引数には正規化された反射ベクトルを代入
-float2 SkyMapEquirect2(float3 reflectionVector)
-{
-	float PI = 3.14159265359f;
-	float phi = acos(-reflectionVector.y);
-	float theta = atan2(-1.0f * reflectionVector.x, reflectionVector.z) + PI;
-	return float2(theta / (PI * 2.0f), phi / PI);
-}
-
-float3 PBR(float3 L, float3 N, float3 V, float3 LitColor, float3 albedo, float metalness, float roughness,
-			Texture2D skyTex, SamplerState skySampler)
-{
-	float3 H = normalize(L + V);
-	float NdotV = max(0.0, dot(N, V));
-	float NdotL = max(0.0, dot(N, L));
-	float NdotH = max(0.0, dot(N, H));
-	float3 reflectionVec = 2.0 * NdotV * N - V;
-	
-	//NdotL = NdotL * 0.5f + 0.5f;
-	//NdotL *= NdotL;
-	
-	float3 F0 = lerp(0.04f, albedo, metalness);
-	
-	// FDG
-	float3 F = fresnelSchlick(F0, max(0.0, dot(H, V)));
-	//float D = ndfGGX(NdotH, roughness);
-	float D = BechmannDistribution(NdotH, roughness);
-	//float D = ndfGGX(NdotH, roughness);
-	float G = gaSchlickGGX(NdotL, NdotV, roughness);
-	//float t = 2.0 * NdotH / dot(V, H);
-	//float G = min(1.0, min(t * NdotV, t * NdotL));
-	
-	// Diffuse
-	float3 kd = lerp(float3(1, 1, 1) - F, float3(0, 0, 0), metalness);
-	float3 diffuseBRDF = kd * albedo;
-	// Specular
-	float3 specularBRDF = (F * D * G) / max(0.00001, 4.0 * NdotL * NdotV);
-	
-	float3 directLighting = (diffuseBRDF + specularBRDF) * LitColor * NdotL;
-	
-	// IBL
-	float3 ambientLighting = float3(0, 0, 0);
-	float3 irradiance = skyTex.Sample(skySampler, SkyMapEquirect2(reflect(V,N))).rgb;
-
-	F0 = lerp(0.04f, irradiance, metalness);
-	F = fresnelSchlick(F0, NdotV);
-	kd = lerp(1.0 - F, 0.0, roughness);
-	float3 diffuseIBL = kd * albedo * irradiance;
-
-	//uint specularTextureLevels = querySpecularTextureLevels();
-	//float3 specularIrradiance = specularTexture.SampleLevel(defaultSampler, Lr, roughness * specularTextureLevels).rgb;
-
-	//float2 specularBRDF = specularBRDF_LUT.Sample(spBRDF_Sampler, float2(NdotV, roughness)).rg;
-
-	//float3 specularIBL = (F0 * specularBRDF.x + specularBRDF.y) * specularIrradiance;
-	specularBRDF = (F * D * G) / max(0.00001, 4.0 * NdotL * NdotV);
-	float3 specularIBL = specularBRDF;
-
-	ambientLighting = diffuseIBL + specularIBL;
-	
-	
-	return directLighting + ambientLighting;
-}
-
-float3 fresnelSchlick_roughness(float3 F0, float cosTheta, float roughness)
-{
-	return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
-}
-
+// ----------------------------------------------------------------------------
 float3 EnvBRDFApprox(float3 SpecularColor, float Roughness, float NoV)
 {
 	float4 c0 = float4(-1, -0.0275f, -0.572f, 0.022f);
@@ -126,43 +12,133 @@ float3 EnvBRDFApprox(float3 SpecularColor, float Roughness, float NoV)
 	float2 AB = float2(-1.04f, 1.04f) * a004 + r.zw;
 	return SpecularColor * AB.x + AB.y;
 }
-
-float so(float NoV, float ao, float roughness)
+// ----------------------------------------------------------------------------
+// 引数には正規化された反射ベクトルを代入
+float2 SkyMapEquirect2(float3 reflectionVector)
 {
-	return clamp(pow(NoV + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao, 0.0, 1.0);
+	float phi = acos(-reflectionVector.y);
+	float theta = atan2(-1.0f * reflectionVector.x, reflectionVector.z) + _PI;
+	return float2(theta / (_PI * 2.0f), phi / _PI);
 }
-
-
-float3 shade(float3 albedo, float metalness, float roughness, float3 N, float3 V, float3 L, 
-float3 LitDif, float3 LitAmb, Texture2D AmbiTex, SamplerState AmbiSampler)
+// ----------------------------------------------------------------------------
+float DistributionGGX(float3 N, float3 H, float roughness)
 {
-	float3 H = normalize(L + V);
-	float NdotV = max(0.0f, dot(N, V));
-	float NdotL = max(0.0f, dot(N, L));
-	float NdotH = max(0.0f, dot(N, H));
-		
-	float3 F0 = lerp3(float3(0.04f, 0.04f, 0.04f), albedo, metalness);
+	float a = roughness * roughness;
+	float a2 = a * a;
+	float NdotH = max(dot(N, H), 0.0);
+	float NdotH2 = NdotH * NdotH;
 
-	float3 F = fresnelSchlick_roughness(F0, max(0.0f, dot(H, L)), roughness);
-	float D = ndfGGX(NdotH, roughness);
-	float G = gaSchlickGGX(NdotL, NdotV, roughness);
+	float nom = a2;
+	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+	denom = _PI * denom * denom;
 
-	float3 kd = lerp3(float3(1.0f, 1.0f, 1.0f) - F, float3(0.0f, 0.0f, 0.0f) + F, metalness);
+	return nom / denom;
+}
+// ----------------------------------------------------------------------------
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+	float r = (roughness + 1.0);
+	float k = (r * r) / 8.0;
 
-	float3 diffuseBRDF = kd * albedo / _PI;
-	// CookTorrance
-	float3 specularBRDF = (F * D * G) / max(0.0001f, 4.0f * NdotL * NdotV);
+	float nom = NdotV;
+	float denom = NdotV * (1.0 - k) + k;
 
-	float3 direct = (diffuseBRDF + specularBRDF) * LitDif * NdotL;
+	return nom / denom;
+}
+// ----------------------------------------------------------------------------
+float GeometrySmith(float3 N, float3 V, float3 L, float roughness)
+{
+	float NdotV = max(dot(N, V), 0.0);
+	float NdotL = max(dot(N, L), 0.0);
+	float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+	float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+	return ggx1 * ggx2;
+}
+// ----------------------------------------------------------------------------
+float3 fresnelSchlick(float cosTheta, float3 F0)
+{
+	return F0 + (float3(1,1,1) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+// ----------------------------------------------------------------------------
+float3 fresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
+{
+	float3 invRoughness = float3(1.0f - roughness, 1.0f - roughness, 1.0f - roughness);
+	return F0 + (max(invRoughness, F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+// ----------------------------------------------------------------------------
+float3 Fresnel(float3 F0, float3 V, float3 H)
+{
+	return fresnelSchlick(max(dot(H, V), 0.0), F0);
+}
+// ----------------------------------------------------------------------------
+float3 Fresnel0(float3 albedo, float metallic)
+{
+	float3 F0 = float3(0.04f, 0.04f, 0.04f);
+	float3 M = float3(metallic, metallic, metallic);
+	F0 = lerp(F0, albedo, M);
+	return F0;
+}
+// ----------------------------------------------------------------------------
+float3 DiffuseBRDF(float3 albedo, float metallic, float3 N, float3 L, float3 F)
+{
+	//float3 kS = F;
+	//float3 kD = float3(1.0f, 1.0f, 1.0f) - kS;
+	//kD *= 1.0 - metallic;
+	float3 kD = lerp(float3(1.0f, 1.0f, 1.0f) - F, float3(0.0f, 0.0f, 0.0f) + F, metallic);
 	
-	// Ambient
-	float difAmbi = kd * albedo * LitAmb;
+	float NdotL = max(dot(N, L), 0.0);
+	float3 deffuse = (kD * albedo / _PI) * NdotL;
 	
-	float3 ref = EnvBRDFApprox(F0, roughness, NdotV) * (1.0f - roughness);
-	//float3 speAmbi = AmbiTex.Sample(AmbiSampler, SkyMapEquirect2(reflect(V, N))).rgb * ref;
-	float mip = 12 * roughness;
-	float3 speAmbi = AmbiTex.SampleLevel(AmbiSampler, SkyMapEquirect2(reflect(V, N)), mip).rgb * ref;
-	float3 ambi = difAmbi + speAmbi;
+	return deffuse;
+}
+// ----------------------------------------------------------------------------
+float3 SpeculerBRDF(float roughness, float3 N, float3 V, float3 L, float3 H, float3 F)
+{
+	//float3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+	float NdotL = max(dot(N, L), 0.0);
 	
-	return direct + ambi;
+	// Cook-Torrance BRDF
+	float NDF = DistributionGGX(N, H, roughness);
+	float G = GeometrySmith(N, V, L, roughness);
+           
+	float3 numerator = NDF * G * F;
+	float denominator = 4 * max(dot(N, V), 0.0) * NdotL + 0.0001; // + 0.0001 to prevent divide by zero
+	float3 specular = numerator / denominator;
+	
+	return specular * NdotL;
+}
+// ----------------------------------------------------------------------------
+float3 AmbientBRDF(float3 albedo, float metallic, float roughness, float ao,
+	float3 N, float3 V, float3 R, float3 F0, 
+	float3 ambientLight, Texture2D specularSky, SamplerState skySampler)
+{
+	// ambient lighting (we now use IBL as the ambient term)
+	float3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+	
+	//float3 kS = F;
+	//float3 kD = 1.0 - kS;
+	//kD *= 1.0 - metallic;
+	float3 kD = lerp(float3(1.0f, 1.0f, 1.0f) - F, float3(0.0f, 0.0f, 0.0f) + F, metallic);
+
+	// ライトマップ? 
+	float3 irradiance = ambientLight; //texture(irradianceMap, N).rgb;
+	float3 diffuse = irradiance * albedo;
+    
+    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+	const float MAX_REFLECTION_LOD = 14.0f;
+	//float3 prefilteredColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+	//float3 prefilteredColor = specularSky.SampleLevel(skySampler,
+	//SkyMapEquirect2(R), roughness * MAX_REFLECTION_LOD).rgb;
+	////float2 brdf = texture(brdfLUT, float2(max(dot(N, V), 0.0), roughness)).rg;
+	//float3 specular = prefilteredColor;// * (F * brdf.x + brdf.y);
+
+	float3 ref = EnvBRDFApprox(F0, roughness, dot(N, V)) * (1.0f - roughness);
+	float mip = MAX_REFLECTION_LOD * roughness;
+	float3 specular = specularSky.SampleLevel(skySampler,
+		SkyMapEquirect2(reflect(V, N)), mip).rgb * ref;
+	
+	float3 ambient = (kD * diffuse + specular + diffuse) * ao;
+	
+	return ambient;
 }

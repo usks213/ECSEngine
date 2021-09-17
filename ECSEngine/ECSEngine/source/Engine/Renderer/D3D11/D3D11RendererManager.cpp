@@ -1062,15 +1062,21 @@ void D3D11RendererManager::setD3DLightBuffer(
 {
 	SubResource resource;
 	// ポイントライト
+	std::size_t size = pointLights.size() < SHADER::MAX_POINT_LIGHT_COUNT ? 
+		pointLights.size() * sizeof(PointLightData) : 
+		SHADER::MAX_POINT_LIGHT_COUNT * sizeof(PointLightData);
 	d3dMap(m_pointLightBuffer.Get(), D3D11_MAP::D3D11_MAP_WRITE_DISCARD, true, resource);
-	std::memcpy(resource.pData, pointLights.data(), pointLights.size() * sizeof(PointLightData));
+	std::memcpy(resource.pData, pointLights.data(), size);
 	d3dUnmap(m_pointLightBuffer.Get());
 	setShaderResource[static_cast<std::size_t>(ShaderStage::PS)](m_d3dContext.Get(), SHADER::SHADER_SRV_SLOT_POINTLIGHT, 1, m_pointLightSRV.GetAddressOf());
 	// スポットライト
+	size = spotLights.size() < SHADER::MAX_SPOT_LIGHT_COUNT ?
+		spotLights.size() * sizeof(SpotLightData) :
+		SHADER::MAX_SPOT_LIGHT_COUNT * sizeof(SpotLightData);
 	d3dMap(m_spotLightBuffer.Get(), D3D11_MAP::D3D11_MAP_WRITE_DISCARD, true, resource);
 	std::memcpy(resource.pData, spotLights.data(), spotLights.size() * sizeof(SpotLightData));
 	d3dUnmap(m_spotLightBuffer.Get());
-	setShaderResource[static_cast<std::size_t>(ShaderStage::PS)](m_d3dContext.Get(), SHADER::SHADER_SRV_SLOT_POINTLIGHT, 1, m_spotLightSRV.GetAddressOf());
+	setShaderResource[static_cast<std::size_t>(ShaderStage::PS)](m_d3dContext.Get(), SHADER::SHADER_SRV_SLOT_SPOTLIGHT, 1, m_spotLightSRV.GetAddressOf());
 
 }
 

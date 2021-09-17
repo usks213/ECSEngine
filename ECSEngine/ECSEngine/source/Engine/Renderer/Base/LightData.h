@@ -13,25 +13,23 @@
 
 struct DirectionalLightData
 {
-	Vector4 color;		 // 色
-	Vector4 ambient;	 // 環境光
-	Vector4 direction;	 // 方向
+	Vector4 color		= Vector4(1,1,1,1);				// 色+強さ
+	Vector4 ambient		= Vector4(0.1f, 0.1f, 0.1f, 1); // 環境光
+	Vector4 direction	= Vector4(1.0f, -1.0f, 1.0f, 1);// 方向
 };
 
 struct PointLightData
 {
-	Vector4 color;		 // 色
-	Vector3 position;    // 位置
-	float	range;       // 範囲
-	Vector4 attenuation; // 減衰
+	Vector4 color		= Vector4(1, 1, 1, 1);	// 色+強さ
+	Vector3 position;							// 位置
+	float	range		= 1.0f;					// 範囲
 };
 
 struct SpotLightData
 {
-	Vector4 color;		 // 色
-	Vector3 position;    // 位置
-	float	range;       // 範囲
-	Vector4 attenuation; // 減衰
-	Vector3 direction;   // 方向
-	float	spot;        // スポット
+	Vector4 color		= Vector4(1, 1, 1, 1);	// 色+強さ
+	Vector3 position;							// 位置
+	float	range		= 2.0f;					// 範囲
+	Vector3 direction	= Vector3(0, -1, 0);;	// 方向
+	float	spot		= 0.5f;					// 円錐の大きさ(0.0f~1.0f)
 };

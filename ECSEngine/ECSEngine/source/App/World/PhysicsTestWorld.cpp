@@ -195,10 +195,12 @@ void PhysicsTestWorld::Start()
 
 	// シェーダ読み込み
 	ShaderDesc shaderDesc;
-	shaderDesc.m_name = "Lit";
-	//shaderDesc.m_name = "GBuffer";
+	//shaderDesc.m_name = "Lit";
+	shaderDesc.m_name = "GBuffer";
 	shaderDesc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 	ShaderID shaderLitID = renderer->createShader(shaderDesc);
+	auto* pS = renderer->getShader(shaderLitID);
+	pS->m_type = ShaderType::Deferred;
 
 	shaderDesc.m_name = "Unlit";
 	ShaderID shaderUnlitID = renderer->createShader(shaderDesc);
@@ -376,7 +378,26 @@ void PhysicsTestWorld::Start()
 		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
 	}
 
+	// ライト
+	Archetype pointArc = Archetype::create<Transform, DynamicType, PointLight>();
 
+	for (int i = 0; i < 10; i++)
+	{
+		auto point = getGameObjectManager()->createGameObject("PointLit", pointArc);
+		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);
+		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+		scale = Vector3(1.5f, 1.5f, 1.5f);
+		getGameObjectManager()->setComponentData<Transform>(point, Transform(point, pos, rot, scale));
+		getGameObjectManager()->setComponentData(point, PointLight());
+	}
+
+	// メインライト
+	Archetype DirLit = Archetype::create<Transform, DynamicType, DirectionalLight>();
+	auto mainLit = getGameObjectManager()->createGameObject("MainLight", DirLit);
+	pos = Vector3(0, 10, 0);
+	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	getGameObjectManager()->setComponentData<Transform>(mainLit, Transform(mainLit, pos, rot, scale));
+	getGameObjectManager()->setComponentData(mainLit, DirectionalLight());
 }
 
 /// @brief エンド

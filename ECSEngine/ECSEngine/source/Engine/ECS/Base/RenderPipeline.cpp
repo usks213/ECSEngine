@@ -252,10 +252,27 @@ void RenderPipeline::beginPass(Camera& camera)
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
 
 	// ディレクショナルライト
+		// カメラ設定
+	DirectionalLight* mainLit = nullptr;
+	foreach<DirectionalLight, Transform>(
+		[&mainLit, &engine](DirectionalLight& lit, Transform& transform)
+		{
+			// 向きの更新
+			lit.data.direction = Vector4(transform.globalMatrix.Forward());
+			// シャドウカメラ更新
+			//updateCamera(camera, transform, engine->getWindowWidth(), engine->getWindowHeight());
+			// メインライト
+			mainLit = &lit;
+		});
 	DirectionalLightData dirLit;
-	dirLit.ambient = Vector4(0.3f, 0.3f, 0.3f, 0.3f);
-	dirLit.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	dirLit.direction = Vector4(1.f, -1.5f, -1.f, 1.0f);
+	if (mainLit) {
+		dirLit = mainLit->data;
+	}
+	else {
+		dirLit.ambient = Vector4(0.1f, 0.1f, 0.1f, 1.0f);
+		dirLit.color = Vector4();
+		dirLit.direction = Vector4();
+	}
 
 	// ライトバッファの設定
 	renderer->setD3DLightBuffer(m_pointLights, m_spotLights);
@@ -395,7 +412,8 @@ void RenderPipeline::opaquePass(Camera& camera)
 	renderer->setD3D11RenderBuffer(m_quadRb);
 
 	// トランスフォーム指定
-	Matrix matrix = Matrix::CreateScale(1920 * 1.25f,1080 * 1.25f,1);
+	Vector3 windowSize = Vector3(engine->getWindowWidth(), engine->getWindowHeight(), 1);
+	Matrix matrix = Matrix::CreateScale(windowSize);
 	//matrix *= Matrix::CreateRotationY(XMConvertToDegrees(90));
 	renderer->setD3DTransformBuffer(matrix);
 	

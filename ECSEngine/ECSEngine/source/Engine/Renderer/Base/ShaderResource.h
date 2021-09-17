@@ -41,8 +41,8 @@ namespace SHADER {
 	constexpr std::uint32_t MAX_UAV_SLOT_COUNT = 16;
 
 	// Light
-	constexpr std::uint32_t MAX_POINT_LIGHT_COUNT = 64;
-	constexpr std::uint32_t MAX_SPOT_LIGHT_COUNT = 64;
+	constexpr std::uint32_t MAX_POINT_LIGHT_COUNT = 128;
+	constexpr std::uint32_t MAX_SPOT_LIGHT_COUNT = 128;
 
 	// マテリアルフラグ
 	enum class Material_Flg : UINT
@@ -65,7 +65,9 @@ namespace SHADER {
 		Matrix	_mViewInv;
 		Matrix	_mProjInv;
 		Vector4 _viewPos;
+
 		DirectionalLightData _directionalLit;
+
 		std::uint32_t _pointLightNum;
 		std::uint32_t _spotLightNum;
 

@@ -23,6 +23,7 @@
 #include <Engine/ECS/ComponentData/ComponentTag.h>
 #include <Engine/ECS/ComponentData/RenderingComponentData.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
+#include <Engine/ECS/ComponentData/LightComponentData.h>
 #include <Engine/ECS/ComponentData/PhysicsComponentData.h>
 
 #include <Engine/ECS/System/PhysicsSystem.h>
@@ -301,7 +302,8 @@ void EditorManager::dispInspector()
 			for (int i = 0; i < archetype.getArchetypeSize(); ++i)
 			{
 				const auto& type = archetype.getTypeInfo(i);
-				ImGui::Text(std::to_string(type.getHash()).c_str());
+				componentInspector(type.getHash(), 
+					chunk.getComponentData(type.getHash(), curObject->m_entity.m_index));
 				//DispGui(type.getName(), chunk.getComponentData(type.getName(), curObject->m_entity.m_index));
 			}
 		}
@@ -527,6 +529,48 @@ void EditorManager::DispChilds(const InstanceID parentID)
 		if (open) {
 			// Recursive call...
 			DispChilds(child);
+			ImGui::TreePop();
+		}
+	}
+}
+
+void EditorManager::componentInspector(std::size_t typeHash, void* data)
+{
+	if (data == nullptr)
+	{
+		return;
+	}
+	else if (CheckType(DirectionalLight))
+	{
+		DirectionalLight* dirLit = static_cast<DirectionalLight*>(data);
+		if (ImGui::TreeNode(TypeToString(DirectionalLight)))
+		{
+			ImGui::ColorEdit3("color", (float*)&dirLit->data.color);
+			ImGui::InputFloat("intensity", (float*)&dirLit->data.color.w);
+			ImGui::ColorEdit4("ambient", (float*)&dirLit->data.ambient);
+			ImGui::TreePop();
+		}
+	}
+	else if (CheckType(PointLight))
+	{
+		PointLight* pointLit = static_cast<PointLight*>(data);
+		if (ImGui::TreeNode(TypeToString(PointLight)))
+		{
+			ImGui::ColorEdit3("color", (float*)&pointLit->data.color);
+			ImGui::InputFloat("intensity", (float*)&pointLit->data.color.w);
+			ImGui::InputFloat("range", &pointLit->data.range);
+			ImGui::TreePop();
+		}
+	}
+	else if (CheckType(SpotLight))
+	{
+		SpotLight* spotLit = static_cast<SpotLight*>(data);
+		if (ImGui::TreeNode(TypeToString(PointLight)))
+		{
+			ImGui::ColorEdit3("color", (float*)&spotLit->data.color);
+			ImGui::InputFloat("intensity", (float*)&spotLit->data.color.w);
+			ImGui::InputFloat("range", &spotLit->data.range);
+			ImGui::InputFloat("spot", &spotLit->data.spot);
 			ImGui::TreePop();
 		}
 	}

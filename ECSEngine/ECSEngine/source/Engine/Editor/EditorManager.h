@@ -46,6 +46,7 @@ private:
 	void updateTransform();
 	void updateView();
 
+	void componentInspector(std::size_t typeHash, void* data);
 	void EditTransform(ecs::World* pWorld, ecs::Camera& camera, ecs::Transform& transform);
 
 	void CreateFBX();
