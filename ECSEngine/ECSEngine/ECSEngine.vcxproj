@@ -101,12 +101,12 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;$(ProjectDir)lib\bullet3\include;$(ProjectDir)lib\cereal;$(ProjectDir)lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;$(ProjectDir)lib\bullet3\include;$(ProjectDir)lib\cereal;$(ProjectDir)lib;$(ProjectDir)lib\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)lib\DirectXTK\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\DirectXTex\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\bullet3\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\DirectXTK\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\DirectXTex\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\bullet3\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\assimp\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,14 +119,14 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;$(ProjectDir)lib\bullet3\include;$(ProjectDir)lib\cereal;$(ProjectDir)lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;$(ProjectDir)lib\bullet3\include;$(ProjectDir)lib\cereal;$(ProjectDir)lib;$(ProjectDir)lib\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)lib\DirectXTK\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\DirectXTex\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\bullet3\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\DirectXTK\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\DirectXTex\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\bullet3\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\assimp\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -137,12 +137,12 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;$(ProjectDir)lib\bullet3\include;$(ProjectDir)lib\cereal;$(ProjectDir)lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;$(ProjectDir)lib\bullet3\include;$(ProjectDir)lib\cereal;$(ProjectDir)lib;$(ProjectDir)lib\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)lib\DirectXTK\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\DirectXTex\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\bullet3\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\DirectXTK\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\DirectXTex\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\bullet3\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\assimp\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,18 +155,23 @@
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;$(ProjectDir)lib\bullet3\include;$(ProjectDir)lib\cereal;$(ProjectDir)lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\ImGuizmo;$(ProjectDir)lib\DirectXTK;$(ProjectDir)lib\DirectXTex;$(ProjectDir)lib\DDSTextureLoader;$(ProjectDir)lib\WICTextureLoader;$(ProjectDir)lib\bullet3\include;$(ProjectDir)lib\cereal;$(ProjectDir)lib;$(ProjectDir)lib\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)lib\DirectXTK\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\DirectXTex\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\bullet3\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\DirectXTK\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\DirectXTex\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\bullet3\$(PlatformTarget)\$(Configuration);$(ProjectDir)lib\assimp\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="lib\DDSTextureLoader\DDSTextureLoader11.cpp" />
+    <ClCompile Include="lib\DDSTextureLoader\DDSTextureLoader11.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="lib\ImGuizmo\GraphEditor.cpp" />
     <ClCompile Include="lib\ImGuizmo\ImCurveEdit.cpp" />
     <ClCompile Include="lib\ImGuizmo\ImGradient.cpp" />
@@ -180,6 +185,7 @@
     <ClCompile Include="lib\imgui\imgui_tables.cpp" />
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="lib\WICTextureLoader\WICTextureLoader11.cpp" />
+    <ClCompile Include="source\App\AssimpModel.cpp" />
     <ClCompile Include="source\App\main.cpp" />
     <ClCompile Include="source\App\Model.cpp" />
     <ClCompile Include="source\App\System\DevelopSystem.cpp" />
@@ -223,7 +229,12 @@
     <ClCompile Include="source\Engine\Utility\Input.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\DDSTextureLoader\DDSTextureLoader11.h" />
+    <ClInclude Include="lib\DDSTextureLoader\DDSTextureLoader11.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="lib\DirectXTex\DirectXTex.h" />
     <ClInclude Include="lib\ImGuizmo\GraphEditor.h" />
     <ClInclude Include="lib\ImGuizmo\ImCurveEdit.h" />
@@ -241,6 +252,7 @@
     <ClInclude Include="lib\imgui\imstb_truetype.h" />
     <ClInclude Include="lib\WICTextureLoader\WICTextureLoader11.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="source\App\AssimpModel.h" />
     <ClInclude Include="source\App\Model.h" />
     <ClInclude Include="source\App\System\DevelopSystem.h" />
     <ClInclude Include="source\App\World\DevelopWorld.h" />

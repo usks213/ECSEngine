@@ -242,6 +242,9 @@
     <ClCompile Include="source\App\System\DevelopSystem.cpp">
       <Filter>ソース ファイル\App\System</Filter>
     </ClCompile>
+    <ClCompile Include="source\App\AssimpModel.cpp">
+      <Filter>ソース ファイル\App</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -516,6 +519,9 @@
     </ClInclude>
     <ClInclude Include="source\App\System\DevelopSystem.h">
       <Filter>ソース ファイル\App\System</Filter>
+    </ClInclude>
+    <ClInclude Include="source\App\AssimpModel.h">
+      <Filter>ソース ファイル\App</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
