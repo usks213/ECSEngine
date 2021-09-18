@@ -236,13 +236,16 @@
     <ClCompile Include="source\Engine\Utility\FBXParser.cpp">
       <Filter>ソース ファイル\Engine\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="source\App\Model.cpp">
-      <Filter>ソース ファイル\App</Filter>
-    </ClCompile>
     <ClCompile Include="source\App\System\DevelopSystem.cpp">
       <Filter>ソース ファイル\App\System</Filter>
     </ClCompile>
     <ClCompile Include="source\App\AssimpModel.cpp">
+      <Filter>ソース ファイル\App</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Engine\Utility\AssimpLoader.cpp">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="source\App\FBXModel.cpp">
       <Filter>ソース ファイル\App</Filter>
     </ClCompile>
   </ItemGroup>
@@ -514,14 +517,20 @@
     <ClInclude Include="source\Engine\Utility\FBXParser.h">
       <Filter>ソース ファイル\Engine\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="source\App\Model.h">
-      <Filter>ソース ファイル\App</Filter>
-    </ClInclude>
     <ClInclude Include="source\App\System\DevelopSystem.h">
       <Filter>ソース ファイル\App\System</Filter>
     </ClInclude>
     <ClInclude Include="source\App\AssimpModel.h">
       <Filter>ソース ファイル\App</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Utility\AssimpLoader.h">
+      <Filter>ソース ファイル\Engine\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="source\App\FBXModel.h">
+      <Filter>ソース ファイル\App</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\Model.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

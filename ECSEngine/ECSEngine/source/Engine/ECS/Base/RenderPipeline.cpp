@@ -104,6 +104,7 @@ void RenderPipeline::cullingPass(Camera& camera)
 	m_batchList.clear();
 	m_opequeList.clear();
 	m_transparentList.clear();
+	m_deferredList.clear();
 	m_pointLights.clear();
 	m_spotLights.clear();
 
@@ -159,6 +160,7 @@ void RenderPipeline::cullingPass(Camera& camera)
 		{
 			const auto* mat = renderer->getMaterial(rd.materialID);
 			const auto* mesh = renderer->getMesh(rd.meshID);
+			if (!mat || !mesh) return;
 			const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, rd.meshID);
 
 			AABB aabb;

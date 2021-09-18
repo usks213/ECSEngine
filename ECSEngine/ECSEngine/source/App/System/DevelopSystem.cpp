@@ -13,12 +13,12 @@
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 
 #include "imgui.h"
-#include "../Model.h"
+#include "../FBXModel.h"
 
 using namespace ecs;
 //
 ////--- OpenFileDialogを利用した
-//void OpenFBXFile(Model::FBXModelData& out)
+//void OpenFBXFile(FBXModel::FBXModelData& out)
 //{
 //	// ファイルの指定、読み込み
 //	char filename[MAX_PATH] = "";
@@ -44,7 +44,7 @@ using namespace ecs;
 //	if (TRUE == GetOpenFileName(&ofn))
 //	{
 //		// FBXファイルの読み込み
-//		Model::LoadFBXModel(ofn.lpstrFile, out);
+//		FBXModel::LoadFBXModel(ofn.lpstrFile, out);
 //	}
 //}
 
@@ -76,7 +76,7 @@ void DevelopSystem::onUpdate()
 //	if (ImGui::Button("Load FBX"))
 //	{
 //		// モデルロード
-//		Model::FBXModelData fbx;
+//		FBXModel::FBXModelData fbx;
 //		OpenFBXFile(fbx);
 //
 //		auto* renderer = Engine::get().getRendererManager();

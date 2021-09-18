@@ -33,7 +33,7 @@
 #include <Engine/Renderer/Base/Geometry.h>
 #include <Engine/Renderer/D3D11/D3D11Utility.h>
 
-#include "../Model.h"
+#include "../FBXModel.h"
 #include "../System/DevelopSystem.h"
 
 using namespace ecs;
@@ -195,7 +195,7 @@ void PhysicsTestWorld::Start()
 
 	// シェーダ読み込み
 	ShaderDesc shaderDesc;
-	//shaderDesc.m_name = "Lit";
+	shaderDesc.m_name = "Lit";
 	shaderDesc.m_name = "GBuffer";
 	shaderDesc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 	ShaderID shaderLitID = renderer->createShader(shaderDesc);
@@ -232,6 +232,8 @@ void PhysicsTestWorld::Start()
 	renderer->createTextureFromFile("data/texture/field003.jpg");
 	renderer->createTextureFromFile("data/texture/field004.jpg");
 
+	renderer->createTextureFromFile("data/model/Sword And Shield Idle.fbm/Paladin_diffuse.png");
+
 	// テクスチャの読み込み
 	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
 	//auto texID = renderer->createTextureFromFile("data/texture/environment.hdr");
@@ -262,8 +264,8 @@ void PhysicsTestWorld::Start()
 	Geometry::Terrain(*pPlaneMesh, 20, 5, 5);
 
 	// FBX読み込み
-	Model::FBXModelData fbxData;
-	Model::LoadFBXModel("data/model/terrain.fbx", fbxData);
+	FBXModel::FBXModelData fbxData;
+	FBXModel::LoadFBXModel("data/model/terrain.fbx", fbxData);
 
 	// レンダーバッファの生成
 	auto rdID = renderer->createRenderBuffer(shaderLitID, meshID);
@@ -303,10 +305,10 @@ void PhysicsTestWorld::Start()
 	scale = Vector3(1.4f, 1.0f, 1.4f);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 
-	auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
-	getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
-	getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::TERRAIN, meshPlane));
-	getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
+	//auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
+	//getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
+	//getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::TERRAIN, meshPlane));
+	//getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
 
 	// カメラ生成
 	Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag, DynamicType>();
@@ -367,7 +369,7 @@ void PhysicsTestWorld::Start()
 	Archetype sphereArch = Archetype::create<Transform, DynamicType, Collider, Rigidbody, ObjectTag>();
 	sphereArch.addTag(sphereBitchID);
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		auto Ball = getGameObjectManager()->createGameObject("Ball", sphereArch);
 		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);
@@ -381,7 +383,7 @@ void PhysicsTestWorld::Start()
 	// ライト
 	Archetype pointArc = Archetype::create<Transform, DynamicType, PointLight>();
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		auto point = getGameObjectManager()->createGameObject("PointLit", pointArc);
 		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);

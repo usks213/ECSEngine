@@ -11,8 +11,12 @@
 #include "ImGuizmo.h"
 
 #include <Engine/Engine.h>
+
 #include <Engine/Utility/Input.h>
+#include <Engine/Utility/AssimpLoader.h>
+
 #include <Engine/Renderer/D3D11/D3D11RenderTarget.h>
+#include <Engine/Renderer/Base/Model.h>
 #include <Engine/ECS/Base/RenderPipeline.h>
 #include <Engine/ECS/System/TransformSystem.h>
 
@@ -28,7 +32,7 @@
 
 #include <Engine/ECS/System/PhysicsSystem.h>
 
-#include <App/Model.h>
+#include <App/FBXModel.h>
 
 using namespace ecs;
 
@@ -731,7 +735,7 @@ void EditorManager::EditTransform(World* pWorld ,Camera& camera, Transform& tran
 }
 
 //--- OpenFileDialogを利用した
-void OpenFBXFile(Model::FBXModelData& out)
+void OpenFBXFile(Model &out)
 {
 	// ファイルの指定、読み込み
 	char filename[MAX_PATH] = "";
@@ -756,8 +760,35 @@ void OpenFBXFile(Model::FBXModelData& out)
 	*/
 	if (TRUE == GetOpenFileName(&ofn))
 	{
+		// AssimpModelTest
+		AssimpLoader::get().LoadModel(Engine::get().getRendererManager(), ofn.lpstrFile, out);
+
 		// FBXファイルの読み込み
-		Model::LoadFBXModel(ofn.lpstrFile, out);
+		//FBXModel::LoadFBXModel(ofn.lpstrFile, out);
+	}
+}
+
+void childCreate(Model& model, Model::MeshNode& node, GameObjectManager* magaer, MaterialID& matID, GameObjectID parent)
+{
+	RenderData rd;
+	rd.materialID = matID;
+	if(node.meshList.size() > 0)
+		rd.meshID = node.meshList.front().meshID;
+
+	Vector3 pos = node.transform.Translation();
+	Quaternion rot = Quaternion::CreateFromRotationMatrix(node.transform);
+	Vector3 sca = Vector3(0.5f, 0.5f, 0.5f);
+
+	// オブジェクト生成
+	Archetype archetype = Archetype::create<DynamicType, Transform, RenderData>();
+	auto goID = magaer->createGameObject(node.name, archetype);
+	magaer->setComponentData(goID, Transform(goID, pos, rot, sca));
+	magaer->setComponentData(goID, rd);
+	magaer->SetParent(goID, parent);
+
+	for (auto& childID : node.childMeshes)
+	{
+		childCreate(model, *model.m_meshNodes[childID], magaer, matID, goID);
 	}
 }
 
@@ -768,31 +799,22 @@ void EditorManager::CreateFBX()
 	if (ImGui::Button("Load FBX"))
 	{
 		// モデルロード
-		Model::FBXModelData fbx;
+		Model fbx;
 		OpenFBXFile(fbx);
-		if (fbx.meshID == NONE_MESH_ID) return ImGui::End();
 
 		auto* renderer = Engine::get().getRendererManager();
 
 		ShaderDesc desc;
-		desc.m_name = "Lit";
+		desc.m_name = "GBuffer";
 		desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 		ShaderID shaderID = renderer->createShader(desc);
-		MaterialID matID = renderer->createMaterial(fbx.fileName, shaderID);
+		MaterialID matID = renderer->createMaterial(fbx.m_rootMesh.name, shaderID);
 		auto* pMat = renderer->getMaterial(matID);
-		pMat->setTexture("_MainTexture", fbx.textureID);
-
-		RenderData rd;
-		rd.materialID = matID;
-		rd.meshID = fbx.meshID;
+		pMat->m_rasterizeState = RasterizeState::CULL_NONE;
 
 		// オブジェクト生成
 		auto* goMgr = m_pEngine->getWorldManager()->getCurrentWorld()->getGameObjectManager();
-		Archetype archetype = Archetype::create<DynamicType, Transform, RenderData>();
-		auto goID = goMgr->createGameObject(fbx.fileName, archetype);
-
-		goMgr->setComponentData(goID, Transform(goID, Vector3(0, 10, 0)));
-		goMgr->setComponentData(goID, rd);
+		childCreate(fbx, fbx.m_rootMesh, goMgr, matID, NONE_GAME_OBJECT_ID);
 	}
 
 
