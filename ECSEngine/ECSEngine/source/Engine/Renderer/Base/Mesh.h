@@ -43,14 +43,22 @@ public:
 		std::vector<Vector4> boneWeights;
 		std::vector<VectorUint4> boneIndexs;
 	};
+	struct SubMesh
+	{
+		std::uint32_t start = 0;
+		std::uint32_t count = 0;
+	};
 
 	std::string					m_name;
 	MeshID						m_id;
+	std::vector<SubMesh>		m_subMeshes;
 
 	std::uint32_t				m_vertexCount;
 	VertexInfo					m_vertexData;
 	std::uint32_t				m_indexCount;
 	std::vector<std::uint32_t>  m_indexData;
+
+
 	std::uint32_t				m_heightWidth;
 	std::vector<float>			m_heightData;
 

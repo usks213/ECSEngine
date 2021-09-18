@@ -27,15 +27,15 @@ namespace ecs {
 	struct SkinnedMeshRenderer : IComponentData
 	{
 		ECS_DECLARE_COMPONENT_DATA(SkinnedMeshRenderer);
-		MaterialID	materialID;
+		std::vector<MaterialID>	materialIDs;
 		MeshID		meshID;
 		// ルートボーン Boneのトランスフォーム
 		// BoneID or GameObjectID
 
 		// コンストラクタ
-		SkinnedMeshRenderer() :materialID(NONE_MATERIAL_ID), meshID(NONE_MESH_ID) {}
+		SkinnedMeshRenderer() :materialIDs(NONE_MATERIAL_ID), meshID(NONE_MESH_ID) {}
 		SkinnedMeshRenderer(const MaterialID& matID, const MeshID& meshID) :
-			materialID(matID), meshID(meshID)
+			materialIDs(matID), meshID(meshID)
 		{}
 	};
 
