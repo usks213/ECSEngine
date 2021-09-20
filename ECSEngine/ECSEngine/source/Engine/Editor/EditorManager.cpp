@@ -136,7 +136,7 @@ void EditorManager::dispHierarchy()
 
 	//----- ヒエラルキー -----
 	ImGui::SetNextWindowBgAlpha(0.8f);
-	ImGui::Begin("Hierarchy");
+	ImGui::Begin("Hierarchy", 0, ImGuiWindowFlags_HorizontalScrollbar);
 
 	// ルートへ戻す
 	ImGui::Button("Return Root", ImVec2(200, 30));
@@ -267,7 +267,7 @@ void EditorManager::dispInspector()
 
 	//----- インスペクター -----
 	ImGui::SetNextWindowBgAlpha(0.8f);
-	ImGui::Begin("Inspector");
+	ImGui::Begin("Inspector", 0, ImGuiWindowFlags_HorizontalScrollbar);
 
 	if (m_selectObjectInfo.typeID == TypeToID(GameObject))
 	{
@@ -768,13 +768,32 @@ void OpenFBXFile(Model &out)
 	}
 }
 
-void childCreate(Model& model, Model::MeshNode& node, GameObjectManager* magaer, MaterialID& matID, GameObjectID parent)
+void childCreate(Model& model, Model::NodeInfo &node, GameObjectManager* magaer, MaterialID& matID, GameObjectID parent)
 {
 	RenderData rd;
-	rd.materialID = matID;
-	if(node.meshList.size() > 0)
-		rd.meshID = node.meshList.front().meshID;
+	if (node.meshIndexes.size() > 0)
+	{
+		auto& mesh = model.m_meshList[node.meshIndexes.front()];
+		rd.meshID = mesh.meshID;
+		if (mesh.materialIndex != Model::NONE_INDEX)
+		{
+			auto& mat = model.m_materialList[mesh.materialIndex];
 
+			auto* renderer = Engine::get().getRendererManager();
+			ShaderDesc desc;
+			desc.m_name = "GBuffer";
+			desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
+			ShaderID shaderID = renderer->createShader(desc);
+			rd.materialID = renderer->createMaterial(mat.name.c_str(), shaderID);
+			auto* pMat = renderer->getMaterial(rd.materialID);
+			pMat->setTexture("_MainTexture", mat.DiffuseTex);
+			pMat->m_rasterizeState = RasterizeState::CULL_NONE;
+		}
+		else
+		{
+			rd.materialID = matID;
+		}
+	}
 	Vector3 pos = node.transform.Translation();
 	Quaternion rot = Quaternion::CreateFromRotationMatrix(node.transform);
 	Vector3 sca = Vector3(0.5f, 0.5f, 0.5f);
@@ -786,9 +805,9 @@ void childCreate(Model& model, Model::MeshNode& node, GameObjectManager* magaer,
 	magaer->setComponentData(goID, rd);
 	magaer->SetParent(goID, parent);
 
-	for (auto& childID : node.childMeshes)
+	for (auto& childID : node.childs)
 	{
-		childCreate(model, *model.m_meshNodes[childID], magaer, matID, goID);
+		childCreate(model, model.m_nodeMap[childID], magaer, matID, goID);
 	}
 }
 
@@ -808,13 +827,13 @@ void EditorManager::CreateFBX()
 		desc.m_name = "GBuffer";
 		desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 		ShaderID shaderID = renderer->createShader(desc);
-		MaterialID matID = renderer->createMaterial(fbx.m_rootMesh.name, shaderID);
+		MaterialID matID = renderer->createMaterial(fbx.m_rootNode.name, shaderID);
 		auto* pMat = renderer->getMaterial(matID);
 		pMat->m_rasterizeState = RasterizeState::CULL_NONE;
 
 		// オブジェクト生成
 		auto* goMgr = m_pEngine->getWorldManager()->getCurrentWorld()->getGameObjectManager();
-		childCreate(fbx, fbx.m_rootMesh, goMgr, matID, NONE_GAME_OBJECT_ID);
+		childCreate(fbx, fbx.m_rootNode, goMgr, matID, NONE_GAME_OBJECT_ID);
 	}
 
 

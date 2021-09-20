@@ -26,20 +26,30 @@ template<typename T> static constexpr T numMipmapLevels(T width, T height)
 
 
  /// @brief コンストラクタ
-D3D11Texture::D3D11Texture(ID3D11Device1* device, ID3D11DeviceContext1* context, const TextureID& id, const std::string& path)
+D3D11Texture::D3D11Texture(const TextureID& id, const std::string& path)
 	: Texture(id, path)
 {
-	// テクスチャをファイルから生成
-	CreateTextureFromFile(device, context, path.c_str());
 }
 
+/// @brief ファイルからテクスチャの読み込み
+HRESULT D3D11Texture::CreateFromFile(ID3D11Device1* device, ID3D11DeviceContext1* context)
+{
+	return CreateTextureFromFile(device, context, m_name.c_str());
+}
+
+/// @brief メモリからテクスチャの読み込み
+HRESULT D3D11Texture::CreateFromMemory(ID3D11Device1* device, const uint8_t* wicData, size_t wicDataSize)
+{
+	return CreateTextureFromMemory(device, wicData, wicDataSize);
+}
 
  // ワイド文字列
-void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
+HRESULT D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 	_In_ ID3D11DeviceContext1* context,
 	_In_z_ const wchar_t* szFileName,
 	_Out_opt_ TexMetadata* pTexInfo)
 {
+	HRESULT hr = S_OK;
 	TexMetadata meta;
 	ScratchImage image;
 	WCHAR wszExt[_MAX_EXT];
@@ -64,7 +74,8 @@ void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 
 	if (_wcsicmp(wszExt, L".tga") == 0)
 	{
-		CHECK_FAILED(LoadFromTGAFile(szFileName, &meta, image));
+		hr = LoadFromTGAFile(szFileName, &meta, image);
+		if (FAILED(hr)) return hr;
 		if (pTexInfo) *pTexInfo = meta;
 
 		d3d11Desc.Width = meta.width;
@@ -88,21 +99,25 @@ void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 		//	SRVDesc.TextureCube.MipLevels = 1;
 		//}
 
-		CHECK_FAILED(d3dDevice->CreateTexture2D(&d3d11Desc, &d3d11SubresourceData, m_tex.GetAddressOf()));
-		CHECK_FAILED(d3dDevice->CreateShaderResourceView(m_tex.Get(), &SRVDesc, m_srv.GetAddressOf()));
+		hr = d3dDevice->CreateTexture2D(&d3d11Desc, &d3d11SubresourceData, m_tex.GetAddressOf());
+		if (FAILED(hr)) return hr;
+		hr = d3dDevice->CreateShaderResourceView(m_tex.Get(), &SRVDesc, m_srv.GetAddressOf());
+		if (FAILED(hr)) return hr;
 	}
 	else if (_wcsicmp(wszExt, L".dds") == 0)
 	{
 		//hr = LoadFromDDSFile(szFileName, DDS_FLAGS_FORCE_RGB, &meta, image);
-		CHECK_FAILED(DirectX::CreateDDSTextureFromFileEx(
+		hr = (DirectX::CreateDDSTextureFromFileEx(
 			d3dDevice, szFileName, 0,
 			d3d11Desc.Usage, d3d11Desc.BindFlags, d3d11Desc.CPUAccessFlags, d3d11Desc.MiscFlags,
 			false, reinterpret_cast<ID3D11Resource**>(m_tex.GetAddressOf()),
 			m_srv.GetAddressOf()));
+		if (FAILED(hr)) return hr;
 	}
 	else if (_wcsicmp(wszExt, L".hdr") == 0)
 	{
-		 LoadFromHDRFile(szFileName, &meta, image);
+		 hr = LoadFromHDRFile(szFileName, &meta, image);
+		 if (FAILED(hr)) return hr;
 		 //DirectX::CreateTexture();
 		d3d11Desc.Usage = D3D11_USAGE_DEFAULT;
 		d3d11Desc.CPUAccessFlags = 0;
@@ -129,8 +144,10 @@ void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 		 SRVDesc.Texture2D.MostDetailedMip = 0;
 		 SRVDesc.Texture2D.MipLevels = d3d11Desc.MipLevels;
 		 
-		 CHECK_FAILED(d3dDevice->CreateTexture2D(&d3d11Desc, nullptr, m_tex.GetAddressOf()));
-		 CHECK_FAILED(d3dDevice->CreateShaderResourceView(m_tex.Get(), &SRVDesc, m_srv.GetAddressOf()));
+		 hr = (d3dDevice->CreateTexture2D(&d3d11Desc, nullptr, m_tex.GetAddressOf()));
+		 if (FAILED(hr)) return hr;
+		 hr = (d3dDevice->CreateShaderResourceView(m_tex.Get(), &SRVDesc, m_srv.GetAddressOf()));
+		 if (FAILED(hr)) return hr;
 
 		 context->UpdateSubresource(m_tex.Get(), 0, nullptr, d3d11SubresourceData.pSysMem, d3d11SubresourceData.SysMemPitch, d3d11SubresourceData.SysMemSlicePitch);
 		 context->GenerateMips(m_srv.Get());
@@ -139,7 +156,7 @@ void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 	}
 	else
 	{
-		CHECK_FAILED(DirectX::CreateWICTextureFromFileEx(
+		hr = (DirectX::CreateWICTextureFromFileEx(
 			d3dDevice,
 			szFileName,
 			0,
@@ -150,19 +167,51 @@ void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 			WIC_LOADER_DEFAULT,
 			reinterpret_cast<ID3D11Resource**>(m_tex.GetAddressOf()),
 			m_srv.GetAddressOf()));
+		if (FAILED(hr)) return hr;
 	}
+
+	return hr;
 }
 
 
 // マルチバイト文字
-void D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
+HRESULT D3D11Texture::CreateTextureFromFile(_In_ ID3D11Device1* d3dDevice,
 	_In_ ID3D11DeviceContext1* context,
 	_In_z_ const char* szFileName,
 	_Out_opt_ TexMetadata* pTexInfo)
 {
 	WCHAR wszTexFName[_MAX_PATH];
 	int nLen = MultiByteToWideChar(CP_ACP, 0, szFileName, lstrlenA(szFileName), wszTexFName, _countof(wszTexFName));
-	if (nLen <= 0) return;
+	if (nLen <= 0) return E_FAIL;
 	wszTexFName[nLen] = L'\0';
-	CreateTextureFromFile(d3dDevice, context, wszTexFName, pTexInfo);
+	return CreateTextureFromFile(d3dDevice, context, wszTexFName, pTexInfo);
+}
+
+// メモリから生成
+HRESULT D3D11Texture::CreateTextureFromMemory(_In_ ID3D11Device1* d3dDevice,
+	_In_bytecount_(wicDataSize) const uint8_t* wicData,
+	_In_ size_t wicDataSize,
+	_Out_opt_ TexMetadata* pTexInfo)
+{
+	TexMetadata meta;
+	ScratchImage image;
+	HRESULT hr;
+	if (wicDataSize >= 18 && memcmp(&wicData[wicDataSize - 18], "TRUEVISION-XFILE.", 18) == 0) {
+		hr = LoadFromTGAMemory(wicData, wicDataSize, &meta, image);
+	}
+	else if (wicDataSize >= 4 && memcmp(wicData, "DDS ", 4) == 0) {
+		hr = LoadFromDDSMemory(wicData, wicDataSize, DDS_FLAGS_FORCE_RGB, &meta, image);
+	}
+	else {
+		hr = LoadFromWICMemory(wicData, wicDataSize, WIC_FLAGS_FORCE_RGB, &meta, image);
+	}
+	if (FAILED(hr)) return hr;
+	if (pTexInfo) *pTexInfo = meta;
+
+	m_tex.Reset();
+	auto* pTex = static_cast<ID3D11Resource*>(m_tex.Get());
+	hr = DirectX::CreateTexture(d3dDevice, image.GetImages(), image.GetImageCount(), meta, &pTex);
+	if (FAILED(hr)) return hr;
+
+	return CreateShaderResourceView(d3dDevice, image.GetImages(), image.GetImageCount(), meta, m_srv.ReleaseAndGetAddressOf());
 }

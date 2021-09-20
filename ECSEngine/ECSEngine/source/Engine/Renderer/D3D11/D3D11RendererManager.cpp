@@ -934,6 +934,7 @@ void D3D11RendererManager::setD3D11MaterialResource(const D3D11Material& d3dMate
 		auto stageIndex = static_cast<std::size_t>(stage);
 
 		// マテリアルバッファ更新
+		d3dMat.m_materialBuffer._mTex = d3dMat.m_materialBuffer._mTex.Transpose();
 		setCBuffer[stageIndex](m_d3dContext.Get(), SHADER::SHADER_CB_SLOT_MATERIAL, 1, m_materialBuffer.GetAddressOf());
 		m_d3dContext->UpdateSubresource(m_materialBuffer.Get(), 0, nullptr, &d3dMat.m_materialBuffer, 0, 0);
 
@@ -1319,7 +1320,45 @@ TextureID D3D11RendererManager::createTextureFromFile(std::string filePath)
 	if (m_texturePool.end() != itr) return id;
 
 	// 新規生成
-	m_texturePool[id] = std::make_unique<D3D11Texture>(m_d3dDevice.Get(), m_d3dContext.Get(), id, filePath);
+	auto pTex = std::make_unique<D3D11Texture>(id, filePath);
+
+	// テクスチャの読み込み
+	HRESULT hr = pTex->CreateFromFile(m_d3dDevice.Get(), m_d3dContext.Get());
+	if (FAILED(hr))
+	{
+		pTex.release();
+		return NONE_TEXTURE_ID;
+	}
+
+	// 成功したら
+	m_texturePool[id] = std::move(pTex);
+
+	return id;
+}
+
+TextureID D3D11RendererManager::createTextureFromMemory(std::string name, 
+	const std::uint8_t* wicData, std::size_t wicDataSize)
+{
+	// IDの取得
+	TextureID id = hash::crc32string(name.c_str());
+
+	// 既に生成済み
+	const auto& itr = m_texturePool.find(id);
+	if (m_texturePool.end() != itr) return id;
+
+	// 新規生成
+	auto pTex = std::make_unique<D3D11Texture>(id, name);
+
+	// テクスチャの読み込み
+	HRESULT hr = pTex->CreateFromMemory(m_d3dDevice.Get(), wicData, wicDataSize);
+	if (FAILED(hr))
+	{
+		pTex.release();
+		return NONE_TEXTURE_ID;
+	}
+
+	// 成功したら
+	m_texturePool[id] = std::move(pTex);
 
 	return id;
 }

@@ -96,6 +96,7 @@ public:
 	MeshID createMesh(std::string name) override;
 	RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) override;
 	TextureID createTextureFromFile(std::string filePath) override;
+	TextureID createTextureFromMemory(std::string name, const std::uint8_t* wicData, std::size_t wicDataSize) override;
 	RenderTargetID createRenderTarget(std::string name) override;
 	DepthStencilID createDepthStencil(std::string name) override;
 	BatchGroupID creatBatchGroup(MaterialID materialID, MeshID meshID) override;

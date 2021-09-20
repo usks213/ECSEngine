@@ -15,15 +15,11 @@ class Model;
 
 class AssimpLoader final : public Singleton<AssimpLoader>
 {
-private:
-	///// @brief コンストラクタ
-	//AssimpLoader();
-	///// @brief デストラクタ
-	//~AssimpLoader();
-
 public:
-
 	bool LoadModel(RendererManager* renderer, std::string path, Model& out);
+
+private:
+
 
 };
 
