@@ -83,7 +83,7 @@ D3D11RendererManager::D3D11RendererManager() :
 	m_nOutputWidth(1), 
 	m_nOutputHeight(1),
 	m_dxgiMSAA(DXGI_SAMPLE_DESC{1, 0}),
-	m_vireport(),
+	m_viewport(),
 	m_hWnd(nullptr),
 	m_bUseMSAA(false),
 	m_curD3DShader(nullptr),
@@ -138,15 +138,21 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 	d3dDesc.ByteWidth = sizeof(SHADER::MaterialBuffer);
 	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_materialBuffer.ReleaseAndGetAddressOf()));
 
+	// Map/Unmap Param
+	d3dDesc.Usage = D3D11_USAGE_DYNAMIC;
+	d3dDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	// Animation
+	d3dDesc.ByteWidth = sizeof(SHADER::AnimationBuffer);
+	CHECK_FAILED(m_d3dDevice->CreateBuffer(&d3dDesc, nullptr, m_animationBuffer.ReleaseAndGetAddressOf()));
+
 	// Light
+	d3dDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	d3dDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	srvDesc.Buffer.FirstElement = 0;
-	d3dDesc.Usage = D3D11_USAGE_DYNAMIC;
-	d3dDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	d3dDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	d3dDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
 	// ポイントライト
 	d3dDesc.ByteWidth = sizeof(PointLightData) * SHADER::MAX_POINT_LIGHT_COUNT;
 	d3dDesc.StructureByteStride = sizeof(PointLightData);
@@ -241,7 +247,7 @@ void D3D11RendererManager::clear()
 	//m_d3dContext->OMSetRenderTargets(1, m_backBufferRTV.GetAddressOf(), m_depthStencilView.Get());
 	m_d3dContext->OMSetRenderTargets(1, m_gbuffer.m_diffuseRTV.GetAddressOf(), m_depthStencilView.Get());
 
-	m_d3dContext->RSSetViewports(1, &m_vireport);
+	m_d3dContext->RSSetViewports(1, &m_viewport);
 	m_d3dAnnotation->EndEvent();
 }
 
@@ -670,7 +676,7 @@ HRESULT D3D11RendererManager::createSwapChainAndBuffer()
 	CHECK_FAILED(hr);
 
 	// ビューポート
-	m_vireport = CD3D11_VIEWPORT(0.0f, 0.0f,
+	m_viewport = CD3D11_VIEWPORT(0.0f, 0.0f,
 		static_cast<float>(backBufferWidth),
 		static_cast<float>(backBufferHeight));
 
@@ -1058,6 +1064,21 @@ void D3D11RendererManager::setD3DTransformBuffer(const Matrix& mtxWorld)
 	}
 }
 
+void D3D11RendererManager::setD3DAnimationBuffer(std::vector<Matrix>& mtxBones)
+{
+	// マトリックスは倒置前提
+	SubResource resource;
+	std::size_t size = mtxBones.size() < SHADER::MAX_ANIMATION_BONE_COUNT ?
+		mtxBones.size() * sizeof(Matrix) : SHADER::MAX_ANIMATION_BONE_COUNT * sizeof(Matrix);
+	// 更新
+	d3dMap(m_animationBuffer.Get(), D3D11_MAP::D3D11_MAP_WRITE_DISCARD, true, resource);
+	std::memcpy(resource.pData, mtxBones.data(), size);
+	d3dUnmap(m_animationBuffer.Get());
+	// 指定
+	setCBuffer[static_cast<std::size_t>(ShaderStage::VS)](m_d3dContext.Get(), 
+		SHADER::SHADER_CB_SLOT_ANIMATION, 1, m_animationBuffer.GetAddressOf());
+}
+
 void D3D11RendererManager::setD3DLightBuffer(
 	std::vector<PointLightData>& pointLights, std::vector<SpotLightData>& spotLights)
 {
@@ -1218,6 +1239,21 @@ void D3D11RendererManager::d3dUnmap(ID3D11Resource* pResource)
 void D3D11RendererManager::d3dCopyResource(ID3D11Resource* pDst, ID3D11Resource* pSrc)
 {
 	m_d3dContext->CopyResource(pDst, pSrc);
+}
+
+AnimationID D3D11RendererManager::createAnimation(std::string name)
+{
+	// IDの取得
+	AnimationID id = hash::crc32string(name.c_str());
+
+	// 既に生成済み
+	const auto& itr = m_animationPool.find(id);
+	if (m_animationPool.end() != itr) return id;
+
+	// 新規生成
+	m_animationPool[id] = std::make_unique<Animation>(id, name);
+
+	return id;
 }
 
 BufferID D3D11RendererManager::createBuffer(BufferDesc desc, BufferData* pData)

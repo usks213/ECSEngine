@@ -8,6 +8,7 @@
 
 #include "SystemTable.h"
 
+#include "AnimationSystem.h"
 #include "PhysicsSystem.h"
 #include "TransformSystem.h"
 
@@ -20,6 +21,7 @@ using namespace ecs;
 SystemTable::SystemTable()
 {
 	// デフォルトのシステムを格納
+	PUSU_SYSTEM(AnimationSystem);
 	PUSU_SYSTEM(PhysicsSystem);
 	PUSU_SYSTEM(TransformSystem);
 

@@ -7,6 +7,7 @@
  *********************************************************************/
 #pragma once
 
+#include "Animation.h"
 #include "Buffer.h"
 #include "Shader.h"
 #include "Texture.h"
@@ -69,6 +70,7 @@ public:
 	virtual Viewport getViewport() = 0;
 
 public:
+	virtual AnimationID createAnimation(std::string name) = 0;
 	virtual BufferID createBuffer(BufferDesc desc, BufferData* pData = nullptr) = 0;
 	virtual ShaderID createShader(ShaderDesc desc) = 0;
 	virtual MaterialID createMaterial(std::string name, ShaderID id) = 0;
@@ -80,6 +82,7 @@ public:
 	virtual DepthStencilID createDepthStencil(std::string name) = 0;
 	virtual BatchGroupID creatBatchGroup(MaterialID materialID, MeshID meshID) = 0;
 
+	Animation*	getAnimation(AnimationID id);
 	Buffer*	getBuffer(BufferID id);
 	Shader*	getShader(ShaderID id);
 	Material* getMaterial(MaterialID id);
@@ -100,6 +103,7 @@ protected:
 	Engine* m_pEngine;
 
 public:
+	std::unordered_map<AnimationID,		std::unique_ptr<Animation>>		m_animationPool;
 	std::unordered_map<BufferID,		std::unique_ptr<Buffer>>		m_bufferPool;
 	std::unordered_map<ShaderID,		std::unique_ptr<Shader>>		m_shaderPool;
 	std::unordered_map<MaterialID,		std::unique_ptr<Material>>		m_materialPool;

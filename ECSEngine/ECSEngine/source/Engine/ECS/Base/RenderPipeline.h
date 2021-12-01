@@ -9,6 +9,7 @@
 
 #include <Engine/ECS/Base/SystemBase.h>
 #include <Engine/Engine.h>
+#include <Engine/ECS/Base/GameObject.h>
 #include <Engine/ECS/ComponentData/TransformComponentData.h>
 #include <Engine/ECS/ComponentData/RenderingComponentData.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
@@ -56,6 +57,7 @@ namespace ecs {
 		void endPass(Camera& camera);
 
 		static inline void updateCamera(Camera& camera, Transform& transform, float width, float height);
+		static void updateBoneMatrix(GameObjectManager* goMgr, const GameObjectID& goID, Mesh& mesh);
 
 	public:
 		RenderTargetID m_renderTarget;
@@ -69,6 +71,9 @@ namespace ecs {
 			RenderBufferID	renderBufferID;
 			Matrix			worldMatrix;
 			float			cameraLengthSqr;
+			bool			isBone;
+			MeshID			meshID;
+			GameObjectID	rootID;
 		};
 		std::vector<RenderingData> m_opequeList;
 		std::vector<RenderingData> m_transparentList;

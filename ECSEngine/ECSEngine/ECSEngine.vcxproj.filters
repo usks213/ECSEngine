@@ -248,6 +248,9 @@
     <ClCompile Include="source\App\FBXModel.cpp">
       <Filter>ソース ファイル\App</Filter>
     </ClCompile>
+    <ClCompile Include="source\Engine\ECS\System\AnimationSystem.cpp">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Engine\Engine.h">
@@ -532,6 +535,15 @@
     <ClInclude Include="source\Engine\Renderer\Base\Model.h">
       <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
     </ClInclude>
+    <ClInclude Include="source\Engine\Renderer\Base\Animation.h">
+      <Filter>ソース ファイル\Engine\Renderer\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\ComponentData\AnimationComponentData.h">
+      <Filter>ソース ファイル\Engine\ECS\ComponentData</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Engine\ECS\System\AnimationSystem.h">
+      <Filter>ソース ファイル\Engine\ECS\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ECSEngine.rc">
@@ -584,6 +596,12 @@
       <Filter>リソース ファイル\Shader</Filter>
     </FxCompile>
     <FxCompile Include="data\shader\DeferredLit_PS.hlsl">
+      <Filter>リソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shader\AnimationGBuffer_PS.hlsl">
+      <Filter>リソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="data\shader\AnimationGBuffer_VS.hlsl">
       <Filter>リソース ファイル\Shader</Filter>
     </FxCompile>
   </ItemGroup>

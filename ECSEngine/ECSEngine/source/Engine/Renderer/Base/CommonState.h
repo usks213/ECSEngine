@@ -83,7 +83,7 @@ enum class PrimitiveTopology : std::uint8_t
 
 //----- Buffer -----
 
-/// @enum EUsage
+/// @enum Usage
 /// @brief リソース使用識別
 enum class Usage : std::uint8_t
 {

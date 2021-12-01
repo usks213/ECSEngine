@@ -8,6 +8,9 @@ Vulkan / DX12では、この決定は開発者に任されています。
 
 #include "Light.hlsli"
 
+// ボーン数
+#define MAX_BONE (512)
+
 // フラグ
 #define TEXTURE_FLG		(1 << 1)
 #define LIGHT_FLG		(1 << 2)
@@ -36,8 +39,13 @@ cbuffer Transform : register(b6)
 	float4x4 _mWorld;
 }
 
+cbuffer Animation : register(b7)
+{
+	float4x4 _mBone[MAX_BONE];
+}
+
 // マテリアル定数バッファ
-cbuffer Material : register(b7)
+cbuffer Material : register(b8)
 {
 	float4		_Color;
 	float4x4	_mTex;

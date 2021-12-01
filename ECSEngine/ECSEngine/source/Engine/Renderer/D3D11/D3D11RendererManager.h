@@ -60,6 +60,8 @@ public:
 
 	void setD3DTransformBuffer(const Matrix& mtxWorld);
 
+	void setD3DAnimationBuffer(std::vector<Matrix>& mtxBones);
+
 	void setD3DLightBuffer(std::vector<PointLightData>& pointLights, std::vector<SpotLightData>& spotLights);
 
 	void d3dRender(const RenderBufferID& renderBufferID);
@@ -87,9 +89,10 @@ public:
 	void copyRenderTarget(const RenderTargetID& dstID, const RenderTargetID srcID) override;
 
 public:
-	Viewport getViewport() override { return Viewport(m_vireport); }
+	Viewport getViewport() override { return Viewport(m_viewport); }
 
 public:
+	AnimationID createAnimation(std::string name) override;
 	BufferID createBuffer(BufferDesc desc, BufferData* pData = nullptr) override;
 	ShaderID createShader(ShaderDesc desc) override;
 	MaterialID createMaterial(std::string name, ShaderID shaderID) override;
@@ -159,7 +162,7 @@ public:
 
 	ComPtr<IDXGIFactory2>				m_dxgiFactory;			// ファクトリー
 	DXGI_SAMPLE_DESC					m_dxgiMSAA;				// MSAA設定
-	D3D11_VIEWPORT						m_vireport;				// ビューポート
+	D3D11_VIEWPORT						m_viewport;				// ビューポート
 	HWND								m_hWnd;					// ウィンドウハンドル
 
 	bool								m_bUseMSAA;
@@ -170,6 +173,7 @@ public:
 	ComPtr<ID3D11DepthStencilState>		m_depthStencilStates[(size_t)DepthStencilState::MAX];	// 深度ステンシルステート
 
 private:
+	//----- 現在のステート
 	BlendState			m_curBlendState;
 	RasterizeState		m_curRasterizeState;
 	DepthStencilState	m_curDepthStencilState;
@@ -183,8 +187,10 @@ private:
 	ID3D11RenderTargetView* m_curRTV;
 	ID3D11DepthStencilView* m_curDSV;
 
+	//----- シェーダーバッファ
 	ComPtr<ID3D11Buffer> m_systemBuffer;
 	ComPtr<ID3D11Buffer> m_transformBuffer;
+	ComPtr<ID3D11Buffer> m_animationBuffer;
 	ComPtr<ID3D11Buffer> m_materialBuffer;
 
 	ComPtr<ID3D11Buffer> m_pointLightBuffer;

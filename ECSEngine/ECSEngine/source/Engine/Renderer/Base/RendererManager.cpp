@@ -8,6 +8,14 @@
 
 #include "RendererManager.h"
 
+Animation* RendererManager::getAnimation(AnimationID id)
+{
+	const auto& itr = m_animationPool.find(id);
+	if (m_animationPool.end() == itr) return nullptr;
+
+	return itr->second.get();
+}
+
 Buffer* RendererManager::getBuffer(BufferID id)
 {
 	const auto& itr = m_bufferPool.find(id);

@@ -174,6 +174,57 @@ void RenderPipeline::cullingPass(Camera& camera)
 				data.worldMatrix = transform.globalMatrix;
 				data.cameraLengthSqr = (camera.world.Translation() -
 					transform.globalMatrix.Translation()).LengthSquared();
+				data.isBone = false;
+				data.meshID = rd.meshID;
+				data.rootID = NONE_GAME_OBJECT_ID;
+
+				if (mat->m_shaderType == ShaderType::Forward)
+				{
+					// フォワード
+					if (mat->m_isTransparent)
+					{
+						// 半透明
+						m_transparentList.push_back(data);
+					}
+					else
+					{
+						// 不透明
+						m_opequeList.push_back(data);
+					}
+				}
+				else if (mat->m_shaderType == ShaderType::Deferred)
+				{
+					// 不透明(デファード)
+					m_deferredList.push_back(data);
+				}
+			}
+			// シャドウカリング
+
+		});
+
+	// スキンメッシュ
+	foreach<SkinnedMeshRenderer, Transform>(
+		[&](SkinnedMeshRenderer& rd, Transform& transform)
+		{
+			const auto* mat = renderer->getMaterial(rd.materialID);
+			const auto* mesh = renderer->getMesh(rd.meshID);
+			if (!mat || !mesh) return;
+			const auto& rdID = renderer->createRenderBuffer(mat->m_shaderID, rd.meshID);
+
+			AABB aabb;
+			AABB::transformAABB(transform.globalMatrix, mesh->m_aabb, aabb);
+			// カメラカリング
+			//if (cameraFrustum.CheckAABB(aabb))
+			{
+				RenderingData data;
+				data.materialID = rd.materialID;
+				data.renderBufferID = rdID;
+				data.worldMatrix = transform.globalMatrix;
+				data.cameraLengthSqr = (camera.world.Translation() -
+					transform.globalMatrix.Translation()).LengthSquared();
+				data.isBone = true;
+				data.meshID = rd.meshID;
+				data.rootID = rd.rootObjectID;
 
 				if (mat->m_shaderType == ShaderType::Forward)
 				{
@@ -311,6 +362,7 @@ void RenderPipeline::gbufferPass(Camera& camera)
 	// レンダラーマネージャー
 	auto* engine = m_pWorld->getWorldManager()->getEngine();
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+	auto* goMgr = m_pWorld->getGameObjectManager();
 
 	// ビューポート指定
 	Viewport viewport(
@@ -365,6 +417,18 @@ void RenderPipeline::gbufferPass(Camera& camera)
 	// 不透明描画
 	for (auto& opeque : m_deferredList)
 	{
+		// ボーン更新
+		if (opeque.isBone)
+		{
+			auto* pMesh = renderer->getMesh(opeque.meshID);
+			updateBoneMatrix(goMgr, opeque.rootID, *pMesh);
+			renderer->setD3DAnimationBuffer(pMesh->m_calcBoneBuffer);
+			//if (opeque.rootID != NONE_GAME_OBJECT_ID)
+			//{
+			//	auto root = goMgr->getComponentData<Transform>(opeque.rootID);
+			//	if (root) opeque.worldMatrix = root->globalMatrix;
+			//}
+		}
 		renderer->setD3D11Material(opeque.materialID);
 		renderer->setD3DTransformBuffer(opeque.worldMatrix);
 		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
@@ -382,6 +446,7 @@ void RenderPipeline::opaquePass(Camera& camera)
 	// レンダラーマネージャー
 	auto* engine = m_pWorld->getWorldManager()->getEngine();
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+	auto* goMgr = m_pWorld->getGameObjectManager();
 
 	//// ビューポート指定
 	//float scale = 1.0f;
@@ -434,6 +499,13 @@ void RenderPipeline::opaquePass(Camera& camera)
 	// 不透明描画
 	for (auto& opeque : m_opequeList)
 	{
+		// ボーン更新
+		if (opeque.isBone)
+		{
+			auto* pMesh = renderer->getMesh(opeque.meshID);
+			updateBoneMatrix(goMgr ,opeque.rootID, *pMesh);
+			renderer->setD3DAnimationBuffer(pMesh->m_calcBoneBuffer);
+		}
 		renderer->setD3D11Material(opeque.materialID);
 		renderer->setD3DTransformBuffer(opeque.worldMatrix);
 		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
@@ -459,10 +531,18 @@ void RenderPipeline::transparentPass(Camera& camera)
 	// レンダラーマネージャー
 	auto* engine = m_pWorld->getWorldManager()->getEngine();
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+	auto* goMgr = m_pWorld->getGameObjectManager();
 
 	// 半透明描画
 	for (auto& opeque : m_transparentList)
 	{
+		// ボーン更新
+		if (opeque.isBone)
+		{
+			auto* pMesh = renderer->getMesh(opeque.meshID);
+			updateBoneMatrix(goMgr, opeque.rootID, *pMesh);
+			renderer->setD3DAnimationBuffer(pMesh->m_calcBoneBuffer);
+		}
 		renderer->setD3D11Material(opeque.materialID);
 		renderer->setD3DTransformBuffer(opeque.worldMatrix);
 		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
@@ -560,4 +640,24 @@ inline void RenderPipeline::updateCamera(Camera& camera, Transform& transform, f
 	camera.projection = Matrix::CreatePerspectiveFieldOfView(
 		XMConvertToRadians(camera.fovY), camera.aspect, camera.nearZ, camera.farZ);
 
+}
+
+void RenderPipeline::updateBoneMatrix(GameObjectManager* goMgr ,const GameObjectID& goID, Mesh& mesh)
+{
+	auto* go = goMgr->getGameObject(goID);
+	if (go)
+	{
+		auto itr = mesh.m_boneTabel.find(go->getName().data());
+		if (mesh.m_boneTabel.end() != itr)
+		{
+			auto* transform = goMgr->getComponentData<ecs::Transform>(goID);
+			mesh.m_calcBoneBuffer[itr->second] = (mesh.m_invMatrixData[itr->second] * 
+				transform->globalMatrix).Transpose();	// 倒置
+		}
+		// 子ノード
+		for (auto childID : goMgr->GetChilds(goID))
+		{
+			updateBoneMatrix(goMgr, childID, mesh);
+		}
+	}
 }

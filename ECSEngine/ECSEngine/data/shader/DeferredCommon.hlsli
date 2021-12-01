@@ -3,8 +3,8 @@
 // Gbuffer
 cbuffer Gbuffer : register(b0)
 {
-	float _metallic = 1.0f;
-	float _roughness = 1.0f;
+	float _metallic = 0.5f;
+	float _roughness = 0.5f;
 	float2 _Dumey;
 }
 

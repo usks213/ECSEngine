@@ -38,9 +38,13 @@ namespace ecs {
 		Transform(const GameObjectID& id, Vector3 translation, 
 			Quaternion rotation = Quaternion(), Vector3 scale = Vector3(1,1,1)) :
 			id(id), translation(translation), rotation(rotation), scale(scale),
-			globalScale(1, 1, 1)
+			globalScale(scale)
 			//localScale(1, 1, 1), parentScale(1, 1, 1)
 		{
+			localMatrix = Matrix::CreateScale(scale);
+			localMatrix *= Matrix::CreateFromQuaternion(rotation);
+			localMatrix *= Matrix::CreateTranslation(translation);
+			globalMatrix = localMatrix;
 		}
 	};
 }

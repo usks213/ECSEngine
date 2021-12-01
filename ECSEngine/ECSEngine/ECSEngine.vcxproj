@@ -200,6 +200,7 @@
     <ClCompile Include="source\Engine\ECS\Base\SystemBase.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\World.cpp" />
     <ClCompile Include="source\Engine\ECS\Base\WorldManager.cpp" />
+    <ClCompile Include="source\Engine\ECS\System\AnimationSystem.cpp" />
     <ClCompile Include="source\Engine\ECS\System\CollisionSystem.cpp" />
     <ClCompile Include="source\Engine\ECS\System\ImguiSystem.cpp" />
     <ClCompile Include="source\Engine\ECS\System\ParentSystem.cpp" />
@@ -273,6 +274,7 @@
     <ClInclude Include="source\Engine\ECS\Base\TypeInfo.h" />
     <ClInclude Include="source\Engine\ECS\Base\World.h" />
     <ClInclude Include="source\Engine\ECS\Base\WorldManager.h" />
+    <ClInclude Include="source\Engine\ECS\ComponentData\AnimationComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\BasicComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\CameraComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\ColliderComponentData.h" />
@@ -282,6 +284,7 @@
     <ClInclude Include="source\Engine\ECS\ComponentData\RenderingComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\RigidbodyComponentData.h" />
     <ClInclude Include="source\Engine\ECS\ComponentData\TransformComponentData.h" />
+    <ClInclude Include="source\Engine\ECS\System\AnimationSystem.h" />
     <ClInclude Include="source\Engine\ECS\System\CollisionSystem.h" />
     <ClInclude Include="source\Engine\ECS\System\ImguiSystem.h" />
     <ClInclude Include="source\Engine\ECS\System\ParentSystem.h" />
@@ -295,6 +298,7 @@
     <ClInclude Include="source\Engine\Object.h" />
     <ClInclude Include="source\Engine\OS\Base\WindowManager.h" />
     <ClInclude Include="source\Engine\OS\Win\WindowsWindow.h" />
+    <ClInclude Include="source\Engine\Renderer\Base\Animation.h" />
     <ClInclude Include="source\Engine\Renderer\Base\BatchGroup.h" />
     <ClInclude Include="source\Engine\Renderer\Base\Buffer.h" />
     <ClInclude Include="source\Engine\Renderer\Base\CommonState.h" />
@@ -337,6 +341,18 @@
     <Image Include="icon1.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="data\shader\AnimationGBuffer_PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="data\shader\AnimationGBuffer_VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="data\shader\BtLine_PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

@@ -22,6 +22,7 @@
 
 #include <Engine/ECS/Base/WorldManager.h>
 #include <Engine/ECS/Base/GameObjectManager.h>
+#include <Engine/ECS/ComponentData/AnimationComponentData.h>
 #include <Engine/ECS/ComponentData/BasicComponentData.h>
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
 #include <Engine/ECS/ComponentData/ComponentTag.h>
@@ -228,7 +229,7 @@ void EditorManager::dispAsset()
 	{
 		name = "Start";
 	}
-	/*if(ImGui::Button(name.c_str(), ImVec2(100, 30)))
+	if(ImGui::Button(name.c_str(), ImVec2(100, 30)))
 	{
 		std::string path("data/world/");
 
@@ -241,7 +242,7 @@ void EditorManager::dispAsset()
 		{
 			pWorld->deserializeWorld(path);
 		}
-	}*/
+	}
 
 	ImGui::End();
 
@@ -436,7 +437,7 @@ void EditorManager::updateView()
 	{
 		if (GetKeyPress(VK_SHIFT))
 		{
-			moveSpeed *= 2;
+			moveSpeed *= 4;
 		}
 		if (GetKeyPress(VK_D))
 		{
@@ -578,6 +579,17 @@ void EditorManager::componentInspector(std::size_t typeHash, void* data)
 			ImGui::TreePop();
 		}
 	}
+	//else if (CheckType(SkinnedMeshRenderer))
+	//{
+	//	SkinnedMeshRenderer* renderer = static_cast<SkinnedMeshRenderer*>(data);
+	//	if (ImGui::TreeNode(TypeToString(SkinnedMeshRenderer)))
+	//	{
+	//		ImGui::InputInt("materialID", (int*)renderer->materialID);
+	//		ImGui::InputInt("meshID", (int*)renderer->meshID);
+	//		ImGui::InputInt("rootObjectID", (int*)renderer->rootObjectID);
+	//		ImGui::TreePop();
+	//	}
+	//}
 }
 
 void EditorManager::EditTransform(World* pWorld ,Camera& camera, Transform& transform)
@@ -768,9 +780,11 @@ void OpenFBXFile(Model &out)
 	}
 }
 
-void childCreate(Model& model, Model::NodeInfo &node, GameObjectManager* magaer, MaterialID& matID, GameObjectID parent)
+void childCreate(Model& model, Model::NodeInfo &node, GameObjectManager* magaer,
+	MaterialID& matID, GameObjectID parent, 
+	std::multimap<std::string, GameObjectID>& skinMeshList)
 {
-	RenderData rd;
+	SkinnedMeshRenderer rd;
 	if (node.meshIndexes.size() > 0)
 	{
 		auto& mesh = model.m_meshList[node.meshIndexes.front()];
@@ -781,7 +795,7 @@ void childCreate(Model& model, Model::NodeInfo &node, GameObjectManager* magaer,
 
 			auto* renderer = Engine::get().getRendererManager();
 			ShaderDesc desc;
-			desc.m_name = "GBuffer";
+			desc.m_name = "AnimationGBuffer";
 			desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 			ShaderID shaderID = renderer->createShader(desc);
 			rd.materialID = renderer->createMaterial(mat.name.c_str(), shaderID);
@@ -796,19 +810,51 @@ void childCreate(Model& model, Model::NodeInfo &node, GameObjectManager* magaer,
 	}
 	Vector3 pos = node.transform.Translation();
 	Quaternion rot = Quaternion::CreateFromRotationMatrix(node.transform);
-	Vector3 sca = Vector3(0.5f, 0.5f, 0.5f);
+	Vector3 sca = Vector3(1.0f, 1.0f, 1.0f);
 
 	// オブジェクト生成
-	Archetype archetype = Archetype::create<DynamicType, Transform, RenderData>();
+	Archetype archetype = Archetype::create<DynamicType, Transform, SkinnedMeshRenderer>();
 	auto goID = magaer->createGameObject(node.name, archetype);
+	magaer->SetParent(goID, parent);
 	magaer->setComponentData(goID, Transform(goID, pos, rot, sca));
 	magaer->setComponentData(goID, rd);
-	magaer->SetParent(goID, parent);
+
+	if (node.meshIndexes.size() > 0)
+	{
+		auto& mesh = model.m_meshList[node.meshIndexes.front()];
+		// ボーンを持っている
+		if (mesh.boneTable.size() > 0)
+		{
+			if(mesh.rootBoneName.size() > 0)
+				skinMeshList.emplace(mesh.rootBoneName, goID);
+		}
+	}
 
 	for (auto& childID : node.childs)
 	{
-		childCreate(model, model.m_nodeMap[childID], magaer, matID, goID);
+		childCreate(model, model.m_nodeMap[childID], magaer, matID, goID, skinMeshList);
 	}
+}
+
+bool FindRootBoneID(GameObjectManager* magaer, GameObjectID& parentID, 
+	GameObjectID& skinID, const std::string& rootName)
+{
+	auto* parent = magaer->getGameObject(parentID);
+	if (parent->getName() == rootName)
+	{
+		auto* skinMesh = magaer->getComponentData<SkinnedMeshRenderer>(skinID);
+		skinMesh->rootObjectID = parentID;
+		return true;
+	}
+
+	// この検索
+	for (auto childID : magaer->GetChilds(parentID))
+	{
+		if (FindRootBoneID(magaer, childID, skinID, rootName))
+			return true;
+	}
+
+	return false;
 }
 
 void EditorManager::CreateFBX()
@@ -824,7 +870,7 @@ void EditorManager::CreateFBX()
 		auto* renderer = Engine::get().getRendererManager();
 
 		ShaderDesc desc;
-		desc.m_name = "GBuffer";
+		desc.m_name = "AnimationGBuffer";
 		desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 		ShaderID shaderID = renderer->createShader(desc);
 		MaterialID matID = renderer->createMaterial(fbx.m_rootNode.name, shaderID);
@@ -833,7 +879,22 @@ void EditorManager::CreateFBX()
 
 		// オブジェクト生成
 		auto* goMgr = m_pEngine->getWorldManager()->getCurrentWorld()->getGameObjectManager();
-		childCreate(fbx, fbx.m_rootNode, goMgr, matID, NONE_GAME_OBJECT_ID);
+		Archetype archetype = Archetype::create<DynamicType, Transform, Animator>();
+		auto parentID = goMgr->createGameObject(fbx.m_name, archetype);
+		goMgr->setComponentData(parentID, Transform(parentID, 
+			Vector3(), Quaternion(), Vector3(0.2,0.2,0.2)));
+		Animator anim;
+		anim.animationID = fbx.m_animationList[0].animationID;
+		goMgr->setComponentData(parentID, anim);
+
+		std::multimap<std::string ,GameObjectID> skinMeshList;
+		childCreate(fbx, fbx.m_rootNode, goMgr, matID, parentID, skinMeshList);
+
+		// スキンメッシュのルートボーンを検索
+		for (auto& skin : skinMeshList)
+		{
+			FindRootBoneID(goMgr, parentID, skin.second, skin.first);
+		}
 	}
 
 

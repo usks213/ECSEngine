@@ -230,6 +230,7 @@ D3D11Shader::D3D11Shader(ID3D11Device1* device, ShaderDesc desc, const ShaderID&
 			std::string cbName = shaderBufferDesc.Name;
 			if (cbName == SHADER::SHADER_CB_NAME_SYSTEM ||
 				cbName == SHADER::SHADER_CB_NAME_TRANSFORM ||
+				cbName == SHADER::SHADER_CB_NAME_ANIMATION||
 				cbName == SHADER::SHADER_CB_NAME_MATERIAL)
 			{
 				++slotOffset;

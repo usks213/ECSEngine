@@ -45,8 +45,8 @@ namespace SEMANTIC_NAME
 	constexpr char BINORMAL[]		= "BINORMAL";
 	constexpr char COLOR[]			= "COLOR";
 	constexpr char TEXCOORD[]		= "TEXCOORD";
-	constexpr char BONE_WEIGHT[]	= "BONE_WEIGHT";
-	constexpr char BONE_INDEX[]		= "BONE_INDEX";
+	constexpr char BONE_WEIGHT[]	= "BLENDWEIGHT";
+	constexpr char BONE_INDEX[]		= "BLENDINDICES";
 }
 
 

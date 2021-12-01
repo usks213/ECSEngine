@@ -15,12 +15,14 @@ namespace SHADER {
 	constexpr char SHADER_CB_NAME_GBUFFER[] = "Gbuffer";
 	constexpr char SHADER_CB_NAME_SYSTEM[] = "System";
 	constexpr char SHADER_CB_NAME_TRANSFORM[] = "Transform";
+	constexpr char SHADER_CB_NAME_ANIMATION[] = "Animation";
 	constexpr char SHADER_CB_NAME_MATERIAL[] = "Material";
 	// CBuffer Slot
 	constexpr std::uint32_t SHADER_CB_SLOT_GBUFFER = 4;
 	constexpr std::uint32_t SHADER_CB_SLOT_SYSTEM = 5;
 	constexpr std::uint32_t SHADER_CB_SLOT_TRANSFORM = 6;
-	constexpr std::uint32_t SHADER_CB_SLOT_MATERIAL = 7;
+	constexpr std::uint32_t SHADER_CB_SLOT_ANIMATION = 7;
+	constexpr std::uint32_t SHADER_CB_SLOT_MATERIAL = 8;
 	// Texture Slot
 	constexpr std::uint32_t SHADER_SRV_SLOT_MAINTEX = 4;
 	constexpr std::uint32_t SHADER_SRV_SLOT_SHADOWMAP = 5;
@@ -43,6 +45,9 @@ namespace SHADER {
 	// Light
 	constexpr std::uint32_t MAX_POINT_LIGHT_COUNT = 128;
 	constexpr std::uint32_t MAX_SPOT_LIGHT_COUNT = 128;
+
+	// AnimationCB Bone
+	constexpr std::uint32_t MAX_ANIMATION_BONE_COUNT = 512;
 
 	// マテリアルフラグ
 	enum class Material_Flg : UINT
@@ -78,6 +83,12 @@ namespace SHADER {
 	struct TransformBuffer
 	{
 		Matrix _mWorld;
+	};
+
+	// アニメーション定数バッファ
+	struct AnimationBuffer
+	{
+		Matrix _mBone[MAX_ANIMATION_BONE_COUNT];
 	};
 
 	// マテリアル定数バッファ

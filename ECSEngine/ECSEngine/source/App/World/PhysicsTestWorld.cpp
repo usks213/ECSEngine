@@ -21,6 +21,7 @@
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
 #include <Engine/ECS/ComponentData/ComponentTag.h>
 
+#include <Engine/ECS/System/AnimationSystem.h>
 #include <Engine/ECS/System/TransformSystem.h>
 #include <Engine/ECS/System/ParentSystem.h>
 #include <Engine/ECS/System/RenderingSystem.h>
@@ -187,6 +188,7 @@ void PhysicsTestWorld::Start()
 	// システムの追加
 	addSystem<DevelopSystem>();
 	addSystem<SphereSystem>();
+	addSystem<AnimationSystem>();
 	addSystem<TransformSystem>();
 	addSystem<PhysicsSystem>();
 
@@ -197,6 +199,7 @@ void PhysicsTestWorld::Start()
 	ShaderDesc shaderDesc;
 	shaderDesc.m_name = "Lit";
 	shaderDesc.m_name = "GBuffer";
+	shaderDesc.m_name = "AnimationGBuffer";
 	shaderDesc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 	ShaderID shaderLitID = renderer->createShader(shaderDesc);
 	auto* pS = renderer->getShader(shaderLitID);
@@ -305,10 +308,10 @@ void PhysicsTestWorld::Start()
 	scale = Vector3(1.4f, 1.0f, 1.4f);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 
-	//auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
-	//getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
-	//getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::TERRAIN, meshPlane));
-	//getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
+	auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
+	getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
+	getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::TERRAIN, meshPlane));
+	getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
 
 	// カメラ生成
 	Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag, DynamicType>();
@@ -366,18 +369,29 @@ void PhysicsTestWorld::Start()
 	//}
 
 	// ボール
-	Archetype sphereArch = Archetype::create<Transform, DynamicType, Collider, Rigidbody, ObjectTag>();
+
+	Archetype tarnsformArc = Archetype::create<Transform>();
+	GameObjectID BallHost = getGameObjectManager()->createGameObject("BallHost", tarnsformArc);
+	getGameObjectManager()->setComponentData<Transform>(BallHost, Transform(BallHost, Vector3(0,0,0)));
+	Archetype sphereArch = Archetype::create<Transform, DynamicType, Collider, Rigidbody, PointLight, ObjectTag>();
 	sphereArch.addTag(sphereBitchID);
 
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 110; i++)
 	{
 		auto Ball = getGameObjectManager()->createGameObject("Ball", sphereArch);
+		getGameObjectManager()->SetParent(Ball, BallHost);
 		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);
 		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 		scale = Vector3(0.5f, 0.5f, 0.5f);
 		getGameObjectManager()->setComponentData<Transform>(Ball, Transform(Ball, pos, rot, scale));
 		getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
 		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
+		PointLight light;
+		light.data.color = Vector4(rand() % 100, rand() % 100, rand() % 100, 1.0f);
+		light.data.color.Normalize();
+		light.data.color.w = 1.0f;
+		light.data.range = 3.0f;
+		getGameObjectManager()->setComponentData(Ball, light);
 	}
 
 	// ライト
@@ -390,7 +404,12 @@ void PhysicsTestWorld::Start()
 		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 		scale = Vector3(1.5f, 1.5f, 1.5f);
 		getGameObjectManager()->setComponentData<Transform>(point, Transform(point, pos, rot, scale));
-		getGameObjectManager()->setComponentData(point, PointLight());
+		PointLight light;
+		light.data.color = Vector4(rand() % 100, rand() % 100, rand() % 100, 1.0f);
+		light.data.color.Normalize();
+		light.data.color.w = 1.0f;
+		light.data.range = 2.0f;
+		getGameObjectManager()->setComponentData(point, light);
 	}
 
 	// メインライト

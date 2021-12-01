@@ -8,7 +8,9 @@
 #pragma once
 
 #include "Mesh.h"
+#include "Animation.h"
 #include <unordered_map>
+#include <map>
 
 
 class Model
@@ -22,15 +24,25 @@ public:
 	struct MeshInfo {
 		MeshID meshID = NONE_MESH_ID;
 		Index materialIndex = NONE_INDEX;
-		// BoneData
+		// ボーン情報
+		std::string rootBoneName;
+		std::unordered_map<std::string, Index> boneTable;
 		// BoneIndex		// どの骨格か
 		// BoneIndexList;	// その骨格で対応する骨リスト
 	};
-	// Bone情報
-	struct BoneInfo
+
+	// アバター情報
+	struct AvatarInfo
 	{
-		Matrix matrix;	// デフォルト姿勢
-		Quaternion preRotation;
+		std::string name;
+		std::unordered_map<std::string, Index> boneTable;
+	};
+
+	// アニメーション情報
+	struct AnimationInfo
+	{
+		std::string name;
+		AnimationID animationID = NONE_ANIMATION_ID;
 	};
 
 	// マテリアル情報
@@ -42,12 +54,6 @@ public:
 		TextureID NormalTex;
 		TextureID HeightTex;
 		TextureID MRATex;	// メタリック、ラフネス、アンビエントオクルージョン
-	};
-
-	// アニメーション情報
-	struct AnimationInfo
-	{
-
 	};
 
 	// 階層構造
@@ -63,6 +69,9 @@ public:
 	};
 
 public:
+	// モデル名
+	std::string								m_name;
+
 	// ルートノード
 	NodeInfo								m_rootNode;
 	// ノードリスト(ルート以外)
@@ -71,18 +80,16 @@ public:
 	// メッシュリスト
 	std::vector<MeshInfo>					m_meshList;
 
-	// ボーン
-
+	// アバター
+	std::unique_ptr<AvatarInfo>				m_avatar;
 
 	// アニメーション
+	std::vector<AnimationInfo>				m_animationList;
 
 	// マテリアル
-	std::vector<MaterialInfo>					m_materialList;
+	std::vector<MaterialInfo>				m_materialList;
 
 	// テクスチャ
-
-
-
 
 
 private:

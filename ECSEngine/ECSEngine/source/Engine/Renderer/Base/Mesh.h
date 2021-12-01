@@ -58,6 +58,10 @@ public:
 	std::uint32_t				m_indexCount;
 	std::vector<std::uint32_t>  m_indexData;
 
+	std::uint32_t				m_boneCount;
+	std::vector<Matrix>			m_invMatrixData;
+	std::vector<Matrix>			m_calcBoneBuffer;
+	std::unordered_map<std::string, std::uint32_t>	m_boneTabel;
 
 	std::uint32_t				m_heightWidth;
 	std::vector<float>			m_heightData;
