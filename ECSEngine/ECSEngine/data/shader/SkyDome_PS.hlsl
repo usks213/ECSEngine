@@ -18,5 +18,7 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 		Color *= _SkyTexture.Sample(_SkySampler, input.TexCoord);
 	}
 	
+	Color.rgb *= float3(1.0f, 1.0f, 1.0f) + _directionalLit.ambient.rgb;
+	
 	return Color;
 }

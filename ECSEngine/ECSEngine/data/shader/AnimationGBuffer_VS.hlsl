@@ -8,6 +8,7 @@ struct VS_INPUT {
 	float2	TexCoord	: TEXCOORD0;
 	float4	Weight		: BLENDWEIGHT0;
 	uint4	Index		: BLENDINDICES0;
+	uint	instID		: SV_InstanceID;
 };
 
 struct VS_OUTPUT {
@@ -69,7 +70,8 @@ SKIN SkinVert(VS_INPUT input)
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	float4x4 mWVP = mul(_mWorld, _mView);
+	int n = input.instID % MAX_TRANSFORM;
+	float4x4 mWVP = mul(_mWorld[n], _mView);
 	mWVP = mul(mWVP, _mProj);
 	//float4 pos = float4(input.Position, 1.0f);
 	//float3 nrm = input.Normal;
@@ -77,9 +79,9 @@ VS_OUTPUT VS(VS_INPUT input)
 	
 	// ç¿ïWïœä∑
 	output.Position = mul(vSkinned.Pos, mWVP);
-	output.Normal = mul(vSkinned.Norm, (float3x3) _mWorld).xyz;
+	output.Normal = mul(vSkinned.Norm, (float3x3) _mWorld[n]).xyz;
 	//output.TexCoord = mul(float4(input.TexCoord, 0.0f, 1.0f), _mTex).xy;
 	output.TexCoord = input.TexCoord;
-	output.WorldPos = mul(vSkinned.Pos, _mWorld).xyz;
+	output.WorldPos = mul(vSkinned.Pos, _mWorld[n]).xyz;
 	return output;
 }

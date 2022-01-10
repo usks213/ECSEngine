@@ -58,19 +58,21 @@ public:
 public:
 	void setD3DSystemBuffer(const SHADER::SystemBuffer& systemBuffer);
 
-	void setD3DTransformBuffer(const Matrix& mtxWorld);
+	void setD3DTransformBuffer(const void* pData, std::uint32_t matrixCount);
 
 	void setD3DAnimationBuffer(std::vector<Matrix>& mtxBones);
 
 	void setD3DLightBuffer(std::vector<PointLightData>& pointLights, std::vector<SpotLightData>& spotLights);
 
-	void d3dRender(const RenderBufferID& renderBufferID);
+	void d3dRender(const RenderBufferID& renderBufferID, const std::uint32_t instanceCount = 1);
 
 	void d3dMap(ID3D11Resource* pResource, D3D11_MAP mapType, bool mapWait, SubResource& out);
 
 	void d3dUnmap(ID3D11Resource* pResource);
 
 	void d3dCopyResource(ID3D11Resource* pDst, ID3D11Resource* pSrc);
+
+	void d3dGenerateMips(const RenderTargetID& dstID);
 
 public:
 	void setTexture(std::uint32_t slot, const TextureID& textureID, ShaderStage stage) override;
@@ -100,7 +102,7 @@ public:
 	RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) override;
 	TextureID createTextureFromFile(std::string filePath) override;
 	TextureID createTextureFromMemory(std::string name, const std::uint8_t* wicData, std::size_t wicDataSize) override;
-	RenderTargetID createRenderTarget(std::string name) override;
+	RenderTargetID createRenderTarget(std::string name, bool bMipMap = false) override;
 	DepthStencilID createDepthStencil(std::string name) override;
 	BatchGroupID creatBatchGroup(MaterialID materialID, MeshID meshID) override;
 
@@ -186,6 +188,8 @@ private:
 
 	ID3D11RenderTargetView* m_curRTV;
 	ID3D11DepthStencilView* m_curDSV;
+
+	SHADER::TransformBuffer m_transform;
 
 	//----- シェーダーバッファ
 	ComPtr<ID3D11Buffer> m_systemBuffer;

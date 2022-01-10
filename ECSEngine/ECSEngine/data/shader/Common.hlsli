@@ -8,6 +8,9 @@ Vulkan / DX12では、この決定は開発者に任されています。
 
 #include "Light.hlsli"
 
+// トランスフォーム数
+#define MAX_TRANSFORM (1000)
+
 // ボーン数
 #define MAX_BONE (512)
 
@@ -30,13 +33,14 @@ cbuffer System : register(b5)
 	DirectionalLightData _directionalLit;
 	uint _pointLightNum;
 	uint _spotLightNum;
-	float2 _padding2;
+	float _time;
+	uint _frame;
 }
 
 // トランスフォーム定数バッファ
 cbuffer Transform : register(b6)
 {
-	float4x4 _mWorld;
+	float4x4 _mWorld[MAX_TRANSFORM];
 }
 
 cbuffer Animation : register(b7)
@@ -58,6 +62,7 @@ cbuffer Material : register(b8)
 Texture2D		_MainTexture	: register(t4); // メインテクスチャ
 Texture2D		_ShadowTexture	: register(t5); // シャドウマップ
 Texture2D		_SkyTexture		: register(t6);	// スカイボックス
+Texture2D		_GrabTexture	: register(t7);	// グラブテクスチャ
 
 StructuredBuffer<PointLightData> _PointLights : register(t8);	// ポイントライト
 StructuredBuffer<SpotLightData>  _SpotLights  : register(t9);	// スポットライト

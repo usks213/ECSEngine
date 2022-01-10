@@ -32,8 +32,6 @@ public:
 
 public:
 
-	SHADER::MaterialBuffer m_materialBuffer;
-
 	/// @brief 全ステージ、スロット分のCBufferポインタ
 	std::array<std::unordered_map<std::uint32_t, ComPtr<ID3D11Buffer>>,
 		static_cast<size_t>(ShaderStage::MAX)>	m_d3dCbuffer;

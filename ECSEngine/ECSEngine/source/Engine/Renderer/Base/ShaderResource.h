@@ -27,6 +27,7 @@ namespace SHADER {
 	constexpr std::uint32_t SHADER_SRV_SLOT_MAINTEX = 4;
 	constexpr std::uint32_t SHADER_SRV_SLOT_SHADOWMAP = 5;
 	constexpr std::uint32_t SHADER_SRV_SLOT_SKYDOOM = 6;
+	constexpr std::uint32_t SHADER_SRV_SLOT_GRABTEX = 7;
 	// StructuredBuffer Slot
 	constexpr std::uint32_t SHADER_SRV_SLOT_POINTLIGHT = 8;
 	constexpr std::uint32_t SHADER_SRV_SLOT_SPOTLIGHT = 9;
@@ -45,6 +46,9 @@ namespace SHADER {
 	// Light
 	constexpr std::uint32_t MAX_POINT_LIGHT_COUNT = 128;
 	constexpr std::uint32_t MAX_SPOT_LIGHT_COUNT = 128;
+
+	// TransformCB WorldMatrix
+	constexpr std::uint32_t MAX_TRANSFORM_MATRIX_COUNT = 1000;
 
 	// AnimationCB Bone
 	constexpr std::uint32_t MAX_ANIMATION_BONE_COUNT = 512;
@@ -76,13 +80,14 @@ namespace SHADER {
 		std::uint32_t _pointLightNum;
 		std::uint32_t _spotLightNum;
 
-		Vector2 _padding2;
+		float			_time;
+		std::uint32_t	_frame;
 	};
 
 	// トランスフォーム定数バッファ
 	struct TransformBuffer
 	{
-		Matrix _mWorld;
+		Matrix _mWorld[MAX_TRANSFORM_MATRIX_COUNT];
 	};
 
 	// アニメーション定数バッファ

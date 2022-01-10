@@ -22,6 +22,7 @@ struct D3D11RenderTargetDesc
 	DXGI_FORMAT format;
 	bool isMSAA;
 	DXGI_SAMPLE_DESC sampleDesc;
+	bool isMipMap;
 	D3D11RenderTargetDesc():
 		id(NONE_RENDER_TARGET_ID),
 		name(),
@@ -29,7 +30,8 @@ struct D3D11RenderTargetDesc
 		height(0.0f),
 		format(DXGI_FORMAT_B8G8R8A8_UNORM),
 		isMSAA(false),
-		sampleDesc({1,0})
+		sampleDesc({1,0}),
+		isMipMap(false)
 	{}
 };
 

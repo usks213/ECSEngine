@@ -10,6 +10,7 @@
 #include "CommonState.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "ShaderResource.h"
 #include <Engine/Utility/Mathf.h>
 
 
@@ -49,6 +50,9 @@ public:
 	ShaderID			m_shaderID;
 	/// @brief シェーダータイプ
 	ShaderType			m_shaderType;
+
+	/// @brief マテリアルパラメータ
+	SHADER::MaterialBuffer m_materialBuffer;
 
 	/// @brief CBufferデータ
 	struct CBuffer

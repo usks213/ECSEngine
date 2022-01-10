@@ -49,23 +49,51 @@ class SphereSystem : public ecs::SystemBase {
 public:
 	explicit SphereSystem(World* pWorld) :
 		SystemBase(pWorld)
-	{}
+	{
+		m_nCnt = 0;
+	}
 	void onUpdate() override {
+		m_nCnt++;
+
 		foreach<Transform, ObjectTag>([this](Transform& transform, ObjectTag& tag) {
 
-			if (transform.translation.y < -5)
-			{
-				// 削除
-				getGameObjectManager()->destroyGameObject(transform.id);
+			Vector3 vec1 = transform.translation;
+			float len = vec1.Length();
+			vec1.Normalize();
+			Vector3 vec2 = Vector3(0, 1, 0);
+			Vector3 dir = vec1.Cross(vec2);
+			dir.Normalize();
+			dir.y = sinf(sinf(m_nCnt * 0.05f)) * 0.00f;
+			vec1.y = 0.0f;
 
-				//transform.translation.x = 10 - rand() % 20;
-				//transform.translation.y = 30;
-				//transform.translation.z = 0;
-			}
+			dir -= vec1 * fabsf(sinf(m_nCnt * 0.005f)) * 0.41f;
+			dir += vec1 * 0.20f;
+
+			transform.translation += dir * 0.75f;
+
 			});
+
+
+		foreach<Transform, InputTag>
+			([this](Transform& transform, InputTag& tag)
+				{
+					// カメラの回転
+					Vector3 pos = Mathf::RotationY(Vector3(0, 0, -1), m_nCnt) * (30 + cosf(m_nCnt * 0.01f) * 30);
+					pos.y = 12;
+					transform.translation = pos;
+
+					Vector3 dir = pos;
+					dir.Normalize();
+					Matrix rotMat = Matrix::CreateLookAt(pos, Vector3(0,0,0), Vector3(0, 1, 0));
+					transform.rotation = Quaternion::CreateFromRotationMatrix(rotMat.Invert());
+
+				});
+
+		return;
 	}
 private:
 	int m_nCnt;
+	float m_lengthRot;
 };
 
 class ControllSystem : public ecs::SystemBase {
@@ -80,7 +108,7 @@ public:
 		m_oldMousePos = *mousePos;
 	}
 	void onUpdate() override {
-		foreach<Transform, InputTag>
+			foreach<Transform, InputTag>
 			([this](Transform& transform, InputTag& tag)
 				{
 					POINT* mousePos = GetMousePosition();
@@ -188,6 +216,7 @@ void PhysicsTestWorld::Start()
 	// システムの追加
 	addSystem<DevelopSystem>();
 	addSystem<SphereSystem>();
+	//addSystem<ControllSystem>();
 	addSystem<AnimationSystem>();
 	addSystem<TransformSystem>();
 	addSystem<PhysicsSystem>();
@@ -198,12 +227,13 @@ void PhysicsTestWorld::Start()
 	// シェーダ読み込み
 	ShaderDesc shaderDesc;
 	shaderDesc.m_name = "Lit";
-	shaderDesc.m_name = "GBuffer";
-	shaderDesc.m_name = "AnimationGBuffer";
+	shaderDesc.m_name = "Refract";
+	//shaderDesc.m_name = "GBuffer";
+	//shaderDesc.m_name = "AnimationGBuffer";
 	shaderDesc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
 	ShaderID shaderLitID = renderer->createShader(shaderDesc);
 	auto* pS = renderer->getShader(shaderLitID);
-	pS->m_type = ShaderType::Deferred;
+	//pS->m_type = ShaderType::Deferred;
 
 	shaderDesc.m_name = "Unlit";
 	ShaderID shaderUnlitID = renderer->createShader(shaderDesc);
@@ -211,10 +241,16 @@ void PhysicsTestWorld::Start()
 	shaderDesc.m_name = "SkyDome";
 	ShaderID shaderSkyID = renderer->createShader(shaderDesc);
 
+	shaderDesc.m_name = "Wave";
+	ShaderID shaderWaveID = renderer->createShader(shaderDesc);
+
 	// マテリアルの作成
 	auto matLitID = renderer->createMaterial("Lit", shaderLitID);
 	Material* mat = renderer->getMaterial(matLitID);
 	//mat->m_rasterizeState = RasterizeState::CULL_FRONT;
+	mat->m_isTransparent = true;
+	mat->m_blendState = BlendState::ALPHA;
+	mat->m_materialBuffer._Flg ^= (UINT)SHADER::Material_Flg::TEXTURE;
 
 	auto matUnlitID = renderer->createMaterial("Unlit", shaderUnlitID);
 	Material* unlit = renderer->getMaterial(matUnlitID);
@@ -222,6 +258,12 @@ void PhysicsTestWorld::Start()
 
 	auto matSkyID = renderer->createMaterial("SkyDome", shaderSkyID);
 	Material* skyMat = renderer->getMaterial(matSkyID);
+
+	auto matWaveID = renderer->createMaterial("Wave", shaderWaveID);
+	Material* waveMat = renderer->getMaterial(matWaveID);
+	waveMat->setFloat("_metallic", 0.0f);
+	waveMat->setFloat("_roughness", 0.2f);
+	waveMat->m_materialBuffer._Color.z = 0.5f;
 
 	renderer->createTextureFromFile("data/texture/wall000.jpg");
 	renderer->createTextureFromFile("data/texture/wall001.jpg");
@@ -234,15 +276,17 @@ void PhysicsTestWorld::Start()
 	renderer->createTextureFromFile("data/texture/field002.jpg");
 	renderer->createTextureFromFile("data/texture/field003.jpg");
 	renderer->createTextureFromFile("data/texture/field004.jpg");
+	renderer->createTextureFromFile("data/texture/field005.jpg");
 
 	renderer->createTextureFromFile("data/model/Sword And Shield Idle.fbm/Paladin_diffuse.png");
 
 	// テクスチャの読み込み
-	auto texID = renderer->createTextureFromFile("data/texture/wall001.jpg");
+	auto texID = renderer->createTextureFromFile("data/texture/field005.jpg");
 	//auto texID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(SHADER::SHADER_SRV_SLOT_MAINTEX, texID, ShaderStage::PS);
 	mat->setTexture("_MainTexture", texID);
 	unlit->setTexture("_MainTexture", texID);
+	waveMat->setTexture("_MainTexture", texID);
 
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(SHADER::SHADER_SRV_SLOT_SKYDOOM, skytexID, ShaderStage::PS);
@@ -264,7 +308,7 @@ void PhysicsTestWorld::Start()
 
 	MeshID meshPlane = renderer->createMesh("Plane");
 	auto* pPlaneMesh = renderer->getMesh(meshPlane);
-	Geometry::Terrain(*pPlaneMesh, 20, 5, 5);
+	Geometry::Plane(*pPlaneMesh, 1000, 0.1f, 1.0f / 100);
 
 	// FBX読み込み
 	FBXModel::FBXModelData fbxData;
@@ -277,7 +321,7 @@ void PhysicsTestWorld::Start()
 	// バッチデータの作成
 	auto objBitchID = renderer->creatBatchGroup(matLitID, meshID);
 	auto sphereBitchID = renderer->creatBatchGroup(matLitID, sphereID);
-	auto planeBitchID = renderer->creatBatchGroup(matLitID, meshPlane);
+	auto planeBitchID = renderer->creatBatchGroup(matWaveID, meshPlane);
 
 
 	// アーキタイプ
@@ -302,7 +346,7 @@ void PhysicsTestWorld::Start()
 	getGameObjectManager()->setComponentData(sky, rdSky);
 
 	// 床
-	archetype = Archetype::create<Transform, StaticType, Collider, Rigidbody>();
+	archetype = Archetype::create<Transform, StaticType>();
 	archetype.addTag(planeBitchID);
 	pos = Vector3(0, 0, 0);
 	scale = Vector3(1.4f, 1.0f, 1.4f);
@@ -310,8 +354,8 @@ void PhysicsTestWorld::Start()
 
 	auto plane = getGameObjectManager()->createGameObject("Plane", archetype);
 	getGameObjectManager()->setComponentData<Transform>(plane, Transform(plane, pos, rot, scale));
-	getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::TERRAIN, meshPlane));
-	getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
+	//getGameObjectManager()->setComponentData(plane,Collider(Collider::ColliderType::POLYGON, meshPlane));
+	//getGameObjectManager()->setComponentData(plane,Rigidbody(0.0f));
 
 	// カメラ生成
 	Archetype cameraArchetype = Archetype::create<Transform, Camera, InputTag, DynamicType>();
@@ -326,30 +370,30 @@ void PhysicsTestWorld::Start()
 	cameraData.depthStencilID = renderer->createDepthStencil("Camera1");
 	pos.x = 0;
 	pos.z = -30;
-	pos.y = 10;
-	rot = Quaternion::CreateFromYawPitchRoll(3.141592f, 0, 0);
+	pos.y = 12;
+	rot = Quaternion::CreateFromYawPitchRoll(3.141592f, -3.141592f * 0.05f, 0);
 	scale = Vector3(10, 10, 10);
 
 	getGameObjectManager()->setComponentData<Transform>(entity, Transform(entity, pos, rot, scale));
 	getGameObjectManager()->setComponentData(entity, cameraData);
 
 
-	// ステージ
-	Archetype stageArchetype = Archetype::create<Transform, StaticType, Collider, Rigidbody>();
-	stageArchetype.addTag(objBitchID);
+	//// ステージ
+	//Archetype stageArchetype = Archetype::create<Transform, StaticType, Collider, Rigidbody>();
+	//stageArchetype.addTag(objBitchID);
 
-	// Stage
-	auto Stage = getGameObjectManager()->createGameObject("Stage", stageArchetype);
-	pos = Vector3(0, 0, 0);
-	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
-	scale = Vector3(1, 1, 1);
-	getGameObjectManager()->setComponentData<Transform>(Stage, Transform(Stage, pos, rot, scale));
-	getGameObjectManager()->setComponentData(Stage, Collider(Collider::ColliderType::BOX));
-	getGameObjectManager()->setComponentData(Stage, Rigidbody(0.0f));
-	/*RenderData fbxRD;
-	fbxRD.meshID = fbxData.meshID;
-	fbxRD.materialID = matLitID;
-	getGameObjectManager()->setComponentData(Stage, fbxRD);*/
+	//// Stage
+	//auto Stage = getGameObjectManager()->createGameObject("Stage", stageArchetype);
+	//pos = Vector3(0, 0, 0);
+	//rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	//scale = Vector3(1, 1, 1);
+	//getGameObjectManager()->setComponentData<Transform>(Stage, Transform(Stage, pos, rot, scale));
+	//getGameObjectManager()->setComponentData(Stage, Collider(Collider::ColliderType::BOX));
+	//getGameObjectManager()->setComponentData(Stage, Rigidbody(0.0f));
+	///*RenderData fbxRD;
+	//fbxRD.meshID = fbxData.meshID;
+	//fbxRD.materialID = matLitID;
+	//getGameObjectManager()->setComponentData(Stage, fbxRD);*/
 
 
 	//// 杭
@@ -369,46 +413,81 @@ void PhysicsTestWorld::Start()
 	//}
 
 	// ボール
-
-	Archetype tarnsformArc = Archetype::create<Transform>();
-	GameObjectID BallHost = getGameObjectManager()->createGameObject("BallHost", tarnsformArc);
-	getGameObjectManager()->setComponentData<Transform>(BallHost, Transform(BallHost, Vector3(0,0,0)));
-	Archetype sphereArch = Archetype::create<Transform, DynamicType, Collider, Rigidbody, PointLight, ObjectTag>();
-	sphereArch.addTag(sphereBitchID);
-
-	for (int i = 0; i < 110; i++)
 	{
-		auto Ball = getGameObjectManager()->createGameObject("Ball", sphereArch);
-		getGameObjectManager()->SetParent(Ball, BallHost);
-		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);
-		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
-		scale = Vector3(0.5f, 0.5f, 0.5f);
-		getGameObjectManager()->setComponentData<Transform>(Ball, Transform(Ball, pos, rot, scale));
-		getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
-		getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
-		PointLight light;
-		light.data.color = Vector4(rand() % 100, rand() % 100, rand() % 100, 1.0f);
-		light.data.color.Normalize();
-		light.data.color.w = 1.0f;
-		light.data.range = 3.0f;
-		getGameObjectManager()->setComponentData(Ball, light);
+		Archetype tarnsformArc = Archetype::create<Transform>();
+		GameObjectID BallHost = getGameObjectManager()->createGameObject("BallHost", tarnsformArc);
+		getGameObjectManager()->setComponentData<Transform>(BallHost, Transform(BallHost, Vector3(0, 0, 0)));
+		Archetype sphereArch = Archetype::create<Transform, DynamicType, ObjectTag>();
+		sphereArch.addTag(sphereBitchID);
+
+		for (int i = 0; i < 15; i++)
+		{
+			int numX = 15;
+			for (int j = 0; j < 15; ++j)
+			{
+				auto Ball = getGameObjectManager()->createGameObject("Ball", sphereArch);
+				getGameObjectManager()->SetParent(Ball, BallHost);
+				pos = Mathf::RotationY(Vector3(1, 0, 0), j * 360.0f / numX) * 10;
+				pos.y = i * 2;
+				rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+				scale = Vector3(1.0f, 1.0f, 1.0f);
+				getGameObjectManager()->setComponentData<Transform>(Ball, Transform(Ball, pos, rot, scale));
+				//getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
+				//getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
+				PointLight light;
+				light.data.color = Vector4(rand() % 100, rand() % 100, rand() % 100, 1.0f);
+				light.data.color.Normalize();
+				light.data.color.w = 1.0f;
+				light.data.range = 3.0f;
+				//getGameObjectManager()->setComponentData(Ball, light);
+			}
+		}
+	}
+
+
+	// ボックス
+	{
+		Archetype tarnsformArc = Archetype::create<Transform>();
+		GameObjectID BoxHost = getGameObjectManager()->createGameObject("BoxHost", tarnsformArc);
+		getGameObjectManager()->setComponentData<Transform>(BoxHost, Transform(BoxHost, Vector3(0, 0, 0)));
+		Archetype sphereArch = Archetype::create<Transform, DynamicType, ObjectTag>();
+		sphereArch.addTag(objBitchID);
+
+		for (int i = 0; i < 0; i++)
+		{
+			auto Box = getGameObjectManager()->createGameObject("Box", sphereArch);
+			getGameObjectManager()->SetParent(Box, BoxHost);
+			pos = Vector3(rand() % 20 - 10, rand() % 20 + 5, rand() % 20 - 10);
+			rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+			scale = Vector3(1.0f, 1.0f, 1.0f);
+			getGameObjectManager()->setComponentData<Transform>(Box, Transform(Box, pos, rot, scale));
+			//getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
+			//getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
+			PointLight light;
+			light.data.color = Vector4(rand() % 100, rand() % 100, rand() % 100, 1.0f);
+			light.data.color.Normalize();
+			light.data.color.w = 1.0f;
+			light.data.range = 3.0f;
+			//getGameObjectManager()->setComponentData(Ball, light);
+		}
 	}
 
 	// ライト
-	Archetype pointArc = Archetype::create<Transform, DynamicType, PointLight>();
+	Archetype pointArc = Archetype::create<Transform, DynamicType, PointLight, ObjectTag>();
 
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		auto point = getGameObjectManager()->createGameObject("PointLit", pointArc);
-		pos = Vector3(8 - rand() % 16, rand() % 20 + 10, 0);
+		pos = Mathf::RotationY(Vector3(1, 0, 0), i * 360.0f / 10) * 10;
+		pos.y = 10;
 		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 		scale = Vector3(1.5f, 1.5f, 1.5f);
 		getGameObjectManager()->setComponentData<Transform>(point, Transform(point, pos, rot, scale));
 		PointLight light;
-		light.data.color = Vector4(rand() % 100, rand() % 100, rand() % 100, 1.0f);
+		light.data.color = Vector4(rand() % 100 - 50, rand() % 100, rand() % 100, 1.0f);
 		light.data.color.Normalize();
-		light.data.color.w = 1.0f;
-		light.data.range = 2.0f;
+		light.data.color.w = 5.0f;
+		light.data.range = 50.0f;
 		getGameObjectManager()->setComponentData(point, light);
 	}
 

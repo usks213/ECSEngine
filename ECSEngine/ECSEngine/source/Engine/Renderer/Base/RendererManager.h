@@ -78,7 +78,7 @@ public:
 	virtual RenderBufferID createRenderBuffer(ShaderID shaderID, MeshID meshID) = 0;
 	virtual TextureID createTextureFromFile(std::string filePath) = 0;
 	virtual TextureID createTextureFromMemory(std::string name, const std::uint8_t* wicData, std::size_t wicDataSize) = 0;
-	virtual RenderTargetID createRenderTarget(std::string name) = 0;
+	virtual RenderTargetID createRenderTarget(std::string name, bool bMipMap = false) = 0;
 	virtual DepthStencilID createDepthStencil(std::string name) = 0;
 	virtual BatchGroupID creatBatchGroup(MaterialID materialID, MeshID meshID) = 0;
 

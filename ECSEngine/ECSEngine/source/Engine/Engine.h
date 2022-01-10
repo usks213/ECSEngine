@@ -63,6 +63,14 @@ public:
 	[[nodiscard]] int getWindowHeight() { return m_windowManager.get()->getWindowHeight(); }
 	[[nodiscard]] std::uint32_t getCurrentFPS() { return m_nCurrentFPS; }
 
+	std::uint32_t getFrameCount() { return m_nFrameCount; }
+	float getCurrentTime()
+	{
+		std::int64_t fpsTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+			m_CurrentTime - m_InitTime).count();
+		return fpsTime / 1000.0f;
+	}
+
 private:
 	friend Singleton<Engine>;
 
@@ -83,6 +91,7 @@ private:
 	std::chrono::system_clock::time_point m_ExecLastTime;
 	std::chrono::system_clock::time_point m_FPSLastTime;
 	std::chrono::system_clock::time_point m_CurrentTime;
+	std::chrono::system_clock::time_point m_InitTime;
 	std::uint64_t m_nFrameCount;
 	// デルタタイム
 	float m_deltaTime;

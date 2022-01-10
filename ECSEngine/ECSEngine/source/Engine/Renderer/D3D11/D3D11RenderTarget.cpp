@@ -9,6 +9,14 @@
 #include "D3D11RenderTarget.h"
 #include "D3D11Utility.h"
 
+template<typename T> static constexpr T numMipmapLevels(T width, T height)
+{
+	T levels = 1;
+	while ((width | height) >> levels) {
+		++levels;
+	}
+	return levels;
+}
 
  /// @brief コンストラクタ
  /// @param device デバイス
@@ -31,6 +39,12 @@ D3D11RenderTarget::D3D11RenderTarget(ID3D11Device1* device, const D3D11RenderTar
 	else
 		renderTexture.SampleDesc.Count = 1;
 
+	if (desc.isMipMap)
+	{
+		renderTexture.MipLevels = numMipmapLevels(renderTexture.Width, renderTexture.Height);
+		renderTexture.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+	}
+
 	CHECK_FAILED(device->CreateTexture2D(
 		&renderTexture,
 		nullptr,
@@ -48,6 +62,7 @@ D3D11RenderTarget::D3D11RenderTarget(ID3D11Device1* device, const D3D11RenderTar
 
 	// シェーダーリソース
 	CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D, desc.format);
+	//srvDesc.Texture2D.MipLevels = renderTexture.MipLevels;
 	if (desc.isMSAA) srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 	CHECK_FAILED(device->CreateShaderResourceView(
 		m_tex.Get(),

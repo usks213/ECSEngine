@@ -21,10 +21,11 @@ struct VertexData
 	std::size_t size;						// 一頂点サイズ
 	std::unique_ptr<std::byte[]> buffer;	// 全頂点データ
 	ShaderID shaderID;
+	bool isDirty;
 	std::vector<Shader::InputLayoutVariable> inputLayoutVariableList;
 
 	explicit VertexData(const Shader& shader, std::size_t vertexNum) :
-		size(0),count(0),shaderID(0)
+		size(0),count(0),shaderID(0), isDirty(false)
 	{
 		/*inputLayoutVariableList.reserve(shader.m_inputLayoutVariableList.size());
 		std::copy(inputLayoutVariableList.begin(), inputLayoutVariableList.end(),
@@ -84,6 +85,20 @@ struct VertexData
 			}
 		}
 		return false;
+	}
+
+	void UpdateBuffer(void* pData, std::size_t dataSize)
+	{
+		if (dataSize < size * count)
+		{
+			std::memcpy(buffer.get(), pData, dataSize);
+		}
+		else
+		{
+			std::memcpy(buffer.get(), pData, size * count);
+		}
+
+		isDirty = true;
 	}
 };
 

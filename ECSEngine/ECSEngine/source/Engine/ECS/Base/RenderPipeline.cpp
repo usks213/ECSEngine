@@ -136,16 +136,25 @@ void RenderPipeline::cullingPass(Camera& camera)
 						RenderingData data;
 						data.materialID = bitchID.second->m_materialID;
 						data.renderBufferID = renderer->createRenderBuffer(mat->m_shaderID, bitchID.second->m_meshID);
-						data.worldMatrix = transform[i].globalMatrix;
+						data.worldMatrix = transform[i].globalMatrix.Transpose();
 						data.cameraLengthSqr = (camera.world.Translation() -
 							transform[i].globalMatrix.Translation()).LengthSquared();
 						// フォワード
-						m_opequeList.push_back(data);
+						if (mat->m_isTransparent)
+						{
+							// 半透明
+							m_transparentList.push_back(data);
+						}
+						else
+						{
+							// 不透明
+							m_opequeList.push_back(data);
+						}
 					}
 					else if(mat->m_shaderType == ShaderType::Deferred)
 					{
 						// デファード
-						m_batchList[bitchID.first].push_back(transform[i].globalMatrix);
+						m_batchList[bitchID.first].push_back(transform[i].globalMatrix.Transpose());
 					}
 				}
 				// シャドウカリング
@@ -171,7 +180,7 @@ void RenderPipeline::cullingPass(Camera& camera)
 				RenderingData data;
 				data.materialID = rd.materialID;
 				data.renderBufferID = rdID;
-				data.worldMatrix = transform.globalMatrix;
+				data.worldMatrix = transform.globalMatrix.Transpose();
 				data.cameraLengthSqr = (camera.world.Translation() -
 					transform.globalMatrix.Translation()).LengthSquared();
 				data.isBone = false;
@@ -219,7 +228,7 @@ void RenderPipeline::cullingPass(Camera& camera)
 				RenderingData data;
 				data.materialID = rd.materialID;
 				data.renderBufferID = rdID;
-				data.worldMatrix = transform.globalMatrix;
+				data.worldMatrix = transform.globalMatrix.Transpose();
 				data.cameraLengthSqr = (camera.world.Translation() -
 					transform.globalMatrix.Translation()).LengthSquared();
 				data.isBone = true;
@@ -344,12 +353,17 @@ void RenderPipeline::beginPass(Camera& camera)
 	sysBuffer._directionalLit = dirLit;
 	sysBuffer._pointLightNum = m_pointLights.size();
 	sysBuffer._spotLightNum = m_spotLights.size();
+	sysBuffer._time = engine->getCurrentTime();
+	sysBuffer._frame = engine->getFrameCount();
 	renderer->setD3DSystemBuffer(sysBuffer);
 
 	// レンダーターゲットクリア
 	renderer->clearRenderTarget(camera.renderTargetID);
 	renderer->clearDepthStencil(camera.depthStencilID);
 
+	// グラブテクスチャセット
+	auto pGrab = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(m_renderTarget));
+	renderer->m_d3dContext->PSSetShaderResources(SHADER::SHADER_SRV_SLOT_GRABTEX, 1, pGrab->m_srv.GetAddressOf());
 }
 
 void RenderPipeline::prePass(Camera& camera)
@@ -407,10 +421,20 @@ void RenderPipeline::gbufferPass(Camera& camera)
 		renderer->setD3D11Material(pBitch->m_materialID);
 		renderer->setD3D11RenderBuffer(rdID);
 
-		for (auto& matrix : bitch.second)
+		// 最大1000個までバッチ描画
+		const std::size_t count = bitch.second.size();
+		const std::size_t maxNum = SHADER::MAX_TRANSFORM_MATRIX_COUNT;
+
+		for (std::size_t i = 0; i < count / maxNum + 1; ++i)
 		{
-			renderer->setD3DTransformBuffer(matrix);
-			renderer->d3dRender(rdID);
+			std::size_t drawNum = maxNum;
+			if ((count - i * maxNum) / maxNum <= 0)
+			{
+				drawNum = count % maxNum;
+			}
+
+			renderer->setD3DTransformBuffer(bitch.second.data() + i * maxNum, drawNum);
+			renderer->d3dRender(rdID, drawNum);
 		}
 	}
 
@@ -430,7 +454,7 @@ void RenderPipeline::gbufferPass(Camera& camera)
 			//}
 		}
 		renderer->setD3D11Material(opeque.materialID);
-		renderer->setD3DTransformBuffer(opeque.worldMatrix);
+		renderer->setD3DTransformBuffer(&opeque.worldMatrix, 1);
 		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
 		renderer->d3dRender(opeque.renderBufferID);
 	}
@@ -482,7 +506,7 @@ void RenderPipeline::opaquePass(Camera& camera)
 	Vector3 windowSize = Vector3(engine->getWindowWidth(), engine->getWindowHeight(), 1);
 	Matrix matrix = Matrix::CreateScale(windowSize);
 	//matrix *= Matrix::CreateRotationY(XMConvertToDegrees(90));
-	renderer->setD3DTransformBuffer(matrix);
+	renderer->setD3DTransformBuffer(&matrix, 1);
 	
 	auto skytexID = renderer->createTextureFromFile("data/texture/environment.hdr");
 	renderer->setTexture(SHADER::SHADER_SRV_SLOT_SKYDOOM, skytexID, ShaderStage::PS);
@@ -507,7 +531,7 @@ void RenderPipeline::opaquePass(Camera& camera)
 			renderer->setD3DAnimationBuffer(pMesh->m_calcBoneBuffer);
 		}
 		renderer->setD3D11Material(opeque.materialID);
-		renderer->setD3DTransformBuffer(opeque.worldMatrix);
+		renderer->setD3DTransformBuffer(&opeque.worldMatrix, 1);
 		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
 		renderer->d3dRender(opeque.renderBufferID);
 	}
@@ -533,6 +557,10 @@ void RenderPipeline::transparentPass(Camera& camera)
 	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
 	auto* goMgr = m_pWorld->getGameObjectManager();
 
+	// レンダーターゲットコピー
+	renderer->copyRenderTarget(m_renderTarget, camera.renderTargetID);
+	renderer->d3dGenerateMips(m_renderTarget);
+
 	// 半透明描画
 	for (auto& opeque : m_transparentList)
 	{
@@ -544,7 +572,7 @@ void RenderPipeline::transparentPass(Camera& camera)
 			renderer->setD3DAnimationBuffer(pMesh->m_calcBoneBuffer);
 		}
 		renderer->setD3D11Material(opeque.materialID);
-		renderer->setD3DTransformBuffer(opeque.worldMatrix);
+		renderer->setD3DTransformBuffer(&opeque.worldMatrix, 1);
 		renderer->setD3D11RenderBuffer(opeque.renderBufferID);
 		renderer->d3dRender(opeque.renderBufferID);
 	}
@@ -552,6 +580,14 @@ void RenderPipeline::transparentPass(Camera& camera)
 
 void RenderPipeline::postPass(Camera& camera)
 {
+	// レンダラーマネージャー
+	auto* engine = m_pWorld->getWorldManager()->getEngine();
+	auto* renderer = static_cast<D3D11RendererManager*>(engine->getRendererManager());
+	auto* goMgr = m_pWorld->getGameObjectManager();
+
+	// レンダーターゲットコピー
+	renderer->copyRenderTarget(m_renderTarget, camera.renderTargetID);
+	renderer->d3dGenerateMips(m_renderTarget);
 
 }
 

@@ -71,7 +71,7 @@ namespace ecs {
 			RenderBufferID	renderBufferID;
 			Matrix			worldMatrix;
 			float			cameraLengthSqr;
-			bool			isBone;
+			bool			isBone = false;
 			MeshID			meshID;
 			GameObjectID	rootID;
 		};

@@ -980,10 +980,20 @@ void D3D11RendererManager::setD3D11RenderBuffer(const RenderBufferID& renderBuff
 	// データの取得
 	auto* renderBuffer = static_cast<D3D11RenderBuffer*>(getRenderBuffer(renderBufferID));
 
+	// 頂点バッファ更新
+	if (renderBuffer->m_vertexData.isDirty)
+	{
+		SubResource subResource;
+		d3dMap(renderBuffer->m_vertexBuffer.Get(), D3D11_MAP_WRITE_DISCARD, true, subResource);
+		std::memcpy(subResource.pData, renderBuffer->m_vertexData.buffer.get(), 
+			renderBuffer->m_vertexData.size * renderBuffer->m_vertexData.count);
+	}
+
 	// 頂点バッファをセット
 	UINT stride = static_cast<UINT>(renderBuffer->m_vertexData.size);
 	UINT offset = 0;
 	context->IASetVertexBuffers(0, 1, renderBuffer->m_vertexBuffer.GetAddressOf(), &stride, &offset);
+
 	// インデックスバッファをセット
 	if (renderBuffer->m_indexData.count > 0) {
 		context->IASetIndexBuffer(renderBuffer->m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -1051,16 +1061,15 @@ void D3D11RendererManager::setD3DSystemBuffer(const SHADER::SystemBuffer& system
 	}
 }
 
-void D3D11RendererManager::setD3DTransformBuffer(const Matrix& mtxWorld)
+void D3D11RendererManager::setD3DTransformBuffer(const void* pData, std::uint32_t matrixCount)
 {
-	SHADER::TransformBuffer transform;
-	transform._mWorld = mtxWorld.Transpose();
+	std::memcpy(m_transform._mWorld, pData, matrixCount * sizeof(Matrix));
 
 	for (auto stage = ShaderStage::VS; stage < ShaderStage::MAX; ++stage)
 	{
 		auto stageIndex = static_cast<std::size_t>(stage);
+		m_d3dContext->UpdateSubresource(m_transformBuffer.Get(), 0, nullptr, &m_transform, 0, 0);
 		setCBuffer[stageIndex](m_d3dContext.Get(), SHADER::SHADER_CB_SLOT_TRANSFORM, 1, m_transformBuffer.GetAddressOf());
-		m_d3dContext->UpdateSubresource(m_transformBuffer.Get(), 0, nullptr, &transform, 0, 0);
 	}
 }
 
@@ -1201,7 +1210,7 @@ void D3D11RendererManager::copyRenderTarget(const RenderTargetID& dstID, const R
 	}
 }
 
-void D3D11RendererManager::d3dRender(const RenderBufferID& renderBufferID)
+void D3D11RendererManager::d3dRender(const RenderBufferID& renderBufferID, const std::uint32_t instanceCount)
 {
 	auto* context = m_d3dContext.Get();
 
@@ -1211,11 +1220,11 @@ void D3D11RendererManager::d3dRender(const RenderBufferID& renderBufferID)
 	// ポリゴンの描画
 	if (renderBuffer->m_indexData.count > 0)
 	{
-		context->DrawIndexed(renderBuffer->m_indexData.count, 0, 0);
+		context->DrawIndexedInstanced(renderBuffer->m_indexData.count, instanceCount, 0, 0, 0);
 	}
 	else
 	{
-		context->Draw(renderBuffer->m_vertexData.count, 0);
+		context->DrawInstanced(renderBuffer->m_vertexData.count, instanceCount, 0, 0);
 	}
 }
 
@@ -1239,6 +1248,13 @@ void D3D11RendererManager::d3dUnmap(ID3D11Resource* pResource)
 void D3D11RendererManager::d3dCopyResource(ID3D11Resource* pDst, ID3D11Resource* pSrc)
 {
 	m_d3dContext->CopyResource(pDst, pSrc);
+}
+
+void D3D11RendererManager::d3dGenerateMips(const RenderTargetID& dstID)
+{
+	auto* rt = static_cast<D3D11RenderTarget*>(getRenderTarget(dstID));
+
+	m_d3dContext->GenerateMips(rt->m_srv.Get());
 }
 
 AnimationID D3D11RendererManager::createAnimation(std::string name)
@@ -1399,7 +1415,7 @@ TextureID D3D11RendererManager::createTextureFromMemory(std::string name,
 	return id;
 }
 
-RenderTargetID D3D11RendererManager::createRenderTarget(std::string name)
+RenderTargetID D3D11RendererManager::createRenderTarget(std::string name, bool bMipMap)
 {
 	// IDの取得
 	RenderTargetID id = hash::crc32string(name.c_str());
@@ -1416,6 +1432,7 @@ RenderTargetID D3D11RendererManager::createRenderTarget(std::string name)
 	desc.height = m_pEngine->getWindowHeight();
 	desc.isMSAA = m_bUseMSAA;
 	desc.sampleDesc = m_dxgiMSAA;
+	desc.isMipMap = bMipMap;
 
 	// 新規生成
 	m_renderTargetPool[id] = std::make_unique<D3D11RenderTarget>(m_d3dDevice.Get(), desc);

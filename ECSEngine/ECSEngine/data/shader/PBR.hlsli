@@ -126,6 +126,8 @@ float3 AmbientBRDF(float3 albedo, float metallic, float roughness, float ao,
 	float3 diffuse = irradiance * albedo;
     
     // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+	float texWidth, texHeight, texMips;
+	specularSky.GetDimensions(0, texWidth, texHeight, texMips);
 	const float MAX_REFLECTION_LOD = 14.0f;
 	//float3 prefilteredColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;
 	//float3 prefilteredColor = specularSky.SampleLevel(skySampler,
@@ -134,9 +136,9 @@ float3 AmbientBRDF(float3 albedo, float metallic, float roughness, float ao,
 	//float3 specular = prefilteredColor;// * (F * brdf.x + brdf.y);
 
 	float3 ref = EnvBRDFApprox(F0, roughness, dot(N, V)) * (1.0f - roughness);
-	float mip = MAX_REFLECTION_LOD * roughness;
+	float mip = texMips * roughness;
 	float3 specular = specularSky.SampleLevel(skySampler,
-		SkyMapEquirect2(reflect(V, N)), mip).rgb * ref;
+		SkyMapEquirect2(reflect(V, N)), mip).rgb * ref * (float3(1.0f, 1.0f, 1.0f) + irradiance);
 	
 	float3 ambient = (kD * diffuse + specular + diffuse) * ao;
 	

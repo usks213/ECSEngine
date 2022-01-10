@@ -15,8 +15,8 @@ D3D11RenderBuffer::D3D11RenderBuffer(ID3D11Device1* device, const RenderBufferID
 	RenderBuffer(id, shader, mesh)
 {
 	D3D11_BUFFER_DESC desc = {};
-	desc.Usage = D3D11_USAGE_IMMUTABLE;
-	desc.CPUAccessFlags = 0;
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	D3D11_SUBRESOURCE_DATA initData = {};
 
 	// 頂点バッファの生成

@@ -36,7 +36,7 @@ bool Engine::initialize()
 	m_editorManager->initialize();
 
 	// フレームカウント初期化
-	m_ExecLastTime = m_FPSLastTime = 
+	m_InitTime = m_ExecLastTime = m_FPSLastTime = 
 		m_CurrentTime = m_FixedExecLastTime =
 		std::chrono::system_clock::now();
 	m_nFrameCount = 0;

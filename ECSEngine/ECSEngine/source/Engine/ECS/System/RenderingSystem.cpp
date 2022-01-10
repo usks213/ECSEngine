@@ -118,7 +118,7 @@ void RenderingSystem::onUpdate()
 			for (auto i = 0u; i < transform.Count(); ++i)
 			{
 				//Matrix scale = Matrix::CreateScale(transform[i].localScale * transform[i].parentScale);
-				renderer->setD3DTransformBuffer(transform[i].globalMatrix);
+				renderer->setD3DTransformBuffer(&transform[i].globalMatrix, 1);
 				renderer->d3dRender(rdID);
 			}
 		}
@@ -135,7 +135,7 @@ void RenderingSystem::onUpdate()
 			renderer->setD3D11Material(rd.materialID);
 
 			//Matrix scale = Matrix::CreateScale(transform.localScale * transform.parentScale);
-			renderer->setD3DTransformBuffer(transform.globalMatrix);
+			renderer->setD3DTransformBuffer(&transform.globalMatrix, 1);
 
 			renderer->setD3D11RenderBuffer(rdID);
 
