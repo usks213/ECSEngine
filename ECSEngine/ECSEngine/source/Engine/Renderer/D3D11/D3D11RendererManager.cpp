@@ -202,7 +202,7 @@ HRESULT D3D11RendererManager::initialize(HWND hWnd, int width, int height)
 	config.OversampleV = 1;
 	config.PixelSnapH = 1;
 	io.Fonts->AddFontDefault();
-	ImFont* pFont = io.Fonts->AddFontFromFileTTF("data/font/msgothic.ttc", 18.0f * 1.5f, &config, io.Fonts->GetGlyphRangesJapanese());
+	ImFont* pFont = io.Fonts->AddFontFromFileTTF("data/font/msgothic.ttc", 18.0f * 1.0f, &config, io.Fonts->GetGlyphRangesJapanese());
 	IM_ASSERT(pFont != nullptr);
 	ImFont* currentFont = ImGui::GetFont();
 	currentFont = pFont;

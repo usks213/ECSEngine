@@ -21,7 +21,7 @@ cbuffer WaveParam : register(b0)
 	float _waveCycle = 2.5f;
 	float _waveLength = 5.0f;
 	float _waveAmplitude = 1.0f;
-	float _waveMaxLength = 30.0f;
+	float _waveMaxLength = 100.0f;
 	float _waveOffset = 0.1f;
 }
 

@@ -420,10 +420,10 @@ void PhysicsTestWorld::Start()
 		Archetype sphereArch = Archetype::create<Transform, DynamicType, ObjectTag>();
 		sphereArch.addTag(sphereBitchID);
 
-		for (int i = 0; i < 15; i++)
+		int numX = 16;
+		for (int i = 0; i < numX; i++)
 		{
-			int numX = 15;
-			for (int j = 0; j < 15; ++j)
+			for (int j = 0; j < numX; ++j)
 			{
 				auto Ball = getGameObjectManager()->createGameObject("Ball", sphereArch);
 				getGameObjectManager()->SetParent(Ball, BallHost);
@@ -446,39 +446,39 @@ void PhysicsTestWorld::Start()
 
 
 	// ボックス
-	{
-		Archetype tarnsformArc = Archetype::create<Transform>();
-		GameObjectID BoxHost = getGameObjectManager()->createGameObject("BoxHost", tarnsformArc);
-		getGameObjectManager()->setComponentData<Transform>(BoxHost, Transform(BoxHost, Vector3(0, 0, 0)));
-		Archetype sphereArch = Archetype::create<Transform, DynamicType, ObjectTag>();
-		sphereArch.addTag(objBitchID);
+	//{
+	//	Archetype tarnsformArc = Archetype::create<Transform>();
+	//	GameObjectID BoxHost = getGameObjectManager()->createGameObject("BoxHost", tarnsformArc);
+	//	getGameObjectManager()->setComponentData<Transform>(BoxHost, Transform(BoxHost, Vector3(0, 0, 0)));
+	//	Archetype sphereArch = Archetype::create<Transform, DynamicType, ObjectTag>();
+	//	sphereArch.addTag(objBitchID);
 
-		for (int i = 0; i < 0; i++)
-		{
-			auto Box = getGameObjectManager()->createGameObject("Box", sphereArch);
-			getGameObjectManager()->SetParent(Box, BoxHost);
-			pos = Vector3(rand() % 20 - 10, rand() % 20 + 5, rand() % 20 - 10);
-			rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
-			scale = Vector3(1.0f, 1.0f, 1.0f);
-			getGameObjectManager()->setComponentData<Transform>(Box, Transform(Box, pos, rot, scale));
-			//getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
-			//getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
-			PointLight light;
-			light.data.color = Vector4(rand() % 100, rand() % 100, rand() % 100, 1.0f);
-			light.data.color.Normalize();
-			light.data.color.w = 1.0f;
-			light.data.range = 3.0f;
-			//getGameObjectManager()->setComponentData(Ball, light);
-		}
-	}
+	//	for (int i = 0; i < 0; i++)
+	//	{
+	//		auto Box = getGameObjectManager()->createGameObject("Box", sphereArch);
+	//		getGameObjectManager()->SetParent(Box, BoxHost);
+	//		pos = Vector3(rand() % 20 - 10, rand() % 20 + 5, rand() % 20 - 10);
+	//		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	//		scale = Vector3(1.0f, 1.0f, 1.0f);
+	//		getGameObjectManager()->setComponentData<Transform>(Box, Transform(Box, pos, rot, scale));
+	//		//getGameObjectManager()->setComponentData(Ball,Rigidbody(1.0f));
+	//		//getGameObjectManager()->setComponentData(Ball, Collider(Collider::ColliderType::SPHERE));
+	//		PointLight light;
+	//		light.data.color = Vector4(rand() % 100, rand() % 100, rand() % 100, 1.0f);
+	//		light.data.color.Normalize();
+	//		light.data.color.w = 1.0f;
+	//		light.data.range = 3.0f;
+	//		//getGameObjectManager()->setComponentData(Ball, light);
+	//	}
+	//}
 
 	// ライト
 	Archetype pointArc = Archetype::create<Transform, DynamicType, PointLight, ObjectTag>();
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 16; i++)
 	{
 		auto point = getGameObjectManager()->createGameObject("PointLit", pointArc);
-		pos = Mathf::RotationY(Vector3(1, 0, 0), i * 360.0f / 10) * 10;
+		pos = Mathf::RotationY(Vector3(1, 0, 0), i * 360.0f / 16) * 10;
 		pos.y = 10;
 		rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
 		scale = Vector3(1.5f, 1.5f, 1.5f);
