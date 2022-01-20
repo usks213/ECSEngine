@@ -342,7 +342,7 @@ void D3D11RendererManager::imguiDebug()
 			for (const auto& var : mat.second->m_cbufferVariable)
 			{
 				float temp = *(float*)mat.second->getData(var.second.name.c_str());
-				if (ImGui::SliderFloat(var.second.name.c_str(), &temp, 0.0f, 1.0f))
+				if (ImGui::InputFloat(var.second.name.c_str(), &temp))
 					mat.second->setFloat(var.second.name.c_str(), temp);
 			}
 

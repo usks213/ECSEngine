@@ -10,6 +10,7 @@
 #include <Engine/ECS/Base/IComponentData.h>
 #include <Engine/Renderer/Base/LightData.h>
 #include <Engine/Renderer/Base/DepthStencil.h>
+#include "CameraComponentData.h"
 
 namespace ecs {
 
@@ -17,7 +18,7 @@ namespace ecs {
 	{
 		ECS_DECLARE_COMPONENT_DATA(DirectionalLight);
 		DirectionalLightData	data;			// 平行光源データ
-		DepthStencilID			depthStencilID;	// 深度ステンシルID
+		Camera					camera;			// シャドウ用カメラ
 	};
 
 	struct PointLight : IComponentData
