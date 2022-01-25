@@ -496,8 +496,15 @@ void PhysicsTestWorld::Start()
 	auto mainLit = getGameObjectManager()->createGameObject("MainLight", DirLit);
 	pos = Vector3(0, 10, 0);
 	rot = Quaternion::CreateFromYawPitchRoll(0, 0, 0);
+	// ライトデータ
+	DirectionalLight directionalLit;
+	cameraData.isOrthographic = true;
+	cameraData.renderTargetID = renderer->createRenderTarget("DirectionalLight1");
+	cameraData.renderTargetID = renderer->createDepthStencil("DirectionalLight1");
+	directionalLit.camera = cameraData;
+
 	getGameObjectManager()->setComponentData<Transform>(mainLit, Transform(mainLit, pos, rot, scale));
-	getGameObjectManager()->setComponentData(mainLit, DirectionalLight());
+	getGameObjectManager()->setComponentData(mainLit, directionalLit);
 }
 
 /// @brief エンド

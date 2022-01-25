@@ -323,6 +323,8 @@ void EditorManager::dispInspector()
 
 void EditorManager::dispWorld()
 {
+	// レンダラー取得
+	auto* renderer = m_pEngine->getRendererManager();
 	// ワールドマネージャー取得
 	auto* pWorldManager = m_pEngine->getWorldManager();
 	// 現在のワールド取得
@@ -330,18 +332,22 @@ void EditorManager::dispWorld()
 	// パイプライン取得
 	auto* pipeline = pWorld->getRenderPipeline();
 
+	// パイプラインデータ取得
+	auto pipelineData = pipeline->GetPipelineData();
+	pipelineData.camera = &m_editorCamera.camera;
+
 	// カリング
-	pipeline->cullingPass(m_editorCamera.camera);
+	pipeline->cullingPass(renderer, pipelineData);
 
 	// 描画
-	pipeline->beginPass(m_editorCamera.camera);
-	pipeline->prePass(m_editorCamera.camera);
-	pipeline->gbufferPass(m_editorCamera.camera);
-	pipeline->shadowPass(m_editorCamera.camera);
-	pipeline->opaquePass(m_editorCamera.camera);
-	pipeline->skyPass(m_editorCamera.camera);
-	pipeline->transparentPass(m_editorCamera.camera);
-	pipeline->postPass(m_editorCamera.camera);
+	pipeline->beginPass(renderer, pipelineData);
+	pipeline->prePass(renderer, pipelineData);
+	pipeline->gbufferPass(renderer, pipelineData);
+	pipeline->shadowPass(renderer, pipelineData);
+	pipeline->opaquePass(renderer, pipelineData);
+	pipeline->skyPass(renderer, pipelineData);
+	pipeline->transparentPass(renderer, pipelineData);
+	pipeline->postPass(renderer, pipelineData);
 
 
 	// BulletDebugDraw
@@ -351,7 +357,7 @@ void EditorManager::dispWorld()
 		physicsSytem->debugDraw();
 	}
 
-	pipeline->endPass(m_editorCamera.camera);
+	pipeline->endPass(renderer, pipelineData);
 }
 
 void EditorManager::updateTransform()

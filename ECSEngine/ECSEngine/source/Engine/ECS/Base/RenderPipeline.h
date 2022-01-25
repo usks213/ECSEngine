@@ -21,6 +21,13 @@ namespace ecs {
 	class RenderPipeline final : public SystemBase
 	{
 		ECS_DECLARE_SYSTEM(RenderPipeline);
+
+	public:
+		struct PipelineData
+		{
+			Camera*				camera = nullptr;
+			DirectionalLight*	directionalLight = nullptr;
+		};
 	public:
 		/// @brief コンストラクタ
 		/// @param pWorld ワールド
@@ -44,17 +51,19 @@ namespace ecs {
 		void onUpdate() override;
 
 		
-		void cullingPass(Camera& camera);
+		void cullingPass(RendererManager* renderer, const PipelineData& data);
 
-		void beginPass(Camera& camera);
-		void prePass(Camera& camera);
-		void gbufferPass(Camera& camera);
-		void shadowPass(Camera& camera);
-		void opaquePass(Camera& camera);
-		void skyPass(Camera& camera);
-		void transparentPass(Camera& camera);
-		void postPass(Camera& camera);
-		void endPass(Camera& camera);
+		void beginPass(RendererManager* renderer, const PipelineData& data);
+		void prePass(RendererManager* renderer, const PipelineData& data);
+		void gbufferPass(RendererManager* renderer, const PipelineData& data);
+		void shadowPass(RendererManager* renderer, const PipelineData& data);
+		void opaquePass(RendererManager* renderer, const PipelineData& data);
+		void skyPass(RendererManager* renderer, const PipelineData& data);
+		void transparentPass(RendererManager* renderer, const PipelineData& data);
+		void postPass(RendererManager* renderer, const PipelineData& data);
+		void endPass(RendererManager* renderer, const PipelineData& data);
+
+		PipelineData GetPipelineData();
 
 		static inline void updateCamera(Camera& camera, Transform& transform, float width, float height);
 		static void updateBoneMatrix(GameObjectManager* goMgr, const GameObjectID& goID, Mesh& mesh);
@@ -79,12 +88,16 @@ namespace ecs {
 		std::vector<RenderingData> m_transparentList;
 		std::vector<RenderingData> m_deferredList;
 
-		std::vector<Matrix>		m_shadowList;
+		std::unordered_map<MeshID, std::vector<Matrix>>	m_shadowList;
+		Vector2				m_shadowMapSize;
 
 		DirectionalLightData		m_directionalLight;
 		std::vector<PointLightData> m_pointLights;
 		std::vector<SpotLightData>	m_spotLights;
 
+
+
+		MaterialID			m_depthWriteMat;
 		MaterialID			m_defferdLitMat;
 		RenderBufferID		m_quadRb;
 	};
