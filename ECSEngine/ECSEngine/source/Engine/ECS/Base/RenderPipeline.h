@@ -97,6 +97,7 @@ namespace ecs {
 
 
 
+		ShaderID			m_depthWriteShader;
 		MaterialID			m_depthWriteMat;
 		MaterialID			m_defferdLitMat;
 		RenderBufferID		m_quadRb;

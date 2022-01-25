@@ -20,9 +20,7 @@ Vulkan / DX12では、この決定は開発者に任されています。
 #define SHADOW_FLG		(1 << 3)
 #define FOG_FLG			(1 << 4)
 
-
-// システム定数バッファ
-cbuffer System : register(b5)
+struct CameraData
 {
 	float4x4 _mView;
 	float4x4 _mProj;
@@ -30,6 +28,13 @@ cbuffer System : register(b5)
 	float4x4 _mViewInv;
 	float4x4 _mProjInv;
 	float4 _viewPos;
+};
+
+// システム定数バッファ
+cbuffer System : register(b5)
+{
+	CameraData _mainCamera;
+	CameraData _shadowCamera;
 	DirectionalLightData _directionalLit;
 	uint _pointLightNum;
 	uint _spotLightNum;
@@ -56,7 +61,6 @@ cbuffer Material : register(b8)
 	uint		_Flg;
 	float3		_padding3;
 }
-
 
 
 Texture2D		_MainTexture	: register(t4); // メインテクスチャ

@@ -62,7 +62,7 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 	if (_Flg & LIGHT_FLG)
 	{
 		float3 N = normalize(normal); // 法線ベクトル
-		float3 V = normalize(_viewPos.xyz - pos); // 視点へのベクトル
+		float3 V = normalize(_mainCamera._viewPos.xyz - pos); // 視点へのベクトル
 		float3 R = reflect(-V, N);
 		
 		float3 F0 = Fresnel0(albedo, metallic);
@@ -113,13 +113,13 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 	
 	// 屈折
 	float3 N = normalize(normal); // 法線ベクトル
-	float3 V = normalize(_viewPos.xyz - pos); // 視点へのベクトル
+	float3 V = normalize(_mainCamera._viewPos.xyz - pos); // 視点へのベクトル
 	float3 F0 = Fresnel0(albedo, metallic);
 	
 	float3 reflactDir = refract(V, N, 1.0f / _refraction);
 	float3 refractPos = pos + reflactDir * _distance;
-	float4 refractScreenPos = mul(float4(refractPos, 1.0f), _mView);
-	refractScreenPos = mul(refractScreenPos, _mProj);
+	float4 refractScreenPos = mul(float4(refractPos, 1.0f), _mainCamera._mView);
+	refractScreenPos = mul(refractScreenPos, _mainCamera._mProj);
 	float2 screenUV = (refractScreenPos.xy / refractScreenPos.w) * 0.5f + 0.5f;
 	screenUV.y = 1.0f - screenUV.y;
 	

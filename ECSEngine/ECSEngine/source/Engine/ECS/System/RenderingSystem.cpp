@@ -94,10 +94,10 @@ void RenderingSystem::onUpdate()
 
 	// システムバッファの設定
 	SHADER::SystemBuffer sysBuffer;
-	sysBuffer._mView = mainCamera->view.Transpose();
-	sysBuffer._mProj = mainCamera->projection.Transpose();
-	sysBuffer._viewPos = Vector4(cameraPos);
-	sysBuffer._directionalLit = dirLit;
+	//sysBuffer._mView = mainCamera->view.Transpose();
+	//sysBuffer._mProj = mainCamera->projection.Transpose();
+	//sysBuffer._viewPos = Vector4(cameraPos);
+	//sysBuffer._directionalLit = dirLit;
 	renderer->setD3DSystemBuffer(sysBuffer);
 
 

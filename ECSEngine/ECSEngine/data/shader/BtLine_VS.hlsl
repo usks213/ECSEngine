@@ -15,7 +15,7 @@ struct VS_OUTPUT {
 VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
-	float4x4 mVP = mul(_mView, _mProj);
+	float4x4 mVP = mul(_mainCamera._mView, _mainCamera._mProj);
 	output.Position = mul(float4(input.Position, 1.0f), mVP);
 	output.Color = input.Color;
 	return output;

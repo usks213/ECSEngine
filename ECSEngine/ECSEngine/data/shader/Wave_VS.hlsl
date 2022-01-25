@@ -50,8 +50,8 @@ VS_OUTPUT VS(VS_INPUT input)
 	
 	VS_OUTPUT output;
 	int n = input.instID % MAX_TRANSFORM;
-	float4x4 mWVP = mul(_mWorld[n], _mView);
-	mWVP = mul(mWVP, _mProj);
+	float4x4 mWVP = mul(_mWorld[n], _mainCamera._mView);
+	mWVP = mul(mWVP, _mainCamera._mProj);
 	output.Position = mul(pos, mWVP);
 	output.Normal = mul(normal, (float3x3) _mWorld[n]).xyz;
 	//output.TexCoord = mul(float4(input.TexCoord, 0.0f, 1.0f), _mTex).xy;

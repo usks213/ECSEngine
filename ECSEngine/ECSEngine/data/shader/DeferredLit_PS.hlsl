@@ -30,7 +30,7 @@ float4 PS(VS_OUTPUT input) : SV_Target0
 	if (_Flg & LIGHT_FLG)
 	{
 		float3 N = normalize(normal); // 法線ベクトル
-		float3 V = normalize(_viewPos.xyz - pos); // 視点へのベクトル
+		float3 V = normalize(_mainCamera._viewPos.xyz - pos); // 視点へのベクトル
 		float3 R = reflect(-V, N);
 		
 		float3 F0 = Fresnel0(albedo, metallic);

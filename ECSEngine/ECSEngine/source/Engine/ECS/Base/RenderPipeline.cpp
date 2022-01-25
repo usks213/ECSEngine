@@ -49,8 +49,8 @@ void RenderPipeline::onCreate()
 	// 深度パスシェーダー
 	desc.m_name = "DepthWrite";
 	desc.m_stages = 0 | ShaderStageFlags::VS;
-	auto depthWriteShader = renderer->createShader(desc);
-	m_depthWriteMat = renderer->createMaterial("DepthWrite", depthWriteShader);
+	m_depthWriteShader = renderer->createShader(desc);
+	m_depthWriteMat = renderer->createMaterial("DepthWrite", m_depthWriteShader);
 
 	auto quadMesh = renderer->createMesh("Quad");
 	auto* pQuad = renderer->getMesh(quadMesh);
@@ -276,7 +276,7 @@ void RenderPipeline::cullingPass(RendererManager* renderer, const PipelineData& 
 
 	// シャドウカメラから近い順にソート
 	Vector3 shadowPos = data.directionalLight->camera.world.Translation();
-	for (const auto& meshes : m_shadowList)
+	for (auto& meshes : m_shadowList)
 	{
 		std::sort(meshes.second.begin(), meshes.second.end(),
 			[&shadowPos](const Matrix& l, const Matrix& r)
@@ -347,15 +347,31 @@ void RenderPipeline::beginPass(RendererManager* renderer, const PipelineData& da
 
 	// システムバッファの設定
 	SHADER::SystemBuffer sysBuffer;
-	sysBuffer._mView = data.camera->view.Transpose();
-	if (data.camera->isOrthographic)
-		sysBuffer._mProj = data.camera->projection2d.Transpose();
-	else
-		sysBuffer._mProj = data.camera->projection.Transpose();
-	sysBuffer._mProj2D = data.camera->projection2d.Transpose();
-	sysBuffer._mViewInv = data.camera->view.Invert().Transpose();
-	sysBuffer._mProjInv = data.camera->projection.Invert().Transpose();
-	sysBuffer._viewPos = Vector4(data.camera->world.Translation());
+	// メインカメラ
+	{
+		sysBuffer._mainCamera._mView = data.camera->view.Transpose();
+		if (data.camera->isOrthographic)
+			sysBuffer._mainCamera._mProj = data.camera->projection2d.Transpose();
+		else
+			sysBuffer._mainCamera._mProj = data.camera->projection.Transpose();
+		sysBuffer._mainCamera._mProj2D = data.camera->projection2d.Transpose();
+		sysBuffer._mainCamera._mViewInv = data.camera->view.Invert().Transpose();
+		sysBuffer._mainCamera._mProjInv = data.camera->projection.Invert().Transpose();
+		sysBuffer._mainCamera._viewPos = Vector4(data.camera->world.Translation());
+	}
+	// シャドウカメラ
+	{
+		sysBuffer._shadowCamera._mView = data.directionalLight->camera.view.Transpose();
+		if (data.directionalLight->camera.isOrthographic)
+			sysBuffer._shadowCamera._mProj = data.directionalLight->camera.projection2d.Transpose();
+		else
+			sysBuffer._shadowCamera._mProj = data.directionalLight->camera.projection.Transpose();
+		sysBuffer._shadowCamera._mProj2D = data.directionalLight->camera.projection2d.Transpose();
+		sysBuffer._shadowCamera._mViewInv = data.directionalLight->camera.view.Invert().Transpose();
+		sysBuffer._shadowCamera._mProjInv = data.directionalLight->camera.projection.Invert().Transpose();
+		sysBuffer._shadowCamera._viewPos = Vector4(data.directionalLight->camera.world.Translation());
+	}
+	// ライトデータ
 	sysBuffer._directionalLit = dirLit;
 	sysBuffer._pointLightNum = m_pointLights.size();
 	sysBuffer._spotLightNum = m_spotLights.size();
@@ -366,6 +382,8 @@ void RenderPipeline::beginPass(RendererManager* renderer, const PipelineData& da
 	// レンダーターゲットクリア
 	renderer->clearRenderTarget(data.camera->renderTargetID);
 	renderer->clearDepthStencil(data.camera->depthStencilID);
+	renderer->clearRenderTarget(data.directionalLight->camera.renderTargetID);
+	renderer->clearDepthStencil(data.directionalLight->camera.depthStencilID);
 
 	// グラブテクスチャセット
 	auto pGrab = static_cast<D3D11RenderTarget*>(renderer->getRenderTarget(m_renderTarget));
@@ -374,17 +392,40 @@ void RenderPipeline::beginPass(RendererManager* renderer, const PipelineData& da
 
 void RenderPipeline::prePass(RendererManager* renderer, const PipelineData& data)
 {
-	// シャドウパス
+	auto* d3drenderer = static_cast<D3D11RendererManager*>(renderer);
 
 	// レンダーターゲットの切り替え
 	RenderTargetID RTid = 0;
 	renderer->setRenderTarget(RTid, data.directionalLight->camera.depthStencilID);
 
 	// マテリアルの指定
-
+	renderer->setMaterial(m_depthWriteMat);
 
 	// メッシュごとにインスタンシングで描画
+	for (const auto& meshes : m_shadowList)
+	{
+		// レンダーバッファ作成
+		auto rdID = renderer->createRenderBuffer(m_depthWriteShader, meshes.first);
+		// メッシュ指定
+		renderer->getRenderBuffer(rdID);
 
+		// 最大1000個までバッチ描画
+		const std::size_t count = meshes.second.size();
+		const std::size_t maxNum = SHADER::MAX_TRANSFORM_MATRIX_COUNT;
+
+		// インスタンシング描画
+		for (std::size_t i = 0; i < count / maxNum + 1; ++i)
+		{
+			std::size_t drawNum = maxNum;
+			if ((count - i * maxNum) / maxNum <= 0)
+			{
+				drawNum = count % maxNum;
+			}
+
+			d3drenderer->setD3DTransformBuffer(meshes.second.data() + i * maxNum, drawNum);
+			d3drenderer->d3dRender(rdID, drawNum);
+		}
+	}
 }
 
 void RenderPipeline::gbufferPass(RendererManager* renderer, const PipelineData& data)

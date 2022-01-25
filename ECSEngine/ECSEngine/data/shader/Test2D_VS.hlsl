@@ -20,8 +20,8 @@ VS_OUTPUT VS(VS_INPUT input)
 	VS_OUTPUT output;
 	int n = input.instID % MAX_TRANSFORM;
 	float4 P = mul(float4(input.Position, 1.0f), _mWorld[n]);
-	P = mul(P, _mView);
-	output.Position = mul(P, _mProj);
+	P = mul(P, _mainCamera._mView);
+	output.Position = mul(P, _mainCamera._mProj);
 	output.TexCoord = mul(float4(input.TexCoord, 0.0f, 1.0f), _mTex).xy;
 	output.Diffuse = input.Diffuse;
 	return output;

@@ -65,15 +65,21 @@ namespace SHADER {
 		MAX = ALL,
 	};
 
+	struct CameraData
+	{
+		Matrix _mView;
+		Matrix _mProj;
+		Matrix _mProj2D;
+		Matrix _mViewInv;
+		Matrix _mProjInv;
+		Vector4 _viewPos;
+	};
+
 	// システム定数バッファ
 	struct SystemBuffer
 	{
-		Matrix	_mView;
-		Matrix	_mProj;
-		Matrix	_mProj2D;
-		Matrix	_mViewInv;
-		Matrix	_mProjInv;
-		Vector4 _viewPos;
+		CameraData _mainCamera;
+		CameraData _shadowCamera;
 
 		DirectionalLightData _directionalLit;
 

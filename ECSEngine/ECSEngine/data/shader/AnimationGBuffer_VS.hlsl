@@ -71,8 +71,8 @@ VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output;
 	int n = input.instID % MAX_TRANSFORM;
-	float4x4 mWVP = mul(_mWorld[n], _mView);
-	mWVP = mul(mWVP, _mProj);
+	float4x4 mWVP = mul(_mWorld[n], _mainCamera._mView);
+	mWVP = mul(mWVP, _mainCamera._mProj);
 	//float4 pos = float4(input.Position, 1.0f);
 	//float3 nrm = input.Normal;
 	SKIN vSkinned = SkinVert(input);
