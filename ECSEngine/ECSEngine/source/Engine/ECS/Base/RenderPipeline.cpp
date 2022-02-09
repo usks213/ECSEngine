@@ -57,6 +57,21 @@ void RenderPipeline::onCreate()
 	Geometry::Quad(*pQuad);
 	m_quadRb = renderer->createRenderBuffer(defferdLitShader ,quadMesh);
 
+	// ブルーム
+	desc.m_name = "Blur";
+	desc.m_stages = 0 | ShaderStageFlags::VS | ShaderStageFlags::PS;
+	m_blurShader = renderer->createShader(desc);
+	m_blurMat = renderer->createMaterial("Blur", m_blurShader);
+
+	//Vector2 screenSize = Vector2(engine->getWindowWidth(), engine->getWindowHeight());
+	//m_blurRTs.resize(6);
+	//for (int i = 0; i < m_blurRTs.size(); ++i)
+	//{
+	//	if (i % 2 == 0) screenSize.x /= 2;
+	//	else screenSize.y /= 2;
+
+	//	m_blurRTs[i] = renderer->createRenderTarget();
+	//}
 }
 
 /// @brief 削除時
@@ -394,6 +409,15 @@ void RenderPipeline::prePass(RendererManager* renderer, const PipelineData& data
 {
 	auto* d3drenderer = static_cast<D3D11RendererManager*>(renderer);
 
+	// ビューポート指定
+	Viewport viewport(
+		0,
+		0,
+		data.camera->width,
+		data.camera->height
+	);
+	renderer->setViewport(viewport);
+
 	// レンダーターゲットの切り替え
 	RenderTargetID RTid = 0;
 	renderer->setRenderTarget(RTid, data.directionalLight->camera.depthStencilID);
@@ -407,7 +431,7 @@ void RenderPipeline::prePass(RendererManager* renderer, const PipelineData& data
 		// レンダーバッファ作成
 		auto rdID = renderer->createRenderBuffer(m_depthWriteShader, meshes.first);
 		// メッシュ指定
-		renderer->getRenderBuffer(rdID);
+		d3drenderer->setD3D11RenderBuffer(rdID);
 
 		// 最大1000個までバッチ描画
 		const std::size_t count = meshes.second.size();
@@ -423,7 +447,7 @@ void RenderPipeline::prePass(RendererManager* renderer, const PipelineData& data
 			}
 
 			d3drenderer->setD3DTransformBuffer(meshes.second.data() + i * maxNum, drawNum);
-			d3drenderer->d3dRender(rdID, drawNum);
+			//d3drenderer->d3dRender(rdID, drawNum);
 		}
 	}
 }
@@ -463,10 +487,12 @@ void RenderPipeline::gbufferPass(RendererManager* renderer, const PipelineData& 
 		d3drenderer->m_gbuffer.m_positionRTV.Get()};
 	auto* dsv = static_cast<D3D11DepthStencil*>(d3drenderer->getDepthStencil(data.camera->depthStencilID));
 	d3drenderer->m_d3dContext->OMSetRenderTargets(3, rtvs, dsv->m_dsv.Get());
+
 	// GBufferクリア
 	d3drenderer->m_d3dContext->ClearRenderTargetView(rtvs[0], DirectX::Colors::Black);
 	d3drenderer->m_d3dContext->ClearRenderTargetView(rtvs[1], DirectX::Colors::Black);
 	d3drenderer->m_d3dContext->ClearRenderTargetView(rtvs[2], DirectX::Colors::Black);
+	renderer->clearDepthStencil(data.camera->depthStencilID);
 
 	// バッチ描画
 	for (auto& bitch : m_batchList)
@@ -544,7 +570,7 @@ void RenderPipeline::opaquePass(RendererManager* renderer, const PipelineData& d
 
 	//----- デファードレンダリング -----
 	// レンダーターゲット指定
-	renderer->setRenderTarget(data.camera->renderTargetID, NONE_DEPTH_STENCIL_ID);
+	renderer->setRenderTarget(data.camera->renderTargetID, data.camera->depthStencilID);
 
 	// マテリアル指定
 	d3drenderer->setD3D11Material(m_defferdLitMat);
@@ -645,6 +671,7 @@ void RenderPipeline::postPass(RendererManager* renderer, const PipelineData& dat
 	// レンダーターゲットコピー
 	d3drenderer->copyRenderTarget(m_renderTarget, data.camera->renderTargetID);
 	d3drenderer->d3dGenerateMips(m_renderTarget);
+
 
 }
 

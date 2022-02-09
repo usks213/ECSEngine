@@ -101,5 +101,9 @@ namespace ecs {
 		MaterialID			m_depthWriteMat;
 		MaterialID			m_defferdLitMat;
 		RenderBufferID		m_quadRb;
+
+		ShaderID			m_blurShader;;
+		MaterialID			m_blurMat;
+		std::vector<RenderTargetID> m_blurRTs;
 	};
 }
