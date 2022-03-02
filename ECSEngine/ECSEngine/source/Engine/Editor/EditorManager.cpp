@@ -865,44 +865,44 @@ bool FindRootBoneID(GameObjectManager* magaer, GameObjectID& parentID,
 
 void EditorManager::CreateFBX()
 {
-	ImGui::Begin("Test");
+	//ImGui::Begin("Test");
 
-	if (ImGui::Button("Load FBX"))
-	{
-		// モデルロード
-		Model fbx;
-		OpenFBXFile(fbx);
+	//if (ImGui::Button("Load FBX"))
+	//{
+	//	// モデルロード
+	//	Model fbx;
+	//	OpenFBXFile(fbx);
 
-		auto* renderer = Engine::get().getRendererManager();
+	//	auto* renderer = Engine::get().getRendererManager();
 
-		ShaderDesc desc;
-		desc.m_name = "AnimationGBuffer";
-		desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
-		ShaderID shaderID = renderer->createShader(desc);
-		MaterialID matID = renderer->createMaterial(fbx.m_rootNode.name, shaderID);
-		auto* pMat = renderer->getMaterial(matID);
-		pMat->m_rasterizeState = RasterizeState::CULL_NONE;
+	//	ShaderDesc desc;
+	//	desc.m_name = "AnimationGBuffer";
+	//	desc.m_stages = ShaderStageFlags::VS | ShaderStageFlags::PS;
+	//	ShaderID shaderID = renderer->createShader(desc);
+	//	MaterialID matID = renderer->createMaterial(fbx.m_rootNode.name, shaderID);
+	//	auto* pMat = renderer->getMaterial(matID);
+	//	pMat->m_rasterizeState = RasterizeState::CULL_NONE;
 
-		// オブジェクト生成
-		auto* goMgr = m_pEngine->getWorldManager()->getCurrentWorld()->getGameObjectManager();
-		Archetype archetype = Archetype::create<DynamicType, Transform, Animator>();
-		auto parentID = goMgr->createGameObject(fbx.m_name, archetype);
-		goMgr->setComponentData(parentID, Transform(parentID, 
-			Vector3(), Quaternion(), Vector3(0.2,0.2,0.2)));
-		Animator anim;
-		anim.animationID = fbx.m_animationList[0].animationID;
-		goMgr->setComponentData(parentID, anim);
+	//	// オブジェクト生成
+	//	auto* goMgr = m_pEngine->getWorldManager()->getCurrentWorld()->getGameObjectManager();
+	//	Archetype archetype = Archetype::create<DynamicType, Transform, Animator>();
+	//	auto parentID = goMgr->createGameObject(fbx.m_name, archetype);
+	//	goMgr->setComponentData(parentID, Transform(parentID, 
+	//		Vector3(), Quaternion(), Vector3(0.2,0.2,0.2)));
+	//	Animator anim;
+	//	anim.animationID = fbx.m_animationList[0].animationID;
+	//	goMgr->setComponentData(parentID, anim);
 
-		std::multimap<std::string ,GameObjectID> skinMeshList;
-		childCreate(fbx, fbx.m_rootNode, goMgr, matID, parentID, skinMeshList);
+	//	std::multimap<std::string ,GameObjectID> skinMeshList;
+	//	childCreate(fbx, fbx.m_rootNode, goMgr, matID, parentID, skinMeshList);
 
-		// スキンメッシュのルートボーンを検索
-		for (auto& skin : skinMeshList)
-		{
-			FindRootBoneID(goMgr, parentID, skin.second, skin.first);
-		}
-	}
+	//	// スキンメッシュのルートボーンを検索
+	//	for (auto& skin : skinMeshList)
+	//	{
+	//		FindRootBoneID(goMgr, parentID, skin.second, skin.first);
+	//	}
+	//}
 
 
-	ImGui::End();
+	//ImGui::End();
 }

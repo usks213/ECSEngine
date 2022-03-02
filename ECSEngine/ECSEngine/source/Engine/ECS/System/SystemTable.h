@@ -28,6 +28,11 @@ namespace ecs {
 			return std::move(itr->second(pWorld));
 		}
 
+		void PushSystem(std::size_t typeHash, std::function<std::unique_ptr<SystemBase>(World* pWorld)> func)
+		{
+			m_makeSystemTable.emplace(typeHash, func);
+		}
+
 	private:
 		/// @brief コンストラクタ
 		SystemTable();

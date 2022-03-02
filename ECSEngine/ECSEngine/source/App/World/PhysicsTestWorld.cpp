@@ -21,6 +21,7 @@
 #include <Engine/ECS/ComponentData/CameraComponentData.h>
 #include <Engine/ECS/ComponentData/ComponentTag.h>
 
+#include <Engine/ECS/System/SystemTable.h>
 #include <Engine/ECS/System/AnimationSystem.h>
 #include <Engine/ECS/System/TransformSystem.h>
 #include <Engine/ECS/System/ParentSystem.h>
@@ -213,6 +214,10 @@ public:
 /// @brief スタート
 void PhysicsTestWorld::Start()
 {
+	// システムの格納
+	SystemTable::get().PushSystem(DevelopSystem::getTypeHash(), DevelopSystem::Create);
+	SystemTable::get().PushSystem(SphereSystem::getTypeHash(), SphereSystem::Create);
+
 	// システムの追加
 	addSystem<DevelopSystem>();
 	addSystem<SphereSystem>();
@@ -220,7 +225,6 @@ void PhysicsTestWorld::Start()
 	addSystem<AnimationSystem>();
 	addSystem<TransformSystem>();
 	addSystem<PhysicsSystem>();
-
 
 	auto* renderer = getWorldManager()->getEngine()->getRendererManager();
 
